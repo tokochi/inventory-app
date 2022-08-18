@@ -23,6 +23,9 @@
   background-color: rgb(213, 230, 244);
   border-radius: 5px;
 }
+.e-grid .e-toolbar{
+  border-top:0;
+}
 .e-grid .e-gridheader tr th{
   background-color:#f8fafc;
 }

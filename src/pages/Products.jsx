@@ -6,7 +6,7 @@ export default function Products() {
 
   return (
     <>
-      <Header title="Produits 📦" />
+      <Header title="Produits   📦" />
 
       <ProductsTable />
     </>

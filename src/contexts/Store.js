@@ -7,8 +7,9 @@ export const useStore = create((set) => ({
   isLoggedIn: false,
   dropdownOpen: false,
   productForm: {},
-  setproductForm: (field, value) => set((state) => ({ productForm: { ...state.productForm, [field]: value } })),
   products: [],
+  providers: [],
+  customers: [],
   user: {},
   paymentType: "",
   settings: {
@@ -18,16 +19,16 @@ export const useStore = create((set) => ({
   selectedAttendances: {},
   notifactions: [],
   depenses: [],
-  getClasses: () => {
-    ipcRenderer.send("classeList:load");
-    ipcRenderer.on("classeList:get", (e, res) => {
-      set({ classes: JSON.parse(res) });
+  getProviders: () => {
+    ipcRenderer.send("providerList:load");
+    ipcRenderer.on("providerList:get", (e, res) => {
+      set({ providers: JSON.parse(res) });
     });
   },
-  getEvents: () => {
-    ipcRenderer.send("eventList:load");
-    ipcRenderer.on("eventList:get", (e, res) => {
-      set({ events: JSON.parse(res) });
+  getCustomers: () => {
+    ipcRenderer.send("customerList:load");
+    ipcRenderer.on("customerList:get", (e, res) => {
+      set({ customers: JSON.parse(res) });
     });
   },
   getProducts: () => {
@@ -86,9 +87,9 @@ export const useStore = create((set) => ({
 
 export const useisClicked = () => useStore((state) => state.isClicked);
 export const useSetIsClicked = () => useStore((state) => state.setIsClicked);
-export const loadClasses = () => useStore.getState().getClasses();
+export const loadProviders = () => useStore.getState().getProviders();
 export const loadProducts = () => useStore.getState().getProducts();
-export const loadTeachers = () => useStore.getState().getTeachers();
+export const loadCustomers = () => useStore.getState().getCustomers();
 export const loadEvents = () => useStore.getState().getEvents();
 export const loadSettings = () => useStore.getState().getSettings();
 export const loadAttendances = () => useStore.getState().getAttendances();

@@ -4,6 +4,10 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import Sidebar from "./component/layout/Sidebar";
 import Navbar from "./component/layout/Navbar";
 import Products from "./pages/Products";
+import Provider from "./pages/Provider";
+import Customer from "./pages/Customer";
+import Buying from "./pages/Buying";
+import Vending from "./pages/Vending";
 
 
 
@@ -17,6 +21,10 @@ const App = () => {
 
           <Routes>
             <Route path="/products" element={<Products />} />
+            <Route path="/provider" element={<Provider />} />
+            <Route path="/customers" element={<Customer />} />
+            <Route path="/vendings" element={<Vending />} />
+            <Route path="/buyings" element={<Buying />} />
             {/* <Route path="/" element={<Home />} />
         <Route path="/accueil" element={<Home />} />
         <Route path="/login" element={<Login />} />

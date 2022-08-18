@@ -1,27 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useStore } from "../../contexts/Store";
 import Store from "electron-store";
 import TextBox from "../button/TextBox";
 import PopupDialog from "../dialog/PopupDialog";
 import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
 
 export default function ProductForm(props) {
- 
   const labelclassName = "p-4 w-[170px] text-sm font-medium";
-  const productForm = useStore((state) => state.productForm);
-  const setProductForm = useStore((state) => state.setproductForm);
-
   const schema = {
     unit: { type: "array" },
     brand: { type: "array" },
     category: { type: "array" },
   };
   const store = new Store({ schema });
-  // store?.delete("unit");
-  // store?.delete("brand");
-  // store?.delete("category");
+  //  store?.delete("unit");
+  //  store?.delete("brand");
+  //  store?.delete("category");
   const [close, setClose] = useState(false);
-  const [quantity, setQuantity] = useState(props?.quantity);
+  const [unit, setUnit] = useState(props?.unit || "U");
+  const [quantity, setQuantity] = useState(props?.quantity || null);
   const [qtyAlert, setQtyAlert] = useState(props?.qtyAlert);
   const [buyPrice, setBuyPrice] = useState(props?.buyPrice);
   const [sellPrice, setSellPrice] = useState(props?.sellPrice);
@@ -30,13 +26,12 @@ export default function ProductForm(props) {
   const [addUnit, setAddUnit] = useState("");
   const [addBrand, setAddBrand] = useState("");
   const [addCategory, setAddCategory] = useState("");
-  const unit = store?.get("unit") || [];
+  const unitList = store?.get("unit") || [];
   const brand = store?.get("brand") || [];
   const category = store?.get("category") || [];
-  const [margin, setMargin] = useState((productForm.sellPrice - productForm.buyPrice) / productForm.sellPrice);
-  const [marginGros, setMarginGros] = useState((productForm.sellPriceGros - productForm.buyPrice) / productForm.sellPriceGros);
+  const [margin, setMargin] = useState((sellPrice - buyPrice) / sellPrice);
+  const [marginGros, setMarginGros] = useState((sellPriceGros - buyPrice) / sellPriceGros);
   useEffect(() => {
-
     setClose(false);
   }, [close]);
   return (
@@ -116,8 +111,8 @@ export default function ProductForm(props) {
                   type="dropdown"
                   id="unit"
                   width="full"
-                  value={props?.unit || "U"}
-                  // onChange={(e) => e.value != null && setUnit(e.value)}
+                  value={unit}
+                  onChange={(e) => e.value != null && setUnit(e.value)}
                   dataSource={store?.get("unit")}
                   popupHeight="200px"
                   title="Choisir une Unité"
@@ -141,8 +136,8 @@ export default function ProductForm(props) {
                             onClick={() => {
                               setClose(true);
                               if (addUnit.length > 0) {
-                                unit.push(addUnit);
-                                store.set("unit", [...new Set(unit)]);
+                                unitList.push(addUnit);
+                                store.set("unit", [...new Set(unitList)]);
                               }
                             }}>
                             Ajouter
@@ -262,7 +257,7 @@ export default function ProductForm(props) {
               <TextBox
                 type="number"
                 format="N0"
-                label={productForm.unit}
+                label={unit}
                 id="quantity"
                 width="w-[200px]"
                 step={5}

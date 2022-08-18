@@ -15,24 +15,24 @@ import {
   Sort,
   Filter,
 } from "@syncfusion/ej2-react-grids";
-import { useStore, loadProducts } from "../../contexts/Store";
+import { useStore, loadVending } from "../../contexts/Store";
 import React, { useRef, useState, useEffect } from "react";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
 import Status from "./templates/Status";
 import { useReactToPrint } from "react-to-print";
-import ProductsInventory from './../ProductsInventory';
+import VendingInventory from '../VendingInventory';
 const { ipcRenderer } = require("electron");
 
-// ******** Get Products List  ********
-loadProducts();
+// ******** Get Vending List  ********
+loadVending();
 Localization("produits");
 
-export default function ProductsTable() {
+export default function VendingTable() {
   // ******** Column Templates  ********
-  const productsGridStatus = (props) => <Status {...props} />;
-  const productsFormTemplate = (props) => <ProductFormTemplate {...props} />;
-  const productsIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
+  const vendingGridStatus = (props) => <Status {...props} />;
+  const vendingFormTemplate = (props) => <ProductFormTemplate {...props} />;
+  const vendingIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
 
   // ******** Grid Table  ********
   const [active, setActive] = useState({ all: true, stock: false, alert: false, rupture: false });
@@ -41,11 +41,11 @@ export default function ProductsTable() {
   const normalButton =
     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
   const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
-  const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: productsFormTemplate };
+  const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: vendingFormTemplate };
   let grid;
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
-  const productsData = () => useStore((state) => state.products).filter((product) => filterProduct(product));
+  const vendingData = () => useStore((state) => state.vending).filter((product) => filterProduct(product));
   function filterProduct(product) {
     if (active.all === true) {
       return product === product;
@@ -95,7 +95,7 @@ export default function ProductsTable() {
       case args.requestType === "save" && args.action === "add":
         ipcRenderer.send("addProduct", args.data);
         ipcRenderer.on("refreshGridProduct:add", (e, res) => {
-          loadProducts();
+          loadVending();
         });
         break;
       case args.requestType === "beginEdit":
@@ -105,7 +105,7 @@ export default function ProductsTable() {
       case args.requestType === "save" && args.action === "edit":
         ipcRenderer.send("updateProduct", args.data);
         ipcRenderer.on("refreshGridProduct:update", (e, res) => {
-          loadProducts();
+          loadVending();
         });
         break;
       case args.requestType === "add":
@@ -113,7 +113,7 @@ export default function ProductsTable() {
         break;
       case args.requestType === "delete":
         ipcRenderer.on("refreshGridProduct:delete", (e, res) => {
-          loadProducts();
+          loadVending();
         });
         break;
     }
@@ -140,7 +140,7 @@ export default function ProductsTable() {
               onClick={() => {
                 setActive((state) => ({ all: true, stock: false, alert: false, rupture: false }));
               }}>
-              Tous <span className="ml-1 text-indigo-200">{useStore((state) => state.products).length}</span>
+              Tous <span className="ml-1 text-indigo-200">{useStore((state) => state.vending).length}</span>
             </button>
           </li>
           <li className="m-1">
@@ -149,7 +149,7 @@ export default function ProductsTable() {
               onClick={() => {
                 setActive((state) => ({ all: false, stock: true, alert: false, rupture: false }));
               }}>
-              En Stock <span className="ml-1  text-emerald-600">{useStore.getState().products.filter((product) => product?.quantity > 0 && product?.quantity > (product.qtyAlert ?? 1)).length}</span>
+              En Stock <span className="ml-1  text-emerald-600">{useStore.getState().vending.filter((product) => product?.quantity > 0 && product?.quantity > (product.qtyAlert ?? 1)).length}</span>
             </button>
           </li>
           <li className="m-1">
@@ -158,7 +158,7 @@ export default function ProductsTable() {
               onClick={() => {
                 setActive((state) => ({ all: false, stock: false, alert: true, rupture: false }));
               }}>
-              En Alerte <span className="ml-1 text-amber-600">{useStore.getState().products.filter((product) => product?.quantity > 0 && product?.quantity <= product?.qtyAlert).length}</span>
+              En Alerte <span className="ml-1 text-amber-600">{useStore.getState().vending.filter((product) => product?.quantity > 0 && product?.quantity <= product?.qtyAlert).length}</span>
             </button>
           </li>
           <li className="m-1">
@@ -167,16 +167,16 @@ export default function ProductsTable() {
               onClick={() => {
                 setActive((state) => ({ all: false, stock: false, alert: false, rupture: true }));
               }}>
-              En Rupture <span className="ml-1 text-rose-500">{useStore.getState().products.filter((product) => product?.quantity === 0).length}</span>
+              En Rupture <span className="ml-1 text-rose-500">{useStore.getState().vending.filter((product) => product?.quantity === 0).length}</span>
             </button>
           </li>
         </ul>
-        <ProductsInventory close={close} />
+        <VendingInventory close={close} />
       </div>
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
-          dataSource={productsData()}
+          dataSource={vendingData()}
           enableHover={false}
           allowPdfExport
           allowPrint
@@ -192,7 +192,7 @@ export default function ProductsTable() {
           actionComplete={(props) => actionComplete(props)}
           allowSorting>
           <ColumnsDirective>
-            <ColumnDirective field="id" headerText="ID" textAlign="center" headerTextAlign="center" width="30" template={productsIdTemplate} />
+            <ColumnDirective field="id" headerText="ID" textAlign="center" headerTextAlign="center" width="30" template={vendingIdTemplate} />
             <ColumnDirective field="name" headerText="Désignation" textAlign="center" headerTextAlign="center" width="120" />
             <ColumnDirective field="unit" headerText="Unité" textAlign="center" headerTextAlign="center" width="15" />
             <ColumnDirective field="quantity" headerText="Quantité" textAlign="center" headerTextAlign="center" width="20" format="n0" />
@@ -201,7 +201,7 @@ export default function ProductsTable() {
             <ColumnDirective field="sellPriceGros" headerText="Prix Vente Gros" textAlign="center" headerTextAlign="center" width="40" format="c2" />
             <ColumnDirective field="expired" headerText="Expiration" textAlign="center" headerTextAlign="center" visible={false} width="30" type="datetime" format="dd/MM/yyyy" />
             <ColumnDirective field="comment" headerText="Commentaire" textAlign="center" headerTextAlign="center" visible={false} width="40" />
-            <ColumnDirective field="status" headerText="Status" headerTextAlign="center" textAlign="center" template={productsGridStatus} width="30" />
+            <ColumnDirective field="status" headerText="Status" headerTextAlign="center" textAlign="center" template={vendingGridStatus} width="30" />
           </ColumnsDirective>
           <Inject services={[Resize, Selection, Reorder, Search, Toolbar, Edit, ColumnChooser, Sort, Print, Filter, PdfExport]} />
         </GridComponent>
