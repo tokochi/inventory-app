@@ -15,17 +15,16 @@ import {
   Sort,
   Filter,
 } from "@syncfusion/ej2-react-grids";
-import { useStore, loadVending } from "../../contexts/Store";
+import { useStore, loadVendings } from "../../contexts/Store";
 import React, { useRef, useState, useEffect } from "react";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import Status from "./templates/Status";
+import Status from "./templates/ProductsStatus";
 import { useReactToPrint } from "react-to-print";
-import VendingInventory from '../VendingInventory';
 const { ipcRenderer } = require("electron");
 
 // ******** Get Vending List  ********
-loadVending();
+loadVendings();
 Localization("produits");
 
 export default function VendingTable() {
@@ -35,29 +34,30 @@ export default function VendingTable() {
   const vendingIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
 
   // ******** Grid Table  ********
-  const [active, setActive] = useState({ all: true, stock: false, alert: false, rupture: false });
+  const [active, setActive] = useState({ all: true, paid: false, unpaid: false, deposit: false });
   const activeButtoon =
     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
   const normalButton =
     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
+  
+ const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: vendingFormTemplate };
   let grid;
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
-  const vendingData = () => useStore((state) => state.vending).filter((product) => filterProduct(product));
-  function filterProduct(product) {
+  const vendingData = () => useStore((state) => state.vendings).filter((vending) => filterProduct(vending));
+  function filterProduct(vending) {
     if (active.all === true) {
-      return product === product;
+      return vending === vending;
     }
-    if (active.stock === true) {
-      return product?.quantity > 0 && product?.quantity > (product.qtyAlert ?? 1);
+    if (active.paid === true) {
+      return vending?.amount > 0 && vending?.amount === vending?.deposit;
     }
-    if (active.alert === true) {
-      return product?.quantity > 0 && product?.quantity <= product?.qtyAlert;
+    if (active.unpaid === true) {
+      return vending?.amount > 0 && vending?.deposit===0;
     }
-    if (active.rupture === true) {
-      return product?.quantity === 0;
+    if (active.deposit === true) {
+      return vending?.amount > 0 && vending?.amount > vending?.deposit;
     }
   }
   const reactToPrint = useReactToPrint({
@@ -95,25 +95,25 @@ export default function VendingTable() {
       case args.requestType === "save" && args.action === "add":
         ipcRenderer.send("addProduct", args.data);
         ipcRenderer.on("refreshGridProduct:add", (e, res) => {
-          loadVending();
+          loadVendings();
         });
         break;
       case args.requestType === "beginEdit":
-        useStore.setState((state) => ({ productForm: { ...args.rowData } }));
-        args.dialog.header = "Modifier un produit";
+        useStore.setState((state) => ({ vendingForm: { ...args.rowData } }));
+        args.dialog.header = "Modifier une Vente";
         break;
       case args.requestType === "save" && args.action === "edit":
         ipcRenderer.send("updateProduct", args.data);
         ipcRenderer.on("refreshGridProduct:update", (e, res) => {
-          loadVending();
+          loadVendings();
         });
         break;
       case args.requestType === "add":
-        args.dialog.header = "Ajouter un nouvel produit";
+        args.dialog.header = "Ajouter une Vente";
         break;
       case args.requestType === "delete":
         ipcRenderer.on("refreshGridProduct:delete", (e, res) => {
-          loadVending();
+          loadVendings();
         });
         break;
     }
@@ -124,7 +124,7 @@ export default function VendingTable() {
     }
     if (args.requestType === "add") {
       useStore.setState((state) => ({
-        productForm: {},
+        vendingForm: {},
       }));
     }
     if (args.requestType === "beginEdit") {
@@ -138,40 +138,39 @@ export default function VendingTable() {
             <button
               className={active.all ? activeButtoon : normalButton}
               onClick={() => {
-                setActive((state) => ({ all: true, stock: false, alert: false, rupture: false }));
+                setActive((state) => ({ all: true, paid: false, unpaid: false, deposit: false }));
               }}>
-              Tous <span className="ml-1 text-indigo-200">{useStore((state) => state.vending).length}</span>
+              Tous <span className="ml-1 text-indigo-200">{useStore((state) => state.vendings).length}</span>
             </button>
           </li>
           <li className="m-1">
             <button
-              className={active.stock ? activeButtoon : normalButton}
+              className={active.paid ? activeButtoon : normalButton}
               onClick={() => {
-                setActive((state) => ({ all: false, stock: true, alert: false, rupture: false }));
+                setActive((state) => ({ all: false, paid: true, unpaid: false, deposit: false }));
               }}>
-              En Stock <span className="ml-1  text-emerald-600">{useStore.getState().vending.filter((product) => product?.quantity > 0 && product?.quantity > (product.qtyAlert ?? 1)).length}</span>
+              Payé <span className="ml-1  text-emerald-600">{useStore.getState().vendings.filter((vending) => vending?.quantity > 0 && vending?.quantity > (vending.qtyAlert ?? 1)).length}</span>
             </button>
           </li>
           <li className="m-1">
             <button
-              className={active.alert ? activeButtoon : normalButton}
+              className={active.deposit ? activeButtoon : normalButton}
               onClick={() => {
-                setActive((state) => ({ all: false, stock: false, alert: true, rupture: false }));
+                setActive((state) => ({ all: false, paid: false, unpaid: false, deposit: true }));
               }}>
-              En Alerte <span className="ml-1 text-amber-600">{useStore.getState().vending.filter((product) => product?.quantity > 0 && product?.quantity <= product?.qtyAlert).length}</span>
+              Vérsement <span className="ml-1 text-amber-600">{useStore.getState().vendings.filter((vending) => vending?.quantity > 0 && vending?.quantity <= vending?.qtyAlert).length}</span>
             </button>
           </li>
           <li className="m-1">
             <button
-              className={active.rupture ? activeButtoon : normalButton}
+              className={active.unpaid ? activeButtoon : normalButton}
               onClick={() => {
-                setActive((state) => ({ all: false, stock: false, alert: false, rupture: true }));
+                setActive((state) => ({ all: false, paid: false, unpaid: true, deposit: false }));
               }}>
-              En Rupture <span className="ml-1 text-rose-500">{useStore.getState().vending.filter((product) => product?.quantity === 0).length}</span>
+              Non Payé <span className="ml-1 text-rose-500">{useStore.getState().vendings.filter((vending) => vending?.quantity === 0).length}</span>
             </button>
           </li>
         </ul>
-        <VendingInventory close={close} />
       </div>
       <div className="mx-2 mb-4">
         <GridComponent
@@ -193,13 +192,12 @@ export default function VendingTable() {
           allowSorting>
           <ColumnsDirective>
             <ColumnDirective field="id" headerText="ID" textAlign="center" headerTextAlign="center" width="30" template={vendingIdTemplate} />
-            <ColumnDirective field="name" headerText="Désignation" textAlign="center" headerTextAlign="center" width="120" />
-            <ColumnDirective field="unit" headerText="Unité" textAlign="center" headerTextAlign="center" width="15" />
-            <ColumnDirective field="quantity" headerText="Quantité" textAlign="center" headerTextAlign="center" width="20" format="n0" />
-            <ColumnDirective field="buyPrice" headerText="Prix Achat" textAlign="center" headerTextAlign="center" width="40" format="c2" />
-            <ColumnDirective field="sellPrice" headerText="Prix Vente Détail" textAlign="center" headerTextAlign="center" width="40" format="c2" />
-            <ColumnDirective field="sellPriceGros" headerText="Prix Vente Gros" textAlign="center" headerTextAlign="center" width="40" format="c2" />
-            <ColumnDirective field="expired" headerText="Expiration" textAlign="center" headerTextAlign="center" visible={false} width="30" type="datetime" format="dd/MM/yyyy" />
+            <ColumnDirective field="time" headerText="Date" textAlign="center" headerTextAlign="center" width="80" format="dddd MMMM y - HH:mm" />
+            <ColumnDirective field="customer" headerText="Client" textAlign="center" headerTextAlign="center" width="40" />
+            <ColumnDirective field="amount" headerText="Montant" textAlign="center" headerTextAlign="center" width="40" format="c2" />
+            <ColumnDirective field="rebate" headerText="Remise" textAlign="center" headerTextAlign="center" width="40" format="c2" />
+            <ColumnDirective field="deposit" headerText="Versement" textAlign="center" headerTextAlign="center" width="40" format="c2" />
+            <ColumnDirective field="Total" headerText="Total" textAlign="center" headerTextAlign="center" width="40" format="c2" />
             <ColumnDirective field="comment" headerText="Commentaire" textAlign="center" headerTextAlign="center" visible={false} width="40" />
             <ColumnDirective field="status" headerText="Status" headerTextAlign="center" textAlign="center" template={vendingGridStatus} width="30" />
           </ColumnsDirective>

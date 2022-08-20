@@ -32,6 +32,8 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
       </button>
       <DialogComponent
         id={id}
+        isModal
+        allowDragging
         header="Réglement Crédits"
         visible={dropdownOpen}
         showCloseIcon={true}
@@ -112,7 +114,6 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                     value={paymentType}
                     onChange={(e) => e.value != null && setPaymentType(e.value)}
                     dataSource={["Espéce", "Chéque", "Virement"]}
-                   
                     popupHeight="200px"
                     title="Mode de Paiement"
                   />

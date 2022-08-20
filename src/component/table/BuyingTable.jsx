@@ -15,17 +15,17 @@ import {
   Sort,
   Filter,
 } from "@syncfusion/ej2-react-grids";
-import { useStore, loadBuying } from "../../contexts/Store";
+import { useStore, loadBuyings } from "../../contexts/Store";
 import React, { useRef, useState, useEffect } from "react";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import Status from "./templates/Status";
+import Status from "./templates/ProductsStatus";
 import { useReactToPrint } from "react-to-print";
-import BuyingInventory from '../BuyingInventory';
+
 const { ipcRenderer } = require("electron");
 
 // ******** Get Buying List  ********
-loadBuying();
+loadBuyings();
 Localization("produits");
 
 export default function BuyingTable() {
@@ -35,31 +35,13 @@ export default function BuyingTable() {
   const buyingIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
 
   // ******** Grid Table  ********
-  const [active, setActive] = useState({ all: true, stock: false, alert: false, rupture: false });
-  const activeButtoon =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
-  const normalButton =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
+const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: buyingFormTemplate };
   let grid;
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
-  const buyingData = () => useStore((state) => state.buying).filter((product) => filterProduct(product));
-  function filterProduct(product) {
-    if (active.all === true) {
-      return product === product;
-    }
-    if (active.stock === true) {
-      return product?.quantity > 0 && product?.quantity > (product.qtyAlert ?? 1);
-    }
-    if (active.alert === true) {
-      return product?.quantity > 0 && product?.quantity <= product?.qtyAlert;
-    }
-    if (active.rupture === true) {
-      return product?.quantity === 0;
-    }
-  }
+  const buyingData = () => useStore((state) => state.buyings).filter((product) => filterProduct(product));
+
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
@@ -95,25 +77,25 @@ export default function BuyingTable() {
       case args.requestType === "save" && args.action === "add":
         ipcRenderer.send("addProduct", args.data);
         ipcRenderer.on("refreshGridProduct:add", (e, res) => {
-          loadBuying();
+          loadBuyings();
         });
         break;
       case args.requestType === "beginEdit":
         useStore.setState((state) => ({ productForm: { ...args.rowData } }));
-        args.dialog.header = "Modifier un produit";
+        args.dialog.header = "Modifier un Achat";
         break;
       case args.requestType === "save" && args.action === "edit":
         ipcRenderer.send("updateProduct", args.data);
         ipcRenderer.on("refreshGridProduct:update", (e, res) => {
-          loadBuying();
+          loadBuyings();
         });
         break;
       case args.requestType === "add":
-        args.dialog.header = "Ajouter un nouvel produit";
+        args.dialog.header = "Ajouter un Achat";
         break;
       case args.requestType === "delete":
         ipcRenderer.on("refreshGridProduct:delete", (e, res) => {
-          loadBuying();
+          loadBuyings();
         });
         break;
     }
@@ -132,47 +114,7 @@ export default function BuyingTable() {
   }
   return (
     <div className="p-2">
-      <div className="mb-4 mx-4 flex justify-between">
-        <ul className="flex flex-wrap -m-1">
-          <li className="m-1">
-            <button
-              className={active.all ? activeButtoon : normalButton}
-              onClick={() => {
-                setActive((state) => ({ all: true, stock: false, alert: false, rupture: false }));
-              }}>
-              Tous <span className="ml-1 text-indigo-200">{useStore((state) => state.buying).length}</span>
-            </button>
-          </li>
-          <li className="m-1">
-            <button
-              className={active.stock ? activeButtoon : normalButton}
-              onClick={() => {
-                setActive((state) => ({ all: false, stock: true, alert: false, rupture: false }));
-              }}>
-              En Stock <span className="ml-1  text-emerald-600">{useStore.getState().buying.filter((product) => product?.quantity > 0 && product?.quantity > (product.qtyAlert ?? 1)).length}</span>
-            </button>
-          </li>
-          <li className="m-1">
-            <button
-              className={active.alert ? activeButtoon : normalButton}
-              onClick={() => {
-                setActive((state) => ({ all: false, stock: false, alert: true, rupture: false }));
-              }}>
-              En Alerte <span className="ml-1 text-amber-600">{useStore.getState().buying.filter((product) => product?.quantity > 0 && product?.quantity <= product?.qtyAlert).length}</span>
-            </button>
-          </li>
-          <li className="m-1">
-            <button
-              className={active.rupture ? activeButtoon : normalButton}
-              onClick={() => {
-                setActive((state) => ({ all: false, stock: false, alert: false, rupture: true }));
-              }}>
-              En Rupture <span className="ml-1 text-rose-500">{useStore.getState().buying.filter((product) => product?.quantity === 0).length}</span>
-            </button>
-          </li>
-        </ul>
-        <BuyingInventory close={close} />
-      </div>
+<div></div>
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}

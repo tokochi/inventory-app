@@ -19,7 +19,7 @@ import { useStore, loadProducts } from "../../contexts/Store";
 import React, { useRef, useState, useEffect } from "react";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import Status from "./templates/Status";
+import Status from "./templates/ProductsStatus";
 import { useReactToPrint } from "react-to-print";
 import ProductsInventory from './../ProductsInventory';
 const { ipcRenderer } = require("electron");
@@ -109,7 +109,7 @@ export default function ProductsTable() {
         });
         break;
       case args.requestType === "add":
-        args.dialog.header = "Ajouter un nouvel produit";
+        args.dialog.header = "Ajouter un Produit";
         break;
       case args.requestType === "delete":
         ipcRenderer.on("refreshGridProduct:delete", (e, res) => {
@@ -170,6 +170,7 @@ export default function ProductsTable() {
               En Rupture <span className="ml-1 text-rose-500">{useStore.getState().products.filter((product) => product?.quantity === 0).length}</span>
             </button>
           </li>
+
         </ul>
         <ProductsInventory close={close} />
       </div>

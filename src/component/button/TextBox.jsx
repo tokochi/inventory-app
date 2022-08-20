@@ -8,7 +8,7 @@ export default function TextBox({ type, onChange, dataSource, value, id, require
   const labelNumeric = "inline-flex items-center px-5 py-1 text-sm slate-800 bg-gray-200 rounded-r-md border border-l-0 border-gray-300";
   if (type === "text")
     return (
-      <div className={`flex w-${width} border-slate-200  border rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm`}>
+      <div className={`flex ${width} border-slate-200  border rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm`}>
         <TextBoxComponent type="text" id={id} name={id}  value={value} input={onInput} change={onChange} placeholder={title} {...rest}></TextBoxComponent>
       </div>
     );
@@ -43,7 +43,7 @@ export default function TextBox({ type, onChange, dataSource, value, id, require
       );
   if (type === "dropdown")
     return (
-      <div className={`border-slate-200 w-${width} border  rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm`}>
+      <div className={`border-slate-200 ${width} border  rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm`}>
         <DropDownListComponent
           id={id}
           name={id}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import { useStore } from "../contexts/Store";
 
-import Status from "./table/templates/Status";
+import Status from "./table/templates/ProductsStatus";
 
 export default function ProductsInventory({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const productsData = () => useStore((state) => state.products);
@@ -29,6 +29,7 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
       </button>
       <DialogComponent
         id={id}
+        isModal
         allowDragging
         header="Liste Inventaire"
         visible={dropdownOpen}

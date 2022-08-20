@@ -7,9 +7,12 @@ export const useStore = create((set) => ({
   isLoggedIn: false,
   dropdownOpen: false,
   productForm: {},
+  mode:"Détail",
   products: [],
   providers: [],
   customers: [],
+  vendings: [],
+  buyings: [],
   user: {},
   paymentType: "",
   settings: {
@@ -37,16 +40,16 @@ export const useStore = create((set) => ({
       set({ products: JSON.parse(res) });
     });
   },
-  getTeachers: () => {
-    ipcRenderer.send("teacherList:load");
-    ipcRenderer.on("teacherList:get", (e, res) => {
-      set({ teachers: JSON.parse(res) });
+  getVendings: () => {
+    ipcRenderer.send("vendingList:load");
+    ipcRenderer.on("vendingList:get", (e, res) => {
+      set({ vendings: JSON.parse(res) });
     });
   },
-  getAttendances: () => {
-    ipcRenderer.send("attendanceList:load");
-    ipcRenderer.on("attendanceList:get", (e, res) => {
-      set({ attendances: JSON.parse(res) });
+  getBuyings: () => {
+    ipcRenderer.send("buyingList:load");
+    ipcRenderer.on("buyingList:get", (e, res) => {
+      set({ buyings: JSON.parse(res) });
     });
   },
 
@@ -90,10 +93,10 @@ export const useSetIsClicked = () => useStore((state) => state.setIsClicked);
 export const loadProviders = () => useStore.getState().getProviders();
 export const loadProducts = () => useStore.getState().getProducts();
 export const loadCustomers = () => useStore.getState().getCustomers();
+export const loadVendings = () => useStore.getState().getVendings();
+export const loadBuyings = () => useStore.getState().getBuyings();
 export const loadEvents = () => useStore.getState().getEvents();
 export const loadSettings = () => useStore.getState().getSettings();
-export const loadAttendances = () => useStore.getState().getAttendances();
-export const loadEmployees = () => useStore.getState().getEmployees();
 export const loadDepenses = () => useStore.getState().getDepenses();
 export const loadRevenues = () => useStore.getState().getRevenues();
 export const loadNotifications = () => useStore.getState().getNotifications();

@@ -27,6 +27,7 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
       <DialogComponent
         id={id}
         allowDragging
+        isModal
         header="Liste des Versements"
         visible={dropdownOpen}
         showCloseIcon={true}
@@ -72,22 +73,20 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
                     <tr className="text-center" key={customer._id}>
                       {customer.avance.map((avance, indx) => (
                         <>
-                          <td className="text-left p-2">
-                            {"#" + avance?._id.slice(-6)}
-                          </td>
+                          <td className="text-left p-2">{"#" + avance?._id.slice(-6)}</td>
                           <td>{moment(customer?.date).format("DD/MM/YYYY")}</td>
                           <td>{customer?.name}</td>
                           <td>{avance?.credit && avance?.credit + ",00DA"}</td>
                           <td>{avance?.amount && avance?.amount + ",00DA"}</td>
                           <td>{avance?.amount && Math.max(avance?.credit - avance.amount, 0) + ",00DA"}</td>
-                          <td >
+                          <td>
                             {avance?.credit - avance.amount > 0 ? (
                               <p className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-rose-100 text-rose-500">Crédit</p>
                             ) : (
                               <p className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-emerald-100 text-emerald-600 ">Acquitté</p>
                             )}
                           </td>
-                          <td >{avance?.paymentType}</td>
+                          <td>{avance?.paymentType}</td>
                         </>
                       ))}
                     </tr>

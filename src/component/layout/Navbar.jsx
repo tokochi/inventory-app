@@ -3,16 +3,41 @@ import SearchModal from "../dialog/ModalSearch";
 import Notifications from "../dialog/DropdownNotifications";
 import Help from "../dialog/DropdownHelp";
 import UserMenu from "../dialog/DropdownProfile";
+import caisse from "./../../data/icons/caisse.png";
+import invoice from "./../../data/icons/document.png";
+import report from "./../../data/icons/report.png";
+import { NavLink } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
+import Caisse from '../../pages/Caisse';
+import Facture from '../../pages/Facture';
+import Revenu from "../../pages/Revenu";
 
 export default function Navbar() {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-
+   const activeButtoon =
+     "inline-flex items-center justify-center text-sm font-medium leading-5  px-3 py-1 border-r border-transparent shadow-sm bg-indigo-400 text-white duration-150 ease-in-out";
+   const normalButton =
+     "inline-flex items-center justify-center text-sm font-medium leading-5  px-3 py-1 border-r border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
+  
   return (
-    <header className="sticky top-0 bg-white border-b border-slate-200 z-30">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-end h-16 -mb-px">
+    <header className="sticky top-0  shadow-sm  bg-white border-b border-slate-200 z-30">
+      <div className="px-8">
+        <div className="flex items-center justify-between  ">
           {/* Header: Left side */}
-
+          <div  className="min-w-[450px]">
+            <NavLink to="/caisse" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
+              <img src={caisse} width="40" className="m-2" />
+              Caisse
+            </NavLink>
+            <NavLink to="/facture" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
+              <img src={invoice} width="40" className="m-2" />
+              Facture
+            </NavLink>
+            <NavLink to="/revenu" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
+              <img src={report} width="40" className="m-2" />
+              Bénifice
+            </NavLink>
+          </div>
           {/* Header: Right side */}
           <div className="flex items-center space-x-3">
             <div>
@@ -39,6 +64,7 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
     </header>
   );
 }

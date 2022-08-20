@@ -107,18 +107,19 @@ const revenueSchema = new mongoose.Schema({
 
 const vendingSchema = new mongoose.Schema({
   time: { type: Date, default: Date.now },
-  index: "string",
+  isMinimized: "string",
   type: "string",
   customer: mongoose.Schema.ObjectId,
   paymentType: "string",
-  payment: { total: "number", rebate: "number", deposit: "number" },
   grid: [],
   amount: "number",
+  rebate: "number",
+  deposit: "number",
   comment: "string",
 });
 const buyingSchema = new mongoose.Schema({
   time: { type: Date, default: Date.now },
-  index: "string",
+  id: "string",
   type: "string",
   provider: mongoose.Schema.ObjectId,
   grid: [],
