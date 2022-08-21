@@ -6,8 +6,8 @@ const { ipcRenderer } = require("electron");
 export const useStore = create((set) => ({
   isLoggedIn: false,
   dropdownOpen: false,
+  caisse:{mode: "Détail",autoCompleteObj: {},  selectedProducts: [],selectedProduct: null,grid:{}},
   productForm: {},
-  mode:"Détail",
   products: [],
   providers: [],
   customers: [],
