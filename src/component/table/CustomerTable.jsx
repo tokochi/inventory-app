@@ -161,6 +161,7 @@ export default function CustomersTable() {
           ref={(g) => (grid = g)}
           dataSource={customersData()}
           enableHover={false}
+          height="500"
           allowPdfExport
           allowPrint
           allowResizing

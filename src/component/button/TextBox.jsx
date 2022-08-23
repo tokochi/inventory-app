@@ -29,7 +29,7 @@ export default function TextBox({ type, onChange, dataSource, value, id, require
             floatLabelType="Never"
             {...rest}></NumericTextBoxComponent>
         </div>
-        {format && <span className={labelNumeric}>{label}</span>}
+        {label?.length>0 && <span className={labelNumeric}>{label}</span>}
       </div>
     );
     if (type === "textLabel")

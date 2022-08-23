@@ -10,7 +10,12 @@
 ::-webkit-scrollbar-track {
   background-color: transparent;
 }
-
+input[type='number']:focus{
+box-shadow:none;
+}
+input[type='number']{
+background-color: transparent;
+}
 /* Grid */
 .e-grid td.e-active {
   background-color: rgb(213, 230, 244) ;

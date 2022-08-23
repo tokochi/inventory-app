@@ -17,9 +17,9 @@ import {
 } from "@syncfusion/ej2-react-grids";
 import { useStore, loadVendings } from "../../contexts/Store";
 import React, { useRef, useState, useEffect } from "react";
-import ProductFormTemplate from "../form/ProductForm";
+import VendingFormTemplate from "../form/VendingForm";
 import Localization from "../Localization";
-import Status from "./templates/ProductsStatus";
+import Status from "./templates/VendingsStatus";
 import { useReactToPrint } from "react-to-print";
 const { ipcRenderer } = require("electron");
 
@@ -30,7 +30,7 @@ Localization("produits");
 export default function VendingTable() {
   // ******** Column Templates  ********
   const vendingGridStatus = (props) => <Status {...props} />;
-  const vendingFormTemplate = (props) => <ProductFormTemplate {...props} />;
+  const vendingFormTemplate = (props) => <VendingFormTemplate {...props} />;
   const vendingIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
 
   // ******** Grid Table  ********
@@ -45,8 +45,8 @@ export default function VendingTable() {
   let grid;
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
-  const vendingData = () => useStore((state) => state.vendings).filter((vending) => filterProduct(vending));
-  function filterProduct(vending) {
+  const vendingData =  useStore((state) => state.vendings).filter((vending) => filterVending(vending));
+  function filterVending(vending) {
     if (active.all === true) {
       return vending === vending;
     }
@@ -93,8 +93,8 @@ export default function VendingTable() {
   function actionComplete(args) {
     switch (true) {
       case args.requestType === "save" && args.action === "add":
-        ipcRenderer.send("addProduct", args.data);
-        ipcRenderer.on("refreshGridProduct:add", (e, res) => {
+        ipcRenderer.send("addVending", args.data);
+        ipcRenderer.on("refreshGridVending:add", (e, res) => {
           loadVendings();
         });
         break;
@@ -103,8 +103,8 @@ export default function VendingTable() {
         args.dialog.header = "Modifier une Vente";
         break;
       case args.requestType === "save" && args.action === "edit":
-        ipcRenderer.send("updateProduct", args.data);
-        ipcRenderer.on("refreshGridProduct:update", (e, res) => {
+        ipcRenderer.send("updateVending", args.data);
+        ipcRenderer.on("refreshGridVending:update", (e, res) => {
           loadVendings();
         });
         break;
@@ -112,7 +112,7 @@ export default function VendingTable() {
         args.dialog.header = "Ajouter une Vente";
         break;
       case args.requestType === "delete":
-        ipcRenderer.on("refreshGridProduct:delete", (e, res) => {
+        ipcRenderer.on("refreshGridVending:delete", (e, res) => {
           loadVendings();
         });
         break;
@@ -120,7 +120,7 @@ export default function VendingTable() {
   }
   function actionBegin(args) {
     if (args.requestType === "delete") {
-      ipcRenderer.send("deleteProduct", grid.getSelectedRecords()[0]);
+      ipcRenderer.send("deleteVending", grid.getSelectedRecords()[0]);
     }
     if (args.requestType === "add") {
       useStore.setState((state) => ({
@@ -175,8 +175,9 @@ export default function VendingTable() {
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
-          dataSource={vendingData()}
+          dataSource={vendingData}
           enableHover={false}
+          height="500"
           allowPdfExport
           allowPrint
           allowResizing
@@ -192,12 +193,13 @@ export default function VendingTable() {
           allowSorting>
           <ColumnsDirective>
             <ColumnDirective field="id" headerText="ID" textAlign="center" headerTextAlign="center" width="30" template={vendingIdTemplate} />
-            <ColumnDirective field="time" headerText="Date" textAlign="center" headerTextAlign="center" width="80" format="dddd MMMM y - HH:mm" />
+            <ColumnDirective field="time" headerText="Date" textAlign="center" headerTextAlign="center" width="80" type="datetime" format="dd/MM/yyyy" />
+            <ColumnDirective field="type" headerText="Mode Vente" textAlign="center" headerTextAlign="center" width="40" />
             <ColumnDirective field="customer" headerText="Client" textAlign="center" headerTextAlign="center" width="40" />
-            <ColumnDirective field="amount" headerText="Montant" textAlign="center" headerTextAlign="center" width="40" format="c2" />
+            <ColumnDirective field="total" headerText="Montant" textAlign="center" headerTextAlign="center" width="40" format="c2" />
             <ColumnDirective field="rebate" headerText="Remise" textAlign="center" headerTextAlign="center" width="40" format="c2" />
             <ColumnDirective field="deposit" headerText="Versement" textAlign="center" headerTextAlign="center" width="40" format="c2" />
-            <ColumnDirective field="Total" headerText="Total" textAlign="center" headerTextAlign="center" width="40" format="c2" />
+            <ColumnDirective field="amount" headerText="Total Payé" textAlign="center" headerTextAlign="center" width="40" format="c2" />
             <ColumnDirective field="comment" headerText="Commentaire" textAlign="center" headerTextAlign="center" visible={false} width="40" />
             <ColumnDirective field="status" headerText="Status" headerTextAlign="center" textAlign="center" template={vendingGridStatus} width="30" />
           </ColumnsDirective>

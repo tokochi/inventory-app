@@ -114,12 +114,13 @@ const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChoos
   }
   return (
     <div className="p-2">
-<div></div>
+      <div></div>
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
           dataSource={buyingData()}
           enableHover={false}
+          height="500"
           allowPdfExport
           allowPrint
           allowResizing

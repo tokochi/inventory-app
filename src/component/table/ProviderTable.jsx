@@ -152,8 +152,9 @@ export default function ProvidersTable() {
           </li>
         </ul>
         <div className="flex gap-2">
-        <AvanceProvider close={close} />
-        <ProviderCreditList close={close} /></div>
+          <AvanceProvider close={close} />
+          <ProviderCreditList close={close} />
+        </div>
       </div>
       <div className="mx-2 mb-4">
         <GridComponent
@@ -161,6 +162,7 @@ export default function ProvidersTable() {
           dataSource={providersData()}
           enableHover={false}
           allowPdfExport
+          height="500"
           allowPrint
           allowResizing
           showColumnChooser

@@ -182,6 +182,7 @@ export default function ProductsTable() {
           allowPdfExport
           allowPrint
           allowResizing
+          height="500"
           showColumnChooser
           locale="fr-BE"
           // enablePersistence

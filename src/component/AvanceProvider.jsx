@@ -105,7 +105,7 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                 </td>
               </tr>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Choisir Fournisseur:</td>
+                <td className="p-4 w-[220px] text-sm font-medium">Mode de Paiement:</td>
                 <td className="w-[320px]">
                   <TextBox
                     type="dropdown"
