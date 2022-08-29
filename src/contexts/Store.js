@@ -5,8 +5,34 @@ const { ipcRenderer } = require("electron");
 export const useStore = create((set) => ({
   isLoggedIn: false,
   dropdownOpen: false,
-  caisse: { mode: "Détail", autoCompleteObj: {}, amount: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null, grid: {} },
-  facture: { mode: "Détail", paymentType: "Espéce", tva: 0, autoCompleteObj: {}, amount: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null, grid: {} },
+  caisse: { mode: "Détail", autoCompleteObj: {}, client: { name: "Standard" }, amount: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null },
+  facture: {
+    mode: "Détail",
+    paymentType: "Espéce",
+    client: { name: "Standard" },
+    tva: 0,
+    autoCompleteObj: {},
+    amount: 0,
+    total: 0,
+    rebate: 0,
+    deposit: 0,
+    selectedProducts: [],
+    toastObj:{},
+    selectedProduct: null,
+  },
+  bonAchat: {
+    mode: "Détail",
+    paymentType: "Espéce",
+    tva: 0,
+    supplier: { name: "Standard" },
+    autoCompleteObj: {},
+    amount: 0,
+    total: 0,
+    rebate: 0,
+    deposit: 0,
+    selectedProducts: [],
+    selectedProduct: null,
+  },
   productForm: {},
   products: [],
   providers: [],
@@ -29,20 +55,26 @@ export const useStore = create((set) => ({
         amount:
           state.caisse.selectedProducts.reduce(
             (prevProduct, currProduct) =>
-              state.caisse.mode === "Détail" ? prevProduct + currProduct.selectedQuantity * currProduct?.sellPrice : prevProduct + currProduct.selectedQuantity * currProduct?.sellPriceGros,
+              state.caisse.mode === "Détail"
+                ? parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPrice)
+                : parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPriceGros),
             0
           ) - state.caisse.rebate,
         total: state.caisse.selectedProducts.reduce(
           (prevProduct, currProduct) =>
-            state.caisse.mode === "Détail" ? prevProduct + currProduct.selectedQuantity * currProduct?.sellPrice : prevProduct + currProduct.selectedQuantity * currProduct?.sellPriceGros,
+            state.caisse.mode === "Détail"
+              ? parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPrice)
+              : parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPriceGros),
           0
         ),
         deposit:
           state.caisse.selectedProducts.reduce(
             (prevProduct, currProduct) =>
-              state.caisse.mode === "Détail" ? prevProduct + currProduct.selectedQuantity * currProduct?.sellPrice : prevProduct + currProduct.selectedQuantity * currProduct?.sellPriceGros,
+              state.caisse.mode === "Détail"
+                ? parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPrice)
+                : parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPriceGros),
             0
-          ) - state.caisse.rebate,
+          ) - parseInt(state.caisse.rebate),
       },
     })),
   setTotalFacture: () =>
@@ -52,30 +84,54 @@ export const useStore = create((set) => ({
         amount:
           state.facture.selectedProducts.reduce(
             (prevProduct, currProduct) =>
-              state.facture.mode === "Détail" ? prevProduct + currProduct.selectedQuantity * currProduct?.sellPrice : prevProduct + currProduct.selectedQuantity * currProduct?.sellPriceGros,
+              state.facture.mode === "Détail"
+                ? parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPrice)
+                : parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPriceGros),
             0
           ) +
-          state.facture.selectedProducts.reduce(
-            (prevProduct, currProduct) =>
-              state.facture.mode === "Détail" ? prevProduct + currProduct.selectedQuantity * currProduct?.sellPrice : prevProduct + currProduct.selectedQuantity * currProduct?.sellPriceGros,
-            0
-          ) *
-            state.facture.tva -
+          parseInt(
+            state.facture.selectedProducts.reduce(
+              (prevProduct, currProduct) =>
+                state.facture.mode === "Détail"
+                  ? parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPrice)
+                  : parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPriceGros),
+              0
+            ) * state.facture.tva
+          ) -
           state.facture.rebate,
         total: state.facture.selectedProducts.reduce(
           (prevProduct, currProduct) =>
-            state.facture.mode === "Détail" ? prevProduct + currProduct.selectedQuantity * currProduct?.sellPrice : prevProduct + currProduct.selectedQuantity * currProduct?.sellPriceGros,
+            state.facture.mode === "Détail"
+              ? parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPrice)
+              : parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPriceGros),
           0
         ),
         deposit:
           state.facture.selectedProducts.reduce(
             (prevProduct, currProduct) =>
-              state.facture.mode === "Détail" ? prevProduct + currProduct.selectedQuantity * currProduct?.sellPrice : prevProduct + currProduct.selectedQuantity * currProduct?.sellPriceGros,
+              state.facture.mode === "Détail"
+                ? parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPrice)
+                : parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.sellPriceGros),
             0
-          ) - state.facture.rebate,
+          ) - parseInt(state.facture.rebate),
       },
     })),
-
+  setTotalBonAchat: () =>
+    set((state) => ({
+      bonAchat: {
+        ...state.bonAchat,
+        amount:
+          state.bonAchat.selectedProducts.reduce((prevProduct, currProduct) => parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.buyPrice), 0) +
+          parseInt(
+            state.bonAchat.selectedProducts.reduce((prevProduct, currProduct) => parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.buyPrice), 0) * state.bonAchat.tva
+          ) -
+          state.bonAchat.rebate,
+        total: state.bonAchat.selectedProducts.reduce((prevProduct, currProduct) => parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.buyPrice), 0),
+        deposit:
+          state.bonAchat.selectedProducts.reduce((prevProduct, currProduct) => parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.buyPrice), 0) -
+          parseInt(state.bonAchat.rebate),
+      },
+    })),
   getProviders: () => {
     ipcRenderer.send("providerList:load");
     ipcRenderer.on("providerList:get", (e, res) => {

@@ -1,31 +1,32 @@
 import {
-  GridComponent,
-  ColumnsDirective,
-  ColumnDirective,
-  Reorder,
-  Print,
-  Selection,
-  Resize,
   ColumnChooser,
-  Search,
-  Inject,
+  ColumnDirective,
+  ColumnsDirective,
   Edit,
-  Toolbar,
-  PdfExport,
-  Sort,
   Filter,
+  GridComponent,
+  Inject,
+  PdfExport,
+  Print,
+  Reorder,
+  Resize,
+  Search,
+  Selection,
+  Sort,
+  Toolbar,
 } from "@syncfusion/ej2-react-grids";
-import { useStore, loadProducts } from "../../contexts/Store";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+import { loadProducts, useStore } from "../../contexts/Store";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
+import Toast from "../Toast";
+import ProductsInventory from "./../ProductsInventory";
 import Status from "./templates/ProductsStatus";
-import { useReactToPrint } from "react-to-print";
-import ProductsInventory from './../ProductsInventory';
 const { ipcRenderer } = require("electron");
 
 // ******** Get Products List  ********
-loadProducts();
+
 Localization("produits");
 
 export default function ProductsTable() {
@@ -43,9 +44,12 @@ export default function ProductsTable() {
   const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: productsFormTemplate };
   let grid;
+  const [toastRemove, setToastRemove] = useState(false);
+  const [toastAdd, setToastAdd] = useState(false);
+  const [toastEdit, setToastEdit] = useState(false);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
-  const productsData = () => useStore((state) => state.products).filter((product) => filterProduct(product));
+  const productsData = useStore((state) => state.products).filter((product) => filterProduct(product));
   function filterProduct(product) {
     if (active.all === true) {
       return product === product;
@@ -65,7 +69,7 @@ export default function ProductsTable() {
     print: (target) =>
       new Promise(() => {
         let data = target.contentWindow.document.documentElement.outerHTML;
-        let blob = new Blob([data], { type: "text/html" });
+        let blob = new Blob([data], { type: "text/html; charset=utf-8" });
         let url = URL.createObjectURL(blob);
         ipcRenderer.send("previewComponent", url);
       }),
@@ -76,10 +80,22 @@ export default function ProductsTable() {
       setShowPrintDiv(true);
     }
   }, [showPrintDiv]);
+  useEffect(() => {
+    if (toastAdd) {
+      setTimeout(() => setToastAdd(false), 4000);
+    }
+    if (toastRemove) {
+      setTimeout(() => setToastRemove(false), 4000);
+    }
+    if (toastEdit) {
+      setTimeout(() => setToastEdit(false), 4000);
+    }
+  }, [toastAdd, toastRemove, toastEdit]);
   function toolbarClick(args) {
     switch (true) {
       case args.item.id.includes("print"):
         setShowPrintDiv(false);
+        break;
       case args.item.id.includes("excelexport"):
         grid.excelExport({
           fileName: "List des produits.xlsx",
@@ -97,6 +113,7 @@ export default function ProductsTable() {
         ipcRenderer.on("refreshGridProduct:add", (e, res) => {
           loadProducts();
         });
+        setToastAdd(true);
         break;
       case args.requestType === "beginEdit":
         useStore.setState((state) => ({ productForm: { ...args.rowData } }));
@@ -107,20 +124,22 @@ export default function ProductsTable() {
         ipcRenderer.on("refreshGridProduct:update", (e, res) => {
           loadProducts();
         });
+        setToastEdit(true);
         break;
       case args.requestType === "add":
         args.dialog.header = "Ajouter un Produit";
         break;
       case args.requestType === "delete":
+        ipcRenderer.send("deleteProduct", args.data[0]);
         ipcRenderer.on("refreshGridProduct:delete", (e, res) => {
           loadProducts();
         });
+        setToastRemove(true);
         break;
     }
   }
   function actionBegin(args) {
     if (args.requestType === "delete") {
-      ipcRenderer.send("deleteProduct", grid.getSelectedRecords()[0]);
     }
     if (args.requestType === "add") {
       useStore.setState((state) => ({
@@ -129,6 +148,12 @@ export default function ProductsTable() {
     }
     if (args.requestType === "beginEdit") {
     }
+  }
+  function toCurrency(num) {
+    let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+    str = str.replace("DZD", "DA");
+    str = str.replace(",", " ");
+    return str;
   }
   return (
     <div className="p-2">
@@ -170,19 +195,27 @@ export default function ProductsTable() {
               En Rupture <span className="ml-1 text-rose-500">{useStore.getState().products.filter((product) => product?.quantity === 0).length}</span>
             </button>
           </li>
-
         </ul>
         <ProductsInventory close={close} />
       </div>
+      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
+        Nouveau Produit Ajouter au Stock avec succès.
+      </Toast>
+      <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
+        Produit Modifier avec succès.
+      </Toast>
+      <Toast type="error" open={toastRemove} setOpen={setToastRemove}>
+        Produit Supprimer avec succès.
+      </Toast>
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
-          dataSource={productsData()}
+          dataSource={productsData}
           enableHover={false}
           allowPdfExport
           allowPrint
           allowResizing
-          height="500"
+          height="450"
           showColumnChooser
           locale="fr-BE"
           // enablePersistence
@@ -207,7 +240,68 @@ export default function ProductsTable() {
           </ColumnsDirective>
           <Inject services={[Resize, Selection, Reorder, Search, Toolbar, Edit, ColumnChooser, Sort, Print, Filter, PdfExport]} />
         </GridComponent>
-        <div ref={gridRef} className={`mx-2 mb-4 ${showPrintDiv && "hidden"} bg-slate-600 w-full`}></div>
+        <div ref={gridRef} className={`mx-2 mb-4 ${showPrintDiv && "hidden"} h-[297mm] w-[210mm] `}>
+          <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+            <div>
+              <div className="overflow-x-auto">
+                <div className="flex gap-2 p-2">
+                  <span className="text-lg mr-2">Liste Inventaire:</span>
+                  <button className={normalButton}>
+                    Total Produits:
+                    <span className="ml-1  text-emerald-600">{productsData.length}</span>
+                  </button>
+                  <button className={normalButton}>
+                    Total Quantité:
+                    <span className="ml-1  text-emerald-600">{productsData.reduce((acc, cur) => acc + cur.quantity, 0)}</span>
+                  </button>
+                  <button className={normalButton}>
+                    Capital Achat:
+                    <span className="ml-1  text-emerald-600">{toCurrency(productsData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0))}</span>
+                  </button>
+                  {/* <button className={normalButton}>
+                    Capital Detail:
+                    <span className="ml-1  text-emerald-600">{toCurrency(productsData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPrice, 0))}</span>
+                  </button> */}
+                </div>
+                <table className="table-auto w-full divide-y divide-slate-200 ">
+                  <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                    <tr>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">ID</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Désignation</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Qté</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Prix Achat</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Status</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productsData.map((product) => (
+                      <tr className="text-center " key={product._id}>
+                        <td className=" p-2">{"#" + product?._id.slice(-6)}</td>
+                        <td>{product?.name}</td>
+                        <td>{product?.quantity}</td>
+                        <td>{product?.buyPrice && toCurrency(product?.buyPrice)}</td>
+                        <td>
+                          <Status {...product} />
+                        </td>
+                        <td>{product?.paymentType}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

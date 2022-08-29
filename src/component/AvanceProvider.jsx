@@ -5,18 +5,26 @@ import { useStore, loadProviders } from "../contexts/Store";
 const { ipcRenderer } = require("electron");
 import { DateTimePickerComponent } from "@syncfusion/ej2-react-calendars";
 import { HashRouter } from 'react-router-dom';
+import Toast from "./Toast";
 
 export default function AvanceProvider({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const providersData = () => useStore((state) => state.providers);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [amount, setAmount] = useState(0);
+   const [toastAdd, setToastAdd] = useState(false);
+  
   const [paymentType, setPaymentType] = useState("cash");
   const [date, setDate] = useState(new Date());
   const [slectedProvider, setSlectedProvider] = useState("");
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
-
+  useEffect(() => {
+    if (toastAdd) {
+      setTimeout(() => setToastAdd(false), 4000);
+    }
+ 
+  }, [toastAdd]);
   return (
     <>
       <button
@@ -54,6 +62,7 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                       ipcRenderer.send("updateProvider", { credit: slectedProvider.credit - amount, _id: slectedProvider._id, avance: { credit: slectedProvider.credit, date, amount, paymentType } });
                     ipcRenderer.on("refreshGridProvider:update", (e, res) => {
                       loadProviders();
+                      setToastAdd(true);
                     });
                   }}>
                   Terminer
@@ -167,6 +176,9 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
           </table>
         </div>
       </DialogComponent>
+      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
+        Vérsement Ajouter  avec succès.
+      </Toast>
     </>
   );
 }

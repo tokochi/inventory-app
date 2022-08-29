@@ -4,6 +4,23 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+              extend: {
+            keyframes: {
+                'fade-in-down': {
+                    '0%': {
+                        opacity: '0',
+                        transform: 'translateY(-10px)'
+                    },
+                    '100%': {
+                        opacity: '1',
+                        transform: 'translateY(0)'
+                    },
+                }
+            },
+            animation: {
+                'fade-in-down': 'fade-in-down 0.5s ease-out'
+            }
+        },
       boxShadow: {
         DEFAULT: "0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.02)",
         md: "0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.02)",
@@ -30,6 +47,8 @@ module.exports = {
       },
       screens: {
         xs: "480px",
+        sm: "600px",
+        lg: "900px",
       },
       borderWidth: {
         3: "3px",

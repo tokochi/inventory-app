@@ -4,18 +4,24 @@ import TextBox from "./button/TextBox";
 import { useStore, loadCustomers } from "../contexts/Store";
 const { ipcRenderer } = require("electron");
 import { DateTimePickerComponent } from "@syncfusion/ej2-react-calendars";
-
+import Toast from "./Toast";
 
 export default function AvanceCustomer({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const customersData = () => useStore((state) => state.customers);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [amount, setAmount] = useState(0);
   const [paymentType, setPaymentType] = useState("cash");
+  const [toastAdd, setToastAdd] = useState(false);
   const [date, setDate] = useState(new Date());
   const [slectedCustomer, setSlectedCustomer] = useState("");
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
+  useEffect(() => {
+    if (toastAdd) {
+      setTimeout(() => setToastAdd(false), 4000);
+    }
+  }, [toastAdd]);
 
   return (
     <>
@@ -54,6 +60,7 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
                       ipcRenderer.send("updateCustomer", { credit: slectedCustomer.credit - amount, _id: slectedCustomer._id, avance: { credit: slectedCustomer.credit, date, amount, paymentType } });
                     ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                       loadCustomers();
+                      setToastAdd(true);
                     });
                   }}>
                   Terminer
@@ -167,6 +174,9 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
           </table>
         </div>
       </DialogComponent>
+      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
+        Vérsement Ajouter au Stock avec succès.
+      </Toast>
     </>
   );
 }

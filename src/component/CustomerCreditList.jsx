@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import { useStore } from "../contexts/Store";
 import moment from "moment";
-
-
+import { v4 as uuidv4 } from "uuid";
+import Toast from "./Toast";
 
 export default function CustomerCreditList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const customersData = () => useStore((state) => state.customers);
@@ -11,7 +11,12 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
-
+    function toCurrency(num) {
+      let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+      return str;
+    }
   return (
     <>
       <button
@@ -69,25 +74,31 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
                   </tr>
                 </thead>
                 <tbody>
-                  {customersData().map((customer) => (
-                    <tr className="text-center" key={customer._id}>
+                  {customersData().map((customer, index) => (
+                    <tr className="text-center" key={uuidv4()}>
                       {customer.avance.map((avance, indx) => (
-                        <>
-                          <td className="text-left p-2">{"#" + avance?._id.slice(-6)}</td>
-                          <td>{moment(customer?.date).format("DD/MM/YYYY")}</td>
-                          <td>{customer?.name}</td>
-                          <td>{avance?.credit && avance?.credit + ",00DA"}</td>
-                          <td>{avance?.amount && avance?.amount + ",00DA"}</td>
-                          <td>{avance?.amount && Math.max(avance?.credit - avance.amount, 0) + ",00DA"}</td>
-                          <td>
+                        <React.Fragment key={uuidv4()}>
+                          <td key={uuidv4()} className="text-left p-2">
+                            {"#" + avance?._id.slice(-6)}
+                          </td>
+                          <td key={uuidv4()}>{moment(customer?.date).format("DD/MM/YYYY")}</td>
+                          <td key={uuidv4()}>{customer?.name}</td>
+                          <td key={uuidv4()}>{avance?.credit && toCurrency(avance?.credit)}</td>
+                          <td key={uuidv4()}>{avance?.amount && toCurrency(avance?.amount)}</td>
+                          <td key={uuidv4()}>{avance?.amount && toCurrency(avance?.credit - avance.amount)}</td>
+                          <td key={uuidv4()}>
                             {avance?.credit - avance.amount > 0 ? (
-                              <p className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-rose-100 text-rose-500">Crédit</p>
+                              <p key={uuidv4()} className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-rose-100 text-rose-500">
+                                Crédit
+                              </p>
                             ) : (
-                              <p className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-emerald-100 text-emerald-600 ">Acquitté</p>
+                              <p key={uuidv4()} className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-emerald-100 text-emerald-600 ">
+                                Acquitté
+                              </p>
                             )}
                           </td>
-                          <td>{avance?.paymentType}</td>
-                        </>
+                          <td key={uuidv4()}>{avance?.paymentType}</td>
+                        </React.Fragment>
                       ))}
                     </tr>
                   ))}

@@ -26,6 +26,7 @@ const productSchema = new mongoose.Schema({
   quantity: "number",
   qtyAlert: "number",
   buyPrice: "number",
+  lastBuyPrice: "number",
   sellPrice: "number",
   sellPriceGros: "number",
   expired: { type: Date },
@@ -110,24 +111,35 @@ const vendingSchema = new mongoose.Schema({
   time: { type: Date, default: Date.now },
   index: "number",
   type: "string",
-  customerId: mongoose.Schema.ObjectId,
-  customer: "string",
+  mode: "string",
+client:{},
   paymentType: "string",
   grid: [],
   amount: "number",
+  tva: "number",
   rebate: "number",
+  totalSellPrice: "number",
+  totalbuyPrice: "number",
+  totalSellPriceGros: "number",
   total: "number",
   deposit: "number",
   comment: "string",
 });
 const buyingSchema = new mongoose.Schema({
   time: { type: Date, default: Date.now },
-  id: "string",
+  index: "number",
   type: "string",
-  provider: mongoose.Schema.ObjectId,
-  grid: [],
+  mode: "string",
+
+  supplier: {},
   paymentType: "string",
-  payment: { total: "number", rebate: "number", deposit: "number"},
+  grid: [],
+  amount: "number",
+  tva: "number",
+  rebate: "number",
+  totalbuyPrice: "number",
+  total: "number",
+  deposit: "number",
   comment: "string",
 });
 const notificationSchema = new mongoose.Schema({
@@ -160,6 +172,7 @@ ipcMain.on("addProduct", (event, data) => {
     quantity: data.quantity,
     qtyAlert: data.qtyAlert,
     buyPrice: data.buyPrice,
+    lastBuyPrice: data.lastBuyPrice,
     sellPrice: data.sellPrice,
     sellPriceGros: data.sellPriceGros,
     expired: data.expired,
@@ -289,8 +302,13 @@ ipcMain.on("addVending", (event, data) => {
     time: data.time,
     index: data.index,
     type: data.type,
-    customer: data.customer,
+    mode: data.mode,
+    tva: data.tva,
+    client: data.client,
     paymentType: data.paymentType,
+    totalSellPriceGros: data.totalSellPriceGros,
+    totalbuyPrice: data.totalbuyPrice,
+    totalSellPrice: data.totalSellPrice,
     rebate: data.rebate,
     deposit: data.deposit,
     total: data.total,
@@ -298,8 +316,10 @@ ipcMain.on("addVending", (event, data) => {
     amount: data.amount,
     comment: data.comment,
   });
-  vending.save().catch((err) => console.log("cannot create vending", err));
-  win.webContents.send("refreshGridVending:add");
+  vending.save()
+    .then(() => win.webContents.send("refreshGridVending:add"))
+    .catch((err) => console.log("cannot create vending", err));
+  
 });
 // ****** New Buying *********
 ipcMain.on("addBuying", (event, data) => {
@@ -307,15 +327,23 @@ ipcMain.on("addBuying", (event, data) => {
     time: data.time,
     index: data.index,
     type: data.type,
-    provider: data.customer,
+    mode: data.mode,
+    tva: data.tva,
+    supplier: data.supplier,
     paymentType: data.paymentType,
-    payment: data.payment,
+    totalbuyPrice: data.totalbuyPrice,
+    rebate: data.rebate,
+    deposit: data.deposit,
+    total: data.total,
     grid: data.grid,
     amount: data.amount,
     comment: data.comment,
   });
-  buying.save().catch((err) => console.log("cannot create buying", err));
-  win.webContents.send("refreshGridBuying:add");
+  buying
+    .save()
+    .then(() => win.webContents.send("refreshGridBuying:add"))
+    .catch((err) => console.log("cannot create buying", err));
+  
 });
 // ****** Update *********
 ipcMain.on("updateProduct", (event, data) => {
@@ -613,7 +641,7 @@ ipcMain.on("printComponent", (event, url) => {
 
 //handle preview
 ipcMain.on("previewComponent", (event, url) => {
-  let wino = new BrowserWindow({ title: "Preview", show: true, autoHideMenuBar: true });
+  let wino = new BrowserWindow({ title: "Preview", show: true, defaultEncoding: "utf8", autoHideMenuBar: true });
   wino.loadURL(url);
 
   wino.webContents.once("did-finish-load", () => {

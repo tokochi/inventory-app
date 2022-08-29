@@ -6,6 +6,7 @@ import UserMenu from "../dialog/DropdownProfile";
 import caisse from "./../../data/icons/caisse.png";
 import invoice from "./../../data/icons/document.png";
 import report from "./../../data/icons/report.png";
+import wallet from "./../../data/icons/wallet.png";
 import { NavLink } from "react-router-dom";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import Caisse from '../../pages/Caisse';
@@ -24,7 +25,7 @@ export default function Navbar() {
       <div className="px-8">
         <div className="flex items-center justify-between  ">
           {/* Header: Left side */}
-          <div  className="min-w-[450px]">
+          <div className="min-w-[450px]">
             <NavLink to="/caisse" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
               <img src={caisse} width="40" className="m-2" />
               Caisse
@@ -33,9 +34,13 @@ export default function Navbar() {
               <img src={invoice} width="40" className="m-2" />
               Facture
             </NavLink>
-            <NavLink to="/revenu" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
+            <NavLink to="/bonAchat" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
+              <img src={wallet} width="40" className="m-2" />
+              Bon d'Achat
+            </NavLink>
+            <NavLink to="/report" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
               <img src={report} width="40" className="m-2" />
-              Bénifice
+              Rapport
             </NavLink>
           </div>
           {/* Header: Right side */}
@@ -64,7 +69,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-
     </header>
   );
 }

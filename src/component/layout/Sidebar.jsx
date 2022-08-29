@@ -17,7 +17,7 @@ export default function Sidebar() {
     <div
       id="sidebar"
       ref={sidebar}
-      className={`relative flex-none h-screen overflow-y-auto w-[132px] bg-slate-800 "
+      className={`sticky top-0 flex-none h-screen overflow-y-auto w-[132px] bg-slate-800 "
       }`}>
       <NavLink end to="/" className="flex justify-center mt-2 mb-5">
         <svg width="48" height="48" viewBox="0 0 64 64">

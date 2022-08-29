@@ -1,34 +1,28 @@
-import { GridComponent, ColumnsDirective, ColumnDirective, Reorder, Selection, Resize, Inject, Edit, Sort, Filter } from "@syncfusion/ej2-react-grids";
-import { useStore, loadCustomers, loadVendings, loadProducts } from "../contexts/Store";
-import TextBox from "../component/button/TextBox";
-import MyTime from "../component/MyTime";
-import { InPlaceEditorComponent } from "@syncfusion/ej2-react-inplace-editor";
-import { useHotkeys } from "react-hotkeys-hook";
-import React, { useState, useRef, useEffect } from "react";
-import Store from "electron-store";
+import { AutoCompleteComponent } from "@syncfusion/ej2-react-dropdowns";
 import "moment/locale/fr";
 import moment from "moment/min/moment-with-locales";
+import React, { useEffect, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useReactToPrint } from "react-to-print";
+import styled from "styled-components";
+import TextBox from "../component/button/TextBox";
+import MyTime from "../component/MyTime";
+import PrintInvoice from "../component/PrintInvoiceCaisse";
+import Toast from "../component/Toast";
+import { loadCustomers, loadProducts, loadVendings, useStore } from "../contexts/Store";
 import add from "./../data/icons/add.png";
 import box from "./../data/icons/box.png";
-import fav from "./../data/icons/fav.png";
-import nofav from "./../data/icons/nofav.png";
-import minus from "./../data/icons/minus.png";
-import plus from "./../data/icons/plus.png";
-import minus2 from "./../data/icons/minus2.png";
-import addProduct from "./../data/icons/addProduct.png";
-import print from "./../data/icons/print.png";
-import done from "./../data/icons/done.png";
 import deletePng from "./../data/icons/delete.png";
 import deletePng2 from "./../data/icons/delete2.png";
+import done from "./../data/icons/done.png";
+import fav from "./../data/icons/fav.png";
+import minus from "./../data/icons/minus.png";
 import newPng from "./../data/icons/new.png";
-import styled from "styled-components";
+import nofav from "./../data/icons/nofav.png";
+import print from "./../data/icons/print.png";
 const { ipcRenderer } = require("electron");
-import { AutoCompleteComponent } from "@syncfusion/ej2-react-dropdowns";
 
 moment.locale("fr");
-loadCustomers();
-loadVendings();
-
 const Wrapper = styled.div`
   & .e-ddl.e-input-group.e-control-wrapper .e-input {
     padding-left: 0.5rem;
@@ -48,9 +42,6 @@ const Wrapper = styled.div`
   }
 `;
 export default function Caisse() {
-  //const date = useStore((state) => state.currentDateTime);
-  const date = new Date();
-  const [client, setClient] = useState({ name: "Standard" });
   const [activeRow, setActiveRow] = useState(false);
   const [indexRow, setIndexRow] = useState(false);
   const productsData = useStore((state) => state.products).filter((product) => !useStore.getState().caisse.selectedProducts.some((selected) => selected._id === product._id));
@@ -59,12 +50,21 @@ export default function Caisse() {
   const setTotal = useStore((state) => state.setTotal);
   const customersData = useStore((state) => state.customers);
   const vendingsData = useStore((state) => state.vendings);
+  const [toastAdd, setToastAdd] = useState(false);
+  const [toastEdit, setToastEdit] = useState(false);
+  const [showPrintDiv, setShowPrintDiv] = useState(true);
+  const gridRef = useRef();
   let autoCompleteObj;
   const normalButton =
     "inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-
+  function toCurrency(num) {
+    let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+    str = str.replace("DZD", "DA");
+    str = str.replace(",", " ");
+    return str;
+  }
   function addSelectedProducts(e) {
-    e.value != null && useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProduct: e.itemData } }));
+    e.value != null && e.itemData.quantity > 0 && useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProduct: e.itemData } }));
   }
   function addSelectedProductstoGrid() {
     if (useStore.getState().caisse.selectedProduct != null) {
@@ -79,13 +79,36 @@ export default function Caisse() {
     }
   }
   useHotkeys("f3", addSelectedProductstoGrid);
+  const reactToPrint = useReactToPrint({
+    content: () => gridRef.current,
+    print: (target) =>
+      new Promise(() => {
+        let data = target.contentWindow.document.documentElement.outerHTML;
+        let blob = new Blob([data], { type: "text/html; charset=utf-8" });
+        let url = URL.createObjectURL(blob);
+        ipcRenderer.send("previewComponent", url);
+      }),
+  });
+  useEffect(() => {
+    if (!showPrintDiv) {
+      reactToPrint();
+      setShowPrintDiv(true);
+    }
+  }, [showPrintDiv]);
+  useEffect(() => {
+    if (toastAdd) {
+      setTimeout(() => setToastAdd(false), 4000);
+    }
 
+    if (toastEdit) {
+      setTimeout(() => setToastEdit(false), 4000);
+    }
+  }, [toastAdd, toastEdit]);
   const productsTemplate = (props) => (
-    <table className="table-auto">
+    <table className="table-auto w-full">
       <tbody>
-        <tr>
+        <tr className={`${props?.quantity === 0 && "bg-red-300"}`}>
           <td>
-            {" "}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -112,7 +135,7 @@ export default function Caisse() {
           </td>
           <td>
             <div className={normalButton}>
-              Prix Vente: <span className="text-green-600 ">{caisse.mode === "Détail" ? props?.sellPrice : props?.sellPriceGros}.00DA</span>
+              Prix Vente: <span className="text-green-600 ">{caisse.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}</span>
             </div>
           </td>
         </tr>
@@ -123,7 +146,7 @@ export default function Caisse() {
   return (
     <div className="bg-white m-2 shadow-lg rounded-sm   relative ">
       <div className="flex  justify-center">
-        <div id="left" className="bg-white  h-[630px] flex-1 min-w-[520px]">
+        <div id="left" className="bg-white  h-[622px] flex-1 min-w-[530px]">
           <div id="option" className="flex  items-center my-2">
             <span className="px-4  text-sm font-medium min-w-[120px] ">Mode Vente:</span>
             <TextBox
@@ -146,16 +169,16 @@ export default function Caisse() {
               type="dropdown"
               id="brand"
               width="w-[200px]"
-              value={client.name}
-              onChange={(e) => e.value != null && setClient(e.itemData)}
+              value={caisse.client.name}
+              onChange={(e) => e.value != null && useStore.setState((state) => ({ caisse: { ...state.caisse, client: e.itemData } }))}
               fields={{ value: "name", text: "name" }}
               dataSource={[{ name: "Standard" }, ...customersData]}
               popupHeight="200px"
               title="Standard"
             />
-            {client.name != "Standard" && (
+            {caisse.client.name != "Standard" && (
               <div style={{ marginLeft: "4px" }} className={normalButton}>
-                Crédit: <span className="text-rose-600 ml-1">{client?.credit > 0 ? client?.credit : 0}.00DA</span>
+                Crédit: <span className="text-rose-600 ml-1">{caisse.client.credit > 0 ? toCurrency(caisse.client.credit) : toCurrency(0)}</span>
               </div>
             )}
           </div>
@@ -183,12 +206,13 @@ export default function Caisse() {
                           useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProducts: UpdatedProducts } }));
                           setTotal();
                         } else {
-                          useStore.setState((state) => ({
-                            caisse: {
-                              ...state.caisse,
-                              selectedProducts: [...state.caisse.selectedProducts, { ...product, selectedQuantity: parseFloat(1), index: state.caisse.selectedProducts.length + 1 }],
-                            },
-                          }));
+                          product.quantity >= 1 &&
+                            useStore.setState((state) => ({
+                              caisse: {
+                                ...state.caisse,
+                                selectedProducts: [...state.caisse.selectedProducts, { ...product, selectedQuantity: parseFloat(1), index: state.caisse.selectedProducts.length + 1 }],
+                              },
+                            }));
                           setTotal();
                         }
                       }}
@@ -202,7 +226,7 @@ export default function Caisse() {
                           Quantité:<span className="text-green-700 pl-1"> {product.quantity}</span>
                         </div>
                         <div className="inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
-                          Prix: <span className="text-green-700 pl-1">{caisse.mode === "Détail" ? product.sellPrice : product.sellPriceGros}.00DA</span>
+                          Prix: <span className="text-green-700 pl-1">{caisse.mode === "Détail" ? toCurrency(product.sellPrice) : toCurrency(product.sellPriceGros)}</span>
                         </div>
                       </div>
                     </div>
@@ -212,13 +236,13 @@ export default function Caisse() {
           </div>
         </div>
         <div id="right" className="w-full flex flex-col  bg-slate-600 select-none">
-          <div id="black_screen" className="flex  bg-black rounded-sm">
-            <div id="info_screen" className="text-xl text-white p-2 ">
-              <div id="date" className="flex items-center gap-6 mb-2 min-w-[350px] ">
+          <div id="black_screen" className="flex gap-4 bg-black rounded-sm">
+            <div id="info_screen" className="text-xl text-white p-2 min-w-[380px]">
+              <div id="date" className="flex items-center gap-10 mb-2  ">
                 <MyTime />
                 <span>{moment().format("dddd, D MMMM YYYY")}</span>
               </div>
-              <div id="date" className="flex items-center gap-10 mb-2">
+              <div id="date" className="flex items-center gap-10">
                 <div>
                   Vente N°:<span className="text-green-600"> {vendingsData.length + 1} </span>
                 </div>
@@ -227,12 +251,9 @@ export default function Caisse() {
                 </div>
               </div>
             </div>
-            <div id="total_screen" className="mx-4 flex gap-6">
-              <div className="text-xl text-white">Total</div>
-              <div className="text-green-600 text-8xl mt-2 select-none">
-                {caisse.total}
-                .00
-              </div>
+            <div id="total_screen" className="min-w-[520px] ">
+              <div className="text-xl text-white relative">Total</div>
+              <span className="text-green-600 text-[76px] absolute top-0 select-none">{toCurrency(caisse.total)}</span>
             </div>
           </div>
           <Wrapper>
@@ -324,8 +345,8 @@ export default function Caisse() {
                           className="w-[100px]  text-center border-none"
                         />
                       </td>
-                      <td>{caisse.mode === "Détail" ? product?.sellPrice : product?.sellPriceGros},00DA</td>
-                      <td>{caisse.mode === "Détail" ? product?.sellPrice * product?.selectedQuantity : product?.sellPriceGros * product?.selectedQuantity}00DA</td>
+                      <td>{caisse.mode === "Détail" ? toCurrency(product?.sellPrice) : toCurrency(product?.sellPriceGros)}</td>
+                      <td>{caisse.mode === "Détail" ? toCurrency(product?.sellPrice * product?.selectedQuantity) : toCurrency(product?.sellPriceGros * product?.selectedQuantity)}</td>
                       <td>
                         <button
                           className=" p-1.5"
@@ -349,7 +370,6 @@ export default function Caisse() {
               <TextBox
                 type="number"
                 format="C2"
-                
                 min={0}
                 max={caisse.total}
                 step={100}
@@ -362,13 +382,12 @@ export default function Caisse() {
                 }}
               />
             </div>
-            {client.name != "Standard" && (
+            {caisse.client.name != "Standard" && (
               <div id="option" className="flex items-center justify-center ">
                 <span className="px-4  text-sm font-medium">Vérsement:</span>
                 <TextBox
                   type="number"
                   format="C2"
-                  
                   min={0}
                   max={caisse.amount}
                   step={100}
@@ -382,7 +401,7 @@ export default function Caisse() {
             <hr className="w-10" />
             <div id="option" className="flex items-center border p-2 border-slate-400">
               <span className=" font-medium text-slate-700 min-w-[100px]">Total à Payer TTC:</span>
-              <span className="font-semibold ml-2 text-slate-600">{caisse.amount},00 DA</span>
+              <span className="font-semibold ml-2 text-slate-600">{toCurrency(caisse.amount)}</span>
             </div>
           </div>
           <div id="validation" className="flex gap-2 items-center p-2 min-w-[850px]">
@@ -400,7 +419,7 @@ export default function Caisse() {
                   setTotal();
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <span>Qté</span>
+                <span className="">Qté</span>
                 <img src={add} className="w-10" />
               </button>
             </div>
@@ -411,7 +430,7 @@ export default function Caisse() {
                     .getState()
                     .caisse.selectedProducts.map((product) =>
                       product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity > 1
-                        ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) - 1 }
+                        ? { ...product, selectedQuantity: parseInt(product.selectedQuantity) - 1 }
                         : product
                     );
                   useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProducts: UpdatedProducts } }));
@@ -425,29 +444,112 @@ export default function Caisse() {
             <div className="bg-green-500 hover:bg-green-700 p-[9px]">
               <button
                 onClick={() => {
-                  ipcRenderer.send("addVending", {
-                    time: new Date(),
-                    index: vendingsData.length + 1,
-                    customerId: client?._id,
-                    paymentType:"Bon",
-                    customer: client?.name,
-                    type: caisse.mode,
-                    rebate: caisse.rebate,
-                    deposit: caisse.deposit,
-                    amount: caisse.amount,
-                    total: caisse.total,
-                    grid: caisse.selectedProducts,
-                  });
-                  ipcRenderer.on("refreshGridVending:add", (e, res) => {
-                    loadVendings();
-                  });
-                  if (client.name != "Standard" && caisse.amount - caisse.deposit > 0) {
-                    ipcRenderer.send("updateCustomer", { _id: client._id, credit: caisse.amount - caisse.deposit });
-                    ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                      loadCustomers();
+                  if (caisse.isEdit === true) {
+                    // update vending List
+                    ipcRenderer.send("updateVending", {
+                      ...caisse,
+                      client: { name: caisse.client.name, _id: caisse.client._id, credit: caisse.client.credit },
+                      totalbuyPrice: caisse.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
+                      totalSellPriceGros: caisse.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
+                      grid: caisse.selectedProducts,
+                    });
+                    ipcRenderer.on("refreshGridVending:update", (e, res) => {
+                      loadVendings();
+                      caisse.selectedProducts.forEach((prod) => {
+                        // quantity update
+                        productsList.forEach((curProduct) => {
+                          if (curProduct._id === prod._id) {
+                            ipcRenderer.send("updateProduct", {
+                              _id: prod._id,
+                              quantity: parseInt(curProduct.quantity) + (parseInt(prod?.oldSelectedQty || 0) - parseInt(prod.selectedQuantity)),
+                            });
+                          }
+                        });
+                      });
+                      // clear oldClient credit if changed
+                      if (caisse.oldClient._id != caisse.client._id) {
+                        customersData.forEach((customer) => {
+                          if (customer._id === caisse.oldClient._id) {
+                            ipcRenderer.send("updateCustomer", { _id: caisse.oldClient._id, credit: (parseInt(customer.credit) - parseInt(caisse.oldAmount - caisse.oldDeposit)).toFixed(2) });
+                          }
+                          // add credit to new Client
+                          if (customer._id === caisse.client._id && caisse.client.name != "Standard") {
+                            ipcRenderer.send("updateCustomer", {
+                              _id: caisse.client._id,
+                              credit: (parseInt(customer.credit) + parseInt(caisse.amount - caisse.deposit)).toFixed(2),
+                            });
+                          }
+                        });
+                        ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                          loadCustomers();
+                        });
+                      }
+                      if (caisse.client.name != "Standard" && caisse.oldClient._id === caisse.client._id) {
+                        // client didnt change
+
+                        customersData.forEach((customer) => {
+                          if (customer._id === caisse.client._id) {
+                            ipcRenderer.send("updateCustomer", {
+                              _id: caisse.client._id,
+                              credit: parseInt(customer.credit) - parseInt(caisse.oldAmount - caisse.oldDeposit) + parseInt(caisse.amount - caisse.deposit),
+                            });
+                            ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                              loadCustomers();
+                            });
+                          }
+                        });
+                      }
+                      setToastEdit(true);
+                    });
+                  } else {
+                    // add new vending
+                    caisse.amount != 0 &&
+                      ipcRenderer.send("addVending", {
+                        time: new Date(),
+                        index: vendingsData.length + 1,
+                        paymentType: "Espéce",
+                        client: { name: caisse.client.name, _id: caisse.client._id, credit: caisse.client.credit },
+                        type: "caisse",
+                        mode: caisse.mode,
+                        rebate: caisse.rebate.toFixed(2),
+                        deposit: caisse.deposit.toFixed(2),
+                        amount: caisse.amount.toFixed(2),
+                        total: caisse.total.toFixed(2),
+                        totalSellPrice: caisse.selectedProducts.reduce((acc, cur) => acc + cur.sellPrice * cur.selectedQuantity, 0).toFixed(2),
+                        totalbuyPrice: caisse.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
+                        totalSellPriceGros: caisse.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
+                        grid: caisse.selectedProducts,
+                      });
+                    ipcRenderer.on("refreshGridVending:add", (e, res) => {
+                      loadVendings();
+                      caisse.selectedProducts.forEach((prod) => {
+                        // quantity update
+                        productsList.forEach((curProduct) => {
+                          if (curProduct._id === prod._id) {
+                            ipcRenderer.send("updateProduct", { _id: prod._id, quantity: parseInt(prod.quantity) - parseInt(prod.selectedQuantity) });
+                          }
+                        });
+                      });
+
+                      if (caisse.client.name != "Standard" && caisse.amount - caisse.deposit > 0) {
+                        customersData.forEach((customer) => {
+                          if (customer._id === caisse.client._id) {
+                            // add credit
+                            ipcRenderer.send("updateCustomer", { _id: caisse.client._id, credit: (parseInt(customer.credit) + parseInt(caisse.amount - caisse.deposit)).toFixed(2) });
+                            ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                              loadCustomers();
+                            });
+                          }
+                        });
+                      }
+                      setToastAdd(true);
                     });
                   }
-                  useStore.setState((state) => ({ caisse: { mode: "Détail", amount: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null } }));
+
+                  ipcRenderer.on("refreshGridProduct:update", (e, res) => {
+                    loadProducts();
+                  });
+                  useStore.setState((state) => ({ caisse: { mode: "Détail", client: { name: "Standard" }, amount: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null } }));
                   setClient({ name: "Standard" });
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
@@ -459,7 +561,7 @@ export default function Caisse() {
               </button>
             </div>
             <div className="bg-lime-500 hover:bg-lime-700 p-[9px]">
-              <button className="text-xl  text-white gap-2 rounded-sm items-center flex">
+              <button className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
                 <div className="flex flex-col">
                   <span>Imprimer</span>
                   <span className="text-base">(F2)</span>
@@ -492,7 +594,16 @@ export default function Caisse() {
             </div>
           </div>
         </div>
+        <div ref={gridRef} className={`${showPrintDiv && "hidden"} `}>
+          <PrintInvoice />
+        </div>
       </div>
+      <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
+        Vente Modifier avec succès.
+      </Toast>
+      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
+        Nouvelle Vente Ajouter avec succès.
+      </Toast>
     </div>
   );
 }

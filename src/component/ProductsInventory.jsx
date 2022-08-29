@@ -13,7 +13,12 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
-
+ function toCurrency(num) {
+   let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+   str = str.replace("DZD", "DA");
+   str = str.replace(",", " ");
+   return str;
+ }
   return (
     <>
       <button
@@ -48,15 +53,15 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
                 </button>
                 <button className={normalButton}>
                   Capital Achat:
-                  <span className="ml-1  text-emerald-600">{productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0) + ",00DA"}</span>
+                  <span className="ml-1  text-emerald-600">{toCurrency(productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0))}</span>
                 </button>
                 <button className={normalButton}>
                   Capital Détail:
-                  <span className="ml-1  text-emerald-600">{productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPrice, 0) + ",00DA"}</span>
+                  <span className="ml-1  text-emerald-600">{toCurrency(productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPrice, 0))}</span>
                 </button>
                 <button className={normalButton}>
                   Capital Gros:
-                  <span className="ml-1  text-emerald-600">{productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPriceGros, 0) + ",00DA"}</span>
+                  <span className="ml-1  text-emerald-600">{toCurrency(productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPriceGros, 0))}</span>
                 </button>
               </div>
               <table className="table-auto w-full divide-y divide-slate-200 ">
@@ -85,7 +90,7 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
                       <td className=" p-2">{"#" + product?._id.slice(-6)}</td>
                       <td>{product?.name}</td>
                       <td>{product?.quantity}</td>
-                      <td>{product?.buyPrice && product?.buyPrice + ",00DA"}</td>
+                      <td>{product?.buyPrice && toCurrency(product?.buyPrice)}</td>
                       <td>
                         <Status {...product} />
                       </td>

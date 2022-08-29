@@ -3,11 +3,14 @@ import { AutoCompleteComponent } from "@syncfusion/ej2-react-dropdowns";
 import Store from "electron-store";
 import "moment/locale/fr";
 import moment from "moment/min/moment-with-locales";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useReactToPrint } from "react-to-print";
 import styled from "styled-components";
 import TextBox from "../component/button/TextBox";
-import { loadCustomers, loadVendings, loadProducts, useStore } from "../contexts/Store";
+import PrintInvoice from "../component/PrintInvoiceBonAchat";
+import Toast from "../component/Toast";
+import { loadBuyings, loadProducts, loadProviders, useStore } from "../contexts/Store";
 import add from "./../data/icons/add.png";
 import deletePng from "./../data/icons/delete.png";
 import deletePng2 from "./../data/icons/delete2.png";
@@ -15,10 +18,6 @@ import done from "./../data/icons/done.png";
 import minus from "./../data/icons/minus.png";
 import newPng from "./../data/icons/new.png";
 import print from "./../data/icons/print.png";
-import Toast from "../component/Toast";
-import { ToWords } from "to-words";
-import { useReactToPrint } from "react-to-print";
-import PrintInvoice from '../component/PrintInvoiceFacture';
 const { ipcRenderer } = require("electron");
 
 moment.locale("fr");
@@ -41,7 +40,7 @@ const Wrapper = styled.div`
     padding-bottom: 2px;
   }
 `;
-export default function Facture(props) {
+export default function BonAchat() {
   const schema = {
     company: {
       type: "object",
@@ -51,70 +50,38 @@ export default function Facture(props) {
   const company = store?.get("company");
   const [activeRow, setActiveRow] = useState(false);
   const [indexRow, setIndexRow] = useState(false);
-  const productsData = useStore((state) => state.products).filter((product) => !useStore.getState().facture.selectedProducts.some((selected) => selected._id === product._id));
-  const facture = useStore((state) => state.facture);
-  const setTotalFacture = useStore((state) => state.setTotalFacture);
-  const customersData = useStore((state) => state.customers);
+  const productsData = useStore((state) => state.products).filter((product) => !useStore.getState().bonAchat.selectedProducts.some((selected) => selected._id === product._id));
+  const bonAchat = useStore((state) => state.bonAchat);
   const productsList = useStore((state) => state.products);
-  const vendingsData = useStore((state) => state.vendings);
+  const setTotalBonAchat = useStore((state) => state.setTotalBonAchat);
+  const providersData = useStore((state) => state.providers);
+  const buyingsData = useStore((state) => state.buyings);
   const [toastAdd, setToastAdd] = useState(false);
   const [toastEdit, setToastEdit] = useState(false);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   const [date, setDate] = useState(new Date());
   let autoCompleteObj;
-  const toWords = new ToWords({
-    localeCode: "fr-FR",
-    converterOptions: {
-      currency: false,
-      ignoreDecimal: false,
-      ignoreZeroCurrency: false,
-      doNotAddOnly: false,
-    },
-  });
-
   const normalButton =
     "inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
 
   function addSelectedProducts(e) {
-    e.value != null && e.itemData.quantity > 0 && useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: e.itemData } }));
+    e.value != null && useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProduct: e.itemData } }));
   }
   function addSelectedProductstoGrid() {
-    if (useStore.getState().facture.selectedProduct != null) {
+    if (useStore.getState().bonAchat.selectedProduct != null) {
       useStore.setState((state) => ({
-        facture: {
-          ...state.facture,
-          selectedProducts: [...state.facture.selectedProducts, { ...state.facture.selectedProduct, selectedQuantity: parseFloat(1), index: state.facture.selectedProducts.length + 1 }],
+        bonAchat: {
+          ...state.bonAchat,
+          selectedProducts: [...state.bonAchat.selectedProducts, { ...state.bonAchat.selectedProduct, selectedQuantity: parseInt(1), index: state.bonAchat.selectedProducts.length + 1 }],
         },
       }));
       autoCompleteObj.clear();
-      useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: null } }));
+      useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProduct: null } }));
     }
   }
   useHotkeys("f3", addSelectedProductstoGrid);
-  function toCurrency(num) {
-    let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-    str = str.replace("DZD", "DA");
-    str = str.replace(",", " ");
-    return str;
-  }
-  useEffect(() => {
-    if (!showPrintDiv) {
-      reactToPrint();
-      setShowPrintDiv(true);
-    }
-  }, [showPrintDiv]);
-  useEffect(() => {
-    if (toastAdd) {
-      setTimeout(() => setToastAdd(false), 4000);
-    }
-
-    if (toastEdit) {
-      setTimeout(() => setToastEdit(false), 4000);
-    }
-  }, [toastAdd, toastEdit]);
   const reactToPrint = useReactToPrint({
-    
     content: () => gridRef.current,
     print: (target) =>
       new Promise(() => {
@@ -124,6 +91,12 @@ export default function Facture(props) {
         ipcRenderer.send("previewComponent", url);
       }),
   });
+  useEffect(() => {
+    if (!showPrintDiv) {
+      reactToPrint();
+      setShowPrintDiv(true);
+    }
+  }, [showPrintDiv]);
   const productsTemplate = (props) => (
     <table className="table-auto w-full">
       <tbody>
@@ -138,130 +111,53 @@ export default function Facture(props) {
           </td>
           <td>
             <div className={normalButton}>
-              Prix Vente: <span className="text-green-600 ">{facture.mode === "Détail" ? props?.sellPrice : props?.sellPriceGros}.00DA</span>
+              Dérnier Prix Achat: <span className="text-green-600 ">{toCurrency(props?.buyPrice)}</span>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
   );
+  useEffect(() => {
+    if (toastAdd) {
+      setTimeout(() => setToastAdd(false), 4000);
+    }
 
+    if (toastEdit) {
+      setTimeout(() => setToastEdit(false), 4000);
+    }
+  }, [toastAdd, toastEdit]);
+  function toCurrency(num) {
+    let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+    str = str.replace("DZD", "DA");
+    str = str.replace(",", " ");
+    return str;
+  }
   return (
     <div className="bg-white m-2 shadow-lg rounded-sm   relative ">
-      <div className="flex h-full  justify-center">
+      <div className="flex h-full justify-center">
         <div id="left" className="bg-white   flex-1 min-w-[480px]">
           <div className="flex  items-center justify-center my-2">
             <hr className="w-[150px]" />
-            <span className="mx-1">Info Commercial</span>
+            <span className="mx-1">Info BonAchat</span>
             <hr className="w-[150px]" />
           </div>
-          <div id="companyInfo" className="flex  items-center my-2">
-            <span className="px-4  text-sm font-medium min-w-[120px] ">Entreprise:</span>
-            <TextBox
-              type="text"
-              id="brand"
-              width="w-[200px]"
-              value={company?.name}
-              onChange={(e) => {
-                const temp = store.get("company");
-                e.value != null && store.set("company", { ...temp, name: e.value });
-              }}
-              title="Mon Entreprise"
-            />
-          </div>
-          <div id="companyInfo" className="flex  items-center my-2">
-            <span className="px-4  text-sm font-medium min-w-[120px] ">Téléphone:</span>
-            <TextBox
-              type="text"
-              id="brand"
-              width="w-[200px]"
-              value={company?.phone}
-              onChange={(e) => {
-                const temp = store.get("company");
-                e.value != null && store.set("company", { ...temp, phone: e.value });
-              }}
-              title="N° Téléphone"
-            />
-          </div>
-          <div id="companyInfo" className="flex  items-center my-2">
-            <span className="px-4  text-sm font-medium min-w-[120px] ">Adresse:</span>
-            <TextBox
-              type="text"
-              id="brand"
-              width="w-[300px]"
-              value={company?.address}
-              onChange={(e) => {
-                const temp = store.get("company");
-                e.value != null && store.set("company", { ...temp, address: e.value });
-              }}
-              title="adresse"
-            />
-          </div>
-          <div id="companyInfo" className="flex  items-center my-2">
-            <span className="px-4  text-sm font-medium min-w-[120px] ">N°RC:</span>
-            <TextBox
-              type="text"
-              id="brand"
-              width="w-[300px]"
-              value={company?.rc}
-              onChange={(e) => {
-                const temp = store.get("company");
-                e.value != null && store.set("company", { ...temp, rc: e.value });
-              }}
-              title="N° RC"
-            />
-          </div>
-          <div id="companyInfo" className="flex  items-center my-2">
-            <span className="px-4  text-sm font-medium min-w-[120px] ">N°IF:</span>
-            <TextBox
-              type="text"
-              id="brand"
-              width="w-[300px]"
-              value={company?.if}
-              onChange={(e) => {
-                const temp = store.get("company");
-                e.value != null && store.set("company", { ...temp, if: e.value });
-              }}
-              title="N° IF"
-            />
-          </div>
-          <div className="flex  items-center justify-center my-2">
-            <hr className="w-[150px]" />
-            <span className="mx-1">Info Facture</span>
-            <hr className="w-[150px]" />
-          </div>
-          <div id="mode" className="flex  items-center my-2">
-            <span className="px-4  text-sm font-medium min-w-[120px] ">Mode Vente:</span>
+          <div id="supplier" className="flex items-center  mb-2">
+            <span className="px-4  text-sm font-medium min-w-[120px]">Supplier:</span>
             <TextBox
               type="dropdown"
               id="brand"
               width="w-[200px]"
-              value={facture.mode}
-              onChange={(e) => {
-                e.value != null && useStore.setState((state) => ({ facture: { ...state.facture, mode: e.value } }));
-                setTotalFacture();
-              }}
-              dataSource={["Détail", "Gros"]}
-              popupHeight="200px"
-              title="Mode Vente"
-            />
-          </div>
-          <div id="client" className="flex items-center  mb-2">
-            <span className="px-4  text-sm font-medium min-w-[120px]">Client:</span>
-            <TextBox
-              type="dropdown"
-              id="brand"
-              width="w-[200px]"
-              value={facture.client.name}
-              onChange={(e) => e.value != null && useStore.setState((state) => ({ facture: { ...state.facture, client: e.itemData } }))}
+              value={bonAchat.supplier.name}
+              onChange={(e) => e.value != null && useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, supplier: e.itemData } }))}
               fields={{ value: "name", text: "name" }}
-              dataSource={[{ name: "Standard" }, ...customersData]}
+              dataSource={[{ name: "Standard" }, ...providersData]}
               popupHeight="200px"
               title="Standard"
             />
-            {facture.client.name != "Standard" && (
+            {bonAchat.supplier.name != "Standard" && (
               <div style={{ marginLeft: "4px" }} className={normalButton}>
-                Crédit: <span className="text-rose-600 ml-1">{facture.client.credit > 0 ? toCurrency(facture.client.credit) : toCurrency(0)}</span>
+                Déttes: <span className="text-rose-600 ml-1">{bonAchat.supplier.credit > 0 ? toCurrency(bonAchat.supplier.credit) : toCurrency(0)}</span>
               </div>
             )}
           </div>
@@ -285,8 +181,8 @@ export default function Facture(props) {
               type="dropdown"
               id="paymentType"
               width="w-[200px]"
-              value={facture.paymentType}
-              onChange={(e) => e.value != null && useStore.setState((state) => ({ facture: { ...state.facture, paymentType: e.value } }))}
+              value={bonAchat.paymentType}
+              onChange={(e) => e.value != null && useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, paymentType: e.value } }))}
               dataSource={["Espéce", "Chéque", "Virement"]}
               popupHeight="200px"
               title="Mode de Paiement"
@@ -303,30 +199,30 @@ export default function Facture(props) {
               type="number"
               format="C2"
               min={0}
-              max={facture.total}
+              max={bonAchat.total}
               step={100}
               id="brand"
               width="w-[200px]"
-              value={facture.rebate}
+              value={bonAchat.rebate}
               onChange={(e) => {
-                e.value != null && useStore.setState((state) => ({ facture: { ...state.facture, rebate: e.value } }));
-                setTotalFacture();
+                e.value != null && useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, rebate: e.value } }));
+                setTotalBonAchat();
               }}
             />
           </div>
-          {facture.client.name != "Standard" && (
+          {bonAchat.supplier.name != "Standard" && (
             <div id="date" className="flex select-none items-center my-2">
               <span className="px-4  text-sm font-medium min-w-[120px] ">Vérsement:</span>
               <TextBox
                 type="number"
                 format="C2"
                 min={0}
-                max={facture.amount}
+                max={bonAchat.amount}
                 step={100}
                 id="brand"
                 width="w-[200px]"
-                value={facture.deposit}
-                onChange={(e) => e.value != null && useStore.setState((state) => ({ facture: { ...state.facture, deposit: e.value } }))}
+                value={bonAchat.deposit}
+                onChange={(e) => e.value != null && useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, deposit: e.value } }))}
               />
             </div>
           )}
@@ -339,8 +235,8 @@ export default function Facture(props) {
               step={100}
               id="brand"
               width="w-[200px]"
-              value={facture.total}
-              //  onChange={(e) => e.value != null && useStore.setState((state) => ({ facture: { ...state.facture, deposit: e.value } }))}
+              value={bonAchat.total}
+              //  onChange={(e) => e.value != null && useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, deposit: e.value } }))}
             />
           </div>
           <div id="date" className="flex select-none items-center my-2">
@@ -352,17 +248,17 @@ export default function Facture(props) {
               step={0.01}
               id="brand"
               width="w-[200px]"
-              value={facture.tva}
+              value={bonAchat.tva}
               onChange={(e) => {
-                e.value != null && useStore.setState((state) => ({ facture: { ...state.facture, tva: e.value } }));
-                setTotalFacture();
+                e.value != null && useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, tva: e.value } }));
+                setTotalBonAchat();
               }}
             />
           </div>
           <hr className="m-2 w-[100px] ml-[100px]" />
           <div id="option" className="flex items-center ml-10 w-[300px] border p-2 border-slate-400">
             <span className=" font-medium text-slate-700 min-w-[100px]">Total à Payer TTC:</span>
-            <span className="font-semibold ml-2 text-slate-600">{toCurrency(facture.amount)}</span>
+            <span className="font-semibold ml-2 text-slate-600">{toCurrency(bonAchat.amount)}</span>
           </div>
         </div>
         <div id="right" className="w-full flex flex-col  select-none">
@@ -392,7 +288,7 @@ export default function Facture(props) {
                 //customValueSpecifier={(e) => console.log(e)}
                 change={(e) => {
                   e.value != null && addSelectedProducts(e);
-                  setTotalFacture();
+                  setTotalBonAchat();
                 }}
                 valueTemplate={productsTemplate}
                 itemTemplate={productsTemplate}
@@ -413,11 +309,14 @@ export default function Facture(props) {
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-2/4">
                       <div className="font-semibold text-center">Désignation</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-40">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-20">
                       <div className="font-semibold text-center">Quantité</div>
                     </th>
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-20">
+                      <div className="font-semibold text-center">Dérnier Prix Achat</div>
+                    </th>
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/4">
-                      <div className="font-semibold text-center">Prix Vente</div>
+                      <div className="font-semibold text-center">Prix Achat</div>
                     </th>
 
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/4">
@@ -429,7 +328,7 @@ export default function Facture(props) {
                   </tr>
                 </thead>
                 <tbody className="">
-                  {facture.selectedProducts.map((product, indx) => (
+                  {bonAchat.selectedProducts.map((product, indx) => (
                     <tr
                       className={`text-center ${activeRow && product._id === indexRow && "bg-sky-200"}`}
                       onClick={(e) => {
@@ -442,28 +341,47 @@ export default function Facture(props) {
                       <td>
                         <input
                           onChange={(e) => {
-                            const UpdatedProducts = useStore.getState().facture.selectedProducts.map((prod) => (e.target.id === prod._id ? { ...product, selectedQuantity: e.target.value } : prod));
-                            useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: UpdatedProducts } }));
-                            setTotalFacture();
+                            const UpdatedProducts = useStore.getState().bonAchat.selectedProducts.map((prod) => (e.target.id === prod._id ? { ...product, selectedQuantity: e.target.value } : prod));
+                            useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
+                            setTotalBonAchat();
                           }}
                           id={product._id}
                           name={product._id}
                           type="number"
                           min="1"
-                          max={product?.quantity}
                           value={product?.selectedQuantity}
                           className="w-[100px]  text-center border-none"
                         />
                       </td>
-                      <td>{facture.mode === "Détail" ? toCurrency(product?.sellPrice) : toCurrency(product?.sellPriceGros)}</td>
-                      <td>{facture.mode === "Détail" ? toCurrency(product?.sellPrice * product?.selectedQuantity) : toCurrency(product?.sellPriceGros * product?.selectedQuantity)}</td>
+                      <td>{product?.lastBuyPrice && toCurrency(product?.lastBuyPrice)}</td>
+                      <td>
+                        <input
+                          onChange={(e) => {
+                            const UpdatedProducts = useStore
+                              .getState()
+                              .bonAchat.selectedProducts.map((prod) => (e.target.id === prod._id ? { ...product, buyPrice: parseInt(e.target.value).toFixed(2) } : prod));
+                            useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
+                            setTotalBonAchat();
+                          }}
+                          id={product._id}
+                          name={product._id}
+                          type="number"
+                          min="0"
+                          step="100"
+                          //max={product?.quantity}
+                          value={parseInt(product?.buyPrice).toFixed(2)}
+                          className="w-[100px]  text-right border-none"
+                        />
+                        DA
+                      </td>
+                      <td>{toCurrency(product?.buyPrice * product?.selectedQuantity)}</td>
                       <td>
                         <button
                           className=" p-1.5"
                           onClick={(e) => {
-                            const UpdatedProducts = useStore.getState().facture.selectedProducts.filter((prod) => product._id !== prod._id);
-                            useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: UpdatedProducts } }));
-                            setTotalFacture();
+                            const UpdatedProducts = useStore.getState().bonAchat.selectedProducts.filter((prod) => product._id !== prod._id);
+                            useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
+                            setTotalBonAchat();
                           }}>
                           <img src={deletePng2} width="25" />
                         </button>
@@ -476,10 +394,10 @@ export default function Facture(props) {
           </div>
           <div className="flex items-center justify-around gap-4 px-2 py-1 bg-white">
             <div>
-              Facture N°:<span className="text-green-600"> {vendingsData.length + 1} </span>
+              BonAchat N°:<span className="text-green-600"> {buyingsData.length + 1} </span>
             </div>
             <div>
-              Produits:<span className="text-green-600"> {facture.selectedProducts.length}</span>
+              Produits:<span className="text-green-600"> {bonAchat.selectedProducts.length}</span>
             </div>
           </div>
           <div id="validation" className="flex gap-2 items-center p-2 min-w-[850px]">
@@ -488,13 +406,13 @@ export default function Facture(props) {
                 onClick={() => {
                   const UpdatedProducts = useStore
                     .getState()
-                    .facture.selectedProducts.map((product) =>
+                    .bonAchat.selectedProducts.map((product) =>
                       product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity >= 1
                         ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) + 1 }
                         : product
                     );
-                  useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: UpdatedProducts } }));
-                  setTotalFacture();
+                  useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
+                  setTotalBonAchat();
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <span>Qté</span>
@@ -506,13 +424,13 @@ export default function Facture(props) {
                 onClick={() => {
                   const UpdatedProducts = useStore
                     .getState()
-                    .facture.selectedProducts.map((product) =>
+                    .bonAchat.selectedProducts.map((product) =>
                       product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity > 1
                         ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) - 1 }
                         : product
                     );
-                  useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: UpdatedProducts } }));
-                  setTotalFacture();
+                  useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
+                  setTotalBonAchat();
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <span>Qté</span>
@@ -522,56 +440,59 @@ export default function Facture(props) {
             <div className="bg-green-500 hover:bg-green-700 p-[9px]">
               <button
                 onClick={() => {
-                  if (facture.isEdit === true) {
-                    // update vending List
-                    ipcRenderer.send("updateVending", {
-                      ...facture,
-                      client: { name: facture.client.name, _id: facture.client._id, credit: facture.client.credit },
-                      totalbuyPrice: facture.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
-                      totalSellPriceGros: facture.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
-                      grid: facture.selectedProducts,
+                  if (bonAchat.isEdit === true) {
+                    // update buying List
+
+                    ipcRenderer.send("updateBuying", {
+                      ...bonAchat,
+                      supplier: { name: bonAchat.supplier.name, _id: bonAchat.supplier._id, credit: bonAchat.supplier.credit },
+                      totalbuyPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
+                      totalSellPriceGros: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
+                      grid: bonAchat.selectedProducts,
                     });
-                    ipcRenderer.on("refreshGridVending:update", (e, res) => {
-                      loadVendings();
-                      facture.selectedProducts.forEach((prod) => {
+                    ipcRenderer.on("refreshGridBuying:update", (e, res) => {
+                      bonAchat.selectedProducts.forEach((prod) => {
                         // quantity update
                         productsList.forEach((curProduct) => {
                           if (curProduct._id === prod._id) {
                             ipcRenderer.send("updateProduct", {
                               _id: prod._id,
-                              quantity: parseInt(curProduct.quantity) + (parseInt(prod?.oldSelectedQty || 0) - parseInt(prod.selectedQuantity)),
+                              quantity: parseInt(curProduct.quantity) - parseInt(prod?.oldSelectedQty) + parseInt(prod.selectedQuantity),
                             });
                           }
                         });
                       });
-                      // clear oldClient credit if changed
-                      if (facture.oldClient._id != facture.client._id) {
-                        customersData.forEach((customer) => {
-                          if (customer._id === facture.oldClient._id) {
-                            ipcRenderer.send("updateCustomer", { _id: facture.oldClient._id, credit: (parseInt(customer.credit) - parseInt(facture.oldAmount - facture.oldDeposit)).toFixed(2) });
+                      loadBuyings();
+
+                      // clear oldSupplier credit if changed
+                      if (bonAchat.oldSupplier._id != bonAchat.supplier._id) {
+                        providersData.forEach((provider) => {
+                          if (provider._id === bonAchat.oldSupplier._id) {
+                            ipcRenderer.send("updateProvider", { _id: bonAchat.oldSupplier._id, credit: (parseInt(provider.credit) - parseInt(bonAchat.oldAmount - bonAchat.oldDeposit)).toFixed(2) });
                           }
-                          // add credit to new Client
-                          if (customer._id === facture.client._id && facture.client.name != "Standard") {
-                            ipcRenderer.send("updateCustomer", {
-                              _id: facture.client._id,
-                              credit: (parseInt(customer.credit) + parseInt(facture.amount - facture.deposit)).toFixed(2),
+                          // add credit to new Supplier
+                          if (provider._id === bonAchat.supplier._id && bonAchat.supplier.name != "Standard") {
+                            ipcRenderer.send("updateProvider", {
+                              _id: bonAchat.supplier._id,
+                              credit: (parseInt(provider.credit) + parseInt(bonAchat.amount - bonAchat.deposit)).toFixed(2),
                             });
                           }
                         });
-                        ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                          loadCustomers();
+                        ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                          loadProviders();
                         });
                       }
-                      // client didnt change
-                      if (facture.client.name != "Standard" && facture.oldClient._id === facture.client._id) {
-                        customersData.forEach((customer) => {
-                          if (customer._id === facture.client._id) {
-                            ipcRenderer.send("updateCustomer", {
-                              _id: facture.client._id,
-                              credit: parseInt(customer.credit) - parseInt(facture.oldAmount - facture.oldDeposit) + parseInt(facture.amount - facture.deposit),
+                      if (bonAchat.supplier.name != "Standard" && bonAchat.oldSupplier._id === bonAchat.supplier._id) {
+                        // supplier didnt change
+
+                        providersData.forEach((provider) => {
+                          if (provider._id === bonAchat.supplier._id) {
+                            ipcRenderer.send("updateProvider", {
+                              _id: bonAchat.supplier._id,
+                              credit: parseInt(provider.credit) - parseInt(bonAchat.oldAmount - bonAchat.oldDeposit) + parseInt(bonAchat.amount - bonAchat.deposit),
                             });
-                            ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                              loadCustomers();
+                            ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                              loadProviders();
                             });
                           }
                         });
@@ -579,44 +500,38 @@ export default function Facture(props) {
                       setToastEdit(true);
                     });
                   } else {
-                    // add new vending
-                    facture.amount != 0 &&
-                      ipcRenderer.send("addVending", {
+                    // add new buying
+                    bonAchat.amount != 0 &&
+                      ipcRenderer.send("addBuying", {
                         time: new Date(),
-                        index: vendingsData.length + 1,
-                        paymentType: facture.paymentType,
-                        client: { name: facture.client.name, _id: facture.client._id, credit: facture.client.credit },
-                        type: "facture",
-                        mode: facture.mode,
-                        tva: facture.tva,
-                        rebate: facture.rebate.toFixed(2),
-                        deposit: facture.deposit.toFixed(2),
-                        amount: facture.amount.toFixed(2),
-                        total: facture.total.toFixed(2),
-                        totalbuyPrice: facture.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
-                        totalSellPriceGros: facture.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
-                        grid: facture.selectedProducts,
+                        index: buyingsData.length + 1,
+                        paymentType: bonAchat.paymentType,
+                        supplier: { name: bonAchat.supplier.name, _id: bonAchat.supplier._id, credit: bonAchat.supplier.credit },
+                        type: "bonAchat",
+                        mode: bonAchat.mode,
+                        tva: bonAchat.tva,
+                        rebate: bonAchat.rebate.toFixed(2),
+                        deposit: bonAchat.deposit.toFixed(2),
+                        amount: bonAchat.amount.toFixed(2),
+                        total: bonAchat.total.toFixed(2),
+                        totalSellPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.sellPrice * cur.selectedQuantity, 0).toFixed(2),
+                        totalbuyPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
+                        totalSellPriceGros: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
+                        grid: bonAchat.selectedProducts,
                       });
-                    ipcRenderer.on("refreshGridVending:add", (e, res) => {
-                      loadVendings();
-                      facture.selectedProducts.forEach((prod) => {
+                    ipcRenderer.on("refreshGridBuying:add", (e, res) => {
+                      bonAchat.selectedProducts.forEach((prod) => {
                         // quantity update
-                        productsList.forEach((curProduct) => {
-                          if (curProduct._id === prod._id) {
-                            ipcRenderer.send("updateProduct", {
-                              _id: prod._id,
-                              quantity: parseInt(prod.quantity) - parseInt(prod.selectedQuantity),
-                            });
-                          }
-                        });
+                        ipcRenderer.send("updateProduct", { _id: prod._id, quantity: parseInt(prod.quantity) + parseInt(prod.selectedQuantity) });
                       });
-                      if (facture.client.name != "Standard" && facture.amount - facture.deposit > 0) {
-                        customersData.forEach((customer) => {
-                          if (customer._id === facture.client._id) {
+                      loadBuyings();
+                      if (bonAchat.supplier.name != "Standard" && bonAchat.amount - bonAchat.deposit > 0) {
+                        providersData.forEach((provider) => {
+                          if (provider._id === bonAchat.supplier._id) {
                             // add credit
-                            ipcRenderer.send("updateCustomer", { _id: facture.client._id, credit: (parseInt(customer.credit) + parseInt(facture.amount - facture.deposit)).toFixed(2) });
-                            ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                              loadCustomers();
+                            ipcRenderer.send("updateProvider", { _id: bonAchat.supplier._id, credit: (parseInt(provider.credit) + parseInt(bonAchat.amount - bonAchat.deposit)).toFixed(2) });
+                            ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                              loadProviders();
                             });
                           }
                         });
@@ -624,14 +539,24 @@ export default function Facture(props) {
                       setToastAdd(true);
                     });
                   }
-
                   ipcRenderer.on("refreshGridProduct:update", (e, res) => {
                     loadProducts();
                   });
                   useStore.setState((state) => ({
-                    facture: { mode: "Détail", client: { name: "Standard" }, amount: 0, tva: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null },
+                    bonAchat: {
+                      mode: "Détail",
+                      supplier: { name: "Standard" },
+                      paymentType: "Espéce",
+                      amount: 0,
+                      total: 0,
+                      tva: 0,
+                      rebate: 0,
+                      deposit: 0,
+                      selectedProducts: [],
+                      selectedProduct: null,
+                    },
                   }));
-                  setClient({ name: "Standard" });
+                  setSupplier({ name: "Standard" });
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <div className="flex flex-col">
@@ -653,8 +578,8 @@ export default function Facture(props) {
             <div className="bg-rose-500 hover:bg-rose-700 p-[9px]">
               <button
                 onClick={() => {
-                  useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: [] } }));
-                  setTotalFacture();
+                  useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: [] } }));
+                  setTotalBonAchat();
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <div className="flex flex-col">
@@ -675,15 +600,15 @@ export default function Facture(props) {
             </div>
           </div>
         </div>
-        <div ref={gridRef} className={`${showPrintDiv && "hidden"} `}>
-          <PrintInvoice />
-        </div>
+      </div>
+      <div ref={gridRef} className={`${showPrintDiv && "hidden"} `}>
+        <PrintInvoice />
       </div>
       <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
-        Facture Modifier avec succès.
+        Bon d'achat Modifier avec succès.
       </Toast>
       <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
-        Nouvelle Facture Ajouter avec succès.
+        Bon d'achat Ajouter avec succès.
       </Toast>
     </div>
   );

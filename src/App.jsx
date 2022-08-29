@@ -10,10 +10,15 @@ import Buying from "./pages/Buying";
 import Vending from "./pages/Vending";
 import Caisse from './pages/Caisse';
 import Facture from './pages/Facture';
-import Revenu from './pages/Revenu';
+import Report from "./pages/Report";
+import BonAchat from "./pages/BonAchat";
+import { useStore, loadCustomers,loadBuyings, loadVendings,loadProviders, loadProducts } from "./contexts/Store";
 
-
-
+loadCustomers();
+loadVendings();
+loadProducts();
+loadProviders();
+loadBuyings();
 const App = () => {
   return (
     <div className="flex">
@@ -30,7 +35,8 @@ const App = () => {
             <Route path="/buy" element={<Buying />} />
             <Route path="/caisse" element={<Caisse />} />
             <Route path="/facture" element={<Facture />} />
-            <Route path="/revenu" element={<Revenu />} />
+            <Route path="/report" element={<Report />} />
+            <Route path="/bonAchat" element={<BonAchat />} />
             {/* <Route path="/" element={<Home />} />
         <Route path="/accueil" element={<Home />} />
         <Route path="/login" element={<Login />} />
