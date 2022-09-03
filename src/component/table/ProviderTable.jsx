@@ -111,6 +111,7 @@ export default function ProvidersTable() {
         ipcRenderer.send("addProvider", args.data);
         ipcRenderer.on("refreshGridProvider:add", (e, res) => {
           loadProviders();
+          ipcRenderer.removeAllListeners("refreshGridProvider:add");
         });
         break;
       case args.requestType === "beginEdit":
@@ -120,6 +121,7 @@ export default function ProvidersTable() {
         ipcRenderer.send("updateProvider", args.data);
         ipcRenderer.on("refreshGridProvider:update", (e, res) => {
           loadProviders();
+          ipcRenderer.removeAllListeners("refreshGridProvider:update");
         });
         break;
       case args.requestType === "add":
@@ -129,16 +131,20 @@ export default function ProvidersTable() {
         ipcRenderer.send("deleteProvider", args.data[0]);
         ipcRenderer.on("refreshGridProvider:delete", (e, res) => {
           loadProviders();
+          ipcRenderer.removeAllListeners("refreshGridProvider:delete");
         });
         break;
     }
   }
-      function toCurrency(num) {
-        let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-        str = str.replace("DZD", "DA");
-        str = str.replace(",", " ");
-        return str;
-      }
+  function toCurrency(num) {
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
+    return str;
+  }
   function actionBegin(args) {
     if (args.requestType === "delete") {
     }
@@ -214,7 +220,7 @@ export default function ProvidersTable() {
             <ColumnDirective field="email" headerText="Email" textAlign="center" headerTextAlign="center" width="40" />
             <ColumnDirective field="ccp" headerText="CCP" textAlign="center" headerTextAlign="center" width="40" visible={false} />
             <ColumnDirective field="rip" headerText="RIB" textAlign="center" headerTextAlign="center" width="40" visible={false} />
-            <ColumnDirective field="credit" headerText="Crédit" textAlign="center" headerTextAlign="center" width="40" format="c2" />
+            <ColumnDirective field="credit" headerText="Crédit" textAlign="center" headerTextAlign="center" width="40" format="C2" />
             <ColumnDirective field="comment" headerText="Commentaire" textAlign="center" headerTextAlign="center" visible={false} width="40" />
             <ColumnDirective field="status" headerText="Status" headerTextAlign="center" textAlign="center" template={providersGridStatus} width="30" />
           </ColumnsDirective>
@@ -262,9 +268,9 @@ export default function ProvidersTable() {
                   <tbody>
                     {providersData.map((provider) => (
                       <tr className="text-center " key={provider._id}>
-                        <td className=" p-2">{"#" + provider?._id.slice(-6)}</td>
+                        <td className=" p-2">{"#" + provider?._id?.slice(-6)}</td>
                         <td>{provider?.name}</td>
-                        <td>{provider?.phone.toString().match(/.{2}/g).join(" ")}</td>
+                        <td>{provider?.phone?.toString()?.match(/.{2}/g)?.join(" ")}</td>
                         <td>{provider?.address}</td>
                         <td>{toCurrency(provider?.credit)}</td>
                       </tr>

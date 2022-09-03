@@ -25,7 +25,7 @@ const [active, setActive] = useState({ list: true, caisse: false, facture: false
       <div className="flex items-center justify-between mr-10">
         <div className="flex items-center">
           <Header title="Ventes" />
-          <img src={sell} width="30" className="pb-4" />
+          <img src={sell} width="30" className="" />
         </div>
      
       

@@ -79,7 +79,7 @@ export default function Report() {
     return str;
   }
   return (
-    <div className="p-5 ">
+    <div className="p-5  h-screen overflow-y-auto">
       <div className="mb-4  flex  justify-end">
         <div className="w-[300px] border-slate-200  border rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm">
           <DateRangePickerComponent
@@ -155,7 +155,7 @@ export default function Report() {
                     Nombre Total Fournisseurs:<span className="text-green-600 ml-2">{providersData.length}</span>
                   </div>
                   <div className={normalButton}>
-                    Quantité Produits Achter:<span className="text-green-600 ml-2">{buyingQuantity}</span>
+                    Nombre Produits Achter:<span className="text-green-600 ml-2">{buyingQuantity}</span>
                   </div>
                 </div>
                 <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Total Crédit Fournisseurs</div>
@@ -204,9 +204,9 @@ export default function Report() {
                   Chiffre D'affaires Ventes:
                   <span className="text-green-600 ml-2">{toCurrency(total)}</span>
                 </div>
-                <div className={normalButton}>
+                {/* <div className={normalButton}>
                   Total Achats des Ventes:<span className="text-green-600 ml-2">{toCurrency(totalBuyPrice)}</span>
-                </div>
+                </div> */}
 
                 <div className={normalButton}>
                   Moyenne par Vente:<span className="text-green-600 ml-2">{toCurrency(average)}</span>
@@ -248,17 +248,17 @@ export default function Report() {
             </ChartComponent>
           </div>
         </div>
-        <div id="longCard2" className="flex  bg-white shadow-lg rounded-sm border border-slate-200">
+        <div id="longCard2" className="flex mb-20 bg-white shadow-lg rounded-sm border border-slate-200">
           <div className="pl-5 py-2 flex w-[330px]">
             <div className="">
               <h2 className="text-lg text-center font-semibold  text-slate-800">Stock</h2>
               <hr className="w-full mb-4" />
               <div className="flex gap-2 flex-col mb-4 justify-center">
                 <div className={normalButton}>
-                  Nombre Total Produits:<span className="text-green-600 ml-2">{productsData.length}</span>
+                  Nombre Produits:<span className="text-green-600 ml-2">{productsData.length}</span>
                 </div>
                 <div className={normalButton}>
-                  Quantité Total Produits:<span className="text-green-600 ml-2">{productsQty}</span>
+                  Quantité Produits:<span className="text-green-600 ml-2">{productsQty}</span>
                 </div>
                 <div className={normalButton}>
                   Capital Achat Stock:

@@ -47,7 +47,7 @@ export default function PrintInvoiceFacture() {
         <div id="comapnyInfo" className="flex flex-col mt-4">
           <span className="font-semibold">{store?.get("company")?.name}</span>
           <span className="">{store?.get("company")?.address}</span>
-          <span className="">{store?.get("company")?.phone.toString().match(/.{2}/g).join(" ")}</span>
+          <span className="">{store?.get("company")?.phone?.toString()?.match(/.{2}/g)?.join(" ")}</span>
         </div>
       </div>
       <div className="flex justify-between mb-4">
@@ -56,7 +56,7 @@ export default function PrintInvoiceFacture() {
             Facture À:
             <div className="flex flex-col">
               <span className="font-normal">{facture.client.name}</span>
-              <span className="font-normal">{facture.client?.phone.toString().match(/.{2}/g).join(" ")}</span>
+              <span className="font-normal">{facture.client?.phone?.toString()?.match(/.{2}/g)?.join(" ")}</span>
             </div>
           </div>
         )}

@@ -521,6 +521,7 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0)
 }
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
+  const store = new Store();
 
 let win= null
 // Here you can add more preload scripts
@@ -568,6 +569,7 @@ app.whenReady().then(createWindow)
 app.on('window-all-closed', () => {
   win = null
   if (process.platform !== 'darwin') app.quit()
+  store?.get("reset") === true && store?.set("user",{});
 })
 
 app.on('second-instance', () => {

@@ -63,6 +63,7 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                     ipcRenderer.on("refreshGridProvider:update", (e, res) => {
                       loadProviders();
                       setToastAdd(true);
+                      ipcRenderer.removeAllListeners("refreshGridProvider:update");
                     });
                   }}>
                   Terminer

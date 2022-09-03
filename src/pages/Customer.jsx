@@ -7,7 +7,7 @@ export default function Customers() {
     <>
       <div className="flex items-center">
         <Header title="Clients" />
-        <img src={customerPNG} width="30" className="pb-4" />
+        <img src={customerPNG} width="30"  />
       </div>
       <CustomersTable />
     </>

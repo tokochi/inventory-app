@@ -8,7 +8,7 @@ export default function Provider() {
     <>
       <div className="flex items-center">
         <Header title="Fournisseur" />
-        <img src={supplierPNG} width="30" className="pb-4"/>
+        <img src={supplierPNG} width="30"/>
       </div>
       <ProviderTable />
     </>

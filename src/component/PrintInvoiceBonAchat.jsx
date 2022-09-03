@@ -1,8 +1,8 @@
-import React from 'react'
-import { loadCustomers, loadVendings, loadProducts, useStore } from "../contexts/Store";
 import Store from "electron-store";
 import moment from "moment/min/moment-with-locales";
+import React from "react";
 import { ToWords } from "to-words";
+import { useStore } from "../contexts/Store";
 export default function PrintInvoiceBonAchat() {
   const buyingsData = useStore((state) => state.buyings);
   const bonAchat = useStore((state) => state.bonAchat);
@@ -13,9 +13,12 @@ export default function PrintInvoiceBonAchat() {
   };
   const store = new Store({ schema });
   function toCurrency(num) {
-    let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-    str = str.replace("DZD", "DA");
-    str = str.replace(",", " ");
+    let str;
+    if (num != null && !isNaN(num)) {
+      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
     return str;
   }
   const toWords = new ToWords({
@@ -47,7 +50,7 @@ export default function PrintInvoiceBonAchat() {
         <div id="comapnyInfo" className="flex flex-col mt-4">
           <span className="font-semibold">{store?.get("company")?.name}</span>
           <span className="">{store?.get("company")?.address}</span>
-          <span className="">{store?.get("company")?.phone.toString().match(/.{2}/g).join(" ")}</span>
+          <span className="">{store?.get("company")?.phone?.toString()?.match(/.{2}/g)?.join(" ")}</span>
         </div>
       </div>
       <div className="flex justify-between mb-4">
@@ -56,7 +59,7 @@ export default function PrintInvoiceBonAchat() {
             Fournisseur:
             <div className="flex flex-col">
               <span className="font-normal">{bonAchat.supplier.name}</span>
-              <span className="font-normal">{bonAchat.supplier?.phone.toString().match(/.{2}/g).join(" ")}</span>
+              <span className="font-normal">{bonAchat.supplier?.phone?.toString()?.match(/.{2}/g)?.join(" ")}</span>
             </div>
           </div>
         )}

@@ -1,11 +1,24 @@
 import create from "zustand";
-
 const { ipcRenderer } = require("electron");
+import Store from "electron-store";
 
+const store = new Store();
 export const useStore = create((set) => ({
-  isLoggedIn: false,
+  isLoggedIn: store?.get("reset") && !store?.get("user")?.userName ? false : true,
   dropdownOpen: false,
-  caisse: { mode: "Détail", autoCompleteObj: {}, client: { name: "Standard" }, amount: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null },
+  indexRow: false,
+  caisse: {
+    mode: "Détail",
+    autoCompleteObj: {},
+    time: new Date(),
+    client: { name: "Standard" },
+    amount: 0,
+    total: 0,
+    rebate: 0,
+    deposit: 0,
+    selectedProducts: [],
+    selectedProduct: null,
+  },
   facture: {
     mode: "Détail",
     paymentType: "Espéce",
@@ -17,7 +30,7 @@ export const useStore = create((set) => ({
     rebate: 0,
     deposit: 0,
     selectedProducts: [],
-    toastObj:{},
+    toastObj: {},
     selectedProduct: null,
   },
   bonAchat: {
@@ -39,7 +52,7 @@ export const useStore = create((set) => ({
   customers: [],
   vendings: [],
   buyings: [],
-  user: {},
+  user: () => store?.get("user"),
   paymentType: "",
   settings: {
     preferance: { rooms: 4 },
@@ -123,7 +136,8 @@ export const useStore = create((set) => ({
         amount:
           state.bonAchat.selectedProducts.reduce((prevProduct, currProduct) => parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.buyPrice), 0) +
           parseInt(
-            state.bonAchat.selectedProducts.reduce((prevProduct, currProduct) => parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.buyPrice), 0) * state.bonAchat.tva
+            state.bonAchat.selectedProducts.reduce((prevProduct, currProduct) => parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.buyPrice), 0) *
+              state.bonAchat.tva
           ) -
           state.bonAchat.rebate,
         total: state.bonAchat.selectedProducts.reduce((prevProduct, currProduct) => parseInt(prevProduct) + parseInt(currProduct.selectedQuantity) * parseInt(currProduct?.buyPrice), 0),
@@ -134,69 +148,48 @@ export const useStore = create((set) => ({
     })),
   getProviders: () => {
     ipcRenderer.send("providerList:load");
-    ipcRenderer.on("providerList:get", (e, res) => {
-      set({ providers: JSON.parse(res) });
-    });
   },
   getCustomers: () => {
     ipcRenderer.send("customerList:load");
-    ipcRenderer.on("customerList:get", (e, res) => {
-      set({ customers: JSON.parse(res) });
-    });
   },
   getProducts: () => {
     ipcRenderer.send("productList:load");
-    ipcRenderer.on("productList:get", (e, res) => {
-      set({ products: JSON.parse(res) });
-    });
   },
   getVendings: () => {
     ipcRenderer.send("vendingList:load");
-    ipcRenderer.on("vendingList:get", (e, res) => {
-      set({ vendings: JSON.parse(res) });
-    });
   },
   getBuyings: () => {
     ipcRenderer.send("buyingList:load");
-    ipcRenderer.on("buyingList:get", (e, res) => {
-      set({ buyings: JSON.parse(res) });
-    });
-  },
-
-  getDepenses: () => {
-    ipcRenderer.send("depenseList:load");
-    ipcRenderer.on("depenseList:get", (e, res) => {
-      set({ depenses: JSON.parse(res) });
-    });
-  },
-
-  getSettings: () => {
-    ipcRenderer.send("settingList:load");
-    ipcRenderer.on("settingList:get", (e, res) => {
-      const resArray = JSON.parse(res);
-      set({ settings: resArray[0] });
-    });
-  },
-  getUsers: () => {
-    ipcRenderer.send("settingList:load");
-    ipcRenderer.on("settingList:get", (e, res) => {
-      const resArray = JSON.parse(res);
-      set({ settings: resArray[0] });
-    });
-  },
-  getRevenues: () => {
-    ipcRenderer.send("revenueList:load");
-    ipcRenderer.on("revenueList:get", (e, res) => {
-      set({ revenues: JSON.parse(res) });
-    });
   },
   getNotifications: () => {
     ipcRenderer.send("notificationList:load");
-    ipcRenderer.on("notificationList:get", (e, res) => {
-      set({ notifications: JSON.parse(res) });
-    });
   },
 }));
+
+// Romove all isteners
+ipcRenderer.eventNames().forEach((n) => {
+  ipcRenderer.removeAllListeners(n);
+});
+// Add new isteners
+
+ipcRenderer.on("productList:get", (e, res) => {
+  useStore.setState({ products: JSON.parse(res) });
+});
+ipcRenderer.on("providerList:get", (e, res) => {
+  useStore.setState({ providers: JSON.parse(res) });
+});
+ipcRenderer.on("customerList:get", (e, res) => {
+  useStore.setState({ customers: JSON.parse(res) });
+});
+ipcRenderer.on("vendingList:get", (e, res) => {
+  useStore.setState({ vendings: JSON.parse(res) });
+});
+ipcRenderer.on("buyingList:get", (e, res) => {
+  useStore.setState({ buyings: JSON.parse(res) });
+});
+ipcRenderer.on("notificationList:get", (e, res) => {
+  useStore.setState({ notifications: JSON.parse(res) });
+});
 
 export const loadProviders = () => useStore.getState().getProviders();
 export const loadProducts = () => useStore.getState().getProducts();

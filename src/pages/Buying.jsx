@@ -8,7 +8,7 @@ export default function Buying() {
     <>
       <div className="flex items-center">
       <Header title="Achats" />
-        <img src={buy} width="30" className="pb-4"/>
+        <img src={buy} width="30" />
       </div>
       <BuyingTable />
     </>

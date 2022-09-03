@@ -23,6 +23,9 @@ import print from "./../data/icons/print.png";
 const { ipcRenderer } = require("electron");
 
 moment.locale("fr");
+loadCustomers();
+loadVendings();
+loadProducts();
 const Wrapper = styled.div`
   & .e-ddl.e-input-group.e-control-wrapper .e-input {
     padding-left: 0.5rem;
@@ -42,6 +45,7 @@ const Wrapper = styled.div`
   }
 `;
 export default function Caisse() {
+  //************State**************************
   const [activeRow, setActiveRow] = useState(false);
   const [indexRow, setIndexRow] = useState(false);
   const productsData = useStore((state) => state.products).filter((product) => !useStore.getState().caisse.selectedProducts.some((selected) => selected._id === product._id));
@@ -57,28 +61,31 @@ export default function Caisse() {
   let autoCompleteObj;
   const normalButton =
     "inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
+  //************Keyboard shortcuts*********************
+  let validateBtn = useRef();
+  let addQtyBtn = useRef();
+  let subQtyBtn = useRef();
+  let deleteBtn = useRef();
+  let printBtn = useRef();
+  let addListBtn = useRef();
+  let newTabBtn = useRef();
+  useHotkeys("f1", () => validateBtn.current.click());
+  useHotkeys("f2", () => printBtn.current.click());
+  useHotkeys("Delete", () => deleteBtn.current.click());
+  useHotkeys("num_add", () => addQtyBtn.current.click());
+  useHotkeys("num_subtract", () => subQtyBtn.current.click());
+  useHotkeys("f5", () => addListBtn.current.click());
+  useHotkeys("f6", () => newTabBtn.current.click());
+  //************UseEffects*********************
   function toCurrency(num) {
-    let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-    str = str.replace("DZD", "DA");
-    str = str.replace(",", " ");
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
     return str;
   }
-  function addSelectedProducts(e) {
-    e.value != null && e.itemData.quantity > 0 && useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProduct: e.itemData } }));
-  }
-  function addSelectedProductstoGrid() {
-    if (useStore.getState().caisse.selectedProduct != null) {
-      useStore.setState((state) => ({
-        caisse: {
-          ...state.caisse,
-          selectedProducts: [...state.caisse.selectedProducts, { ...state.caisse.selectedProduct, selectedQuantity: parseFloat(1), index: state.caisse.selectedProducts.length + 1 }],
-        },
-      }));
-      autoCompleteObj.clear();
-      useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProduct: null } }));
-    }
-  }
-  useHotkeys("f3", addSelectedProductstoGrid);
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
@@ -95,11 +102,14 @@ export default function Caisse() {
       setShowPrintDiv(true);
     }
   }, [showPrintDiv]);
+
+  useEffect(() => {
+    useStore.setState((state) => ({ caisse: { ...state.caisse, autoCompleteObj } }));
+  }, [autoCompleteObj]);
   useEffect(() => {
     if (toastAdd) {
       setTimeout(() => setToastAdd(false), 4000);
     }
-
     if (toastEdit) {
       setTimeout(() => setToastEdit(false), 4000);
     }
@@ -117,6 +127,7 @@ export default function Caisse() {
                     ipcRenderer.send("updateProduct", { _id: product._id, fav: !product.fav });
                     ipcRenderer.on("refreshGridProduct:update", (e, res) => {
                       loadProducts();
+                      ipcRenderer.removeAllListeners("refreshGridProduct:update");
                     });
                   }
                 });
@@ -142,11 +153,10 @@ export default function Caisse() {
       </tbody>
     </table>
   );
-
   return (
-    <div className="bg-white m-2 shadow-lg rounded-sm   relative ">
+    <div className="bg-white m-2 shadow-lg rounded-sm h-[700px]  relative ">
       <div className="flex  justify-center">
-        <div id="left" className="bg-white  h-[622px] flex-1 min-w-[530px]">
+        <div id="left" className="bg-white flex-1 min-w-[545px]">
           <div id="option" className="flex  items-center my-2">
             <span className="px-4  text-sm font-medium min-w-[120px] ">Mode Vente:</span>
             <TextBox
@@ -183,7 +193,7 @@ export default function Caisse() {
             )}
           </div>
 
-          <div id="favori" className="bg-slate-800 h-full overflow-auto  w-full">
+          <div id="favori" className="bg-slate-800 h-[619px] overflow-auto w-full">
             <div className="text-white text-center w-full my-2 p-2">
               <div className="flex items-center justify-center">
                 <img src={fav} width="25" className="pr-1 pb-1" />
@@ -217,7 +227,7 @@ export default function Caisse() {
                         }
                       }}
                       style={{ backgroundImage: `url(${box})` }}
-                      className={` m-2 w-[155px] h-[120px] select-none flex flex-col bg-center bg-auto justify-start cursor-pointer items-center rounded-lg px-2 py-1 border border-slate-200 hover:opacity-90 shadow-sm  text-slate-500 duration-150 ease-in-out`}>
+                      className={` m-2 w-[162px] h-[120px] select-none flex flex-col bg-center bg-auto justify-start cursor-pointer items-center rounded-lg px-2 py-1 border border-slate-200 hover:opacity-90 shadow-sm  text-slate-500 duration-150 ease-in-out`}>
                       <div className="flex gap-2 justify-center items-center ">
                         <span className="text-slate-900 text-sm font-semibold text-center ">{product.name.slice(0, 22)}</span>
                       </div>
@@ -237,10 +247,10 @@ export default function Caisse() {
         </div>
         <div id="right" className="w-full flex flex-col  bg-slate-600 select-none">
           <div id="black_screen" className="flex gap-4 bg-black rounded-sm">
-            <div id="info_screen" className="text-xl text-white p-2 min-w-[380px]">
+            <div id="info_screen" className="text-xl text-white p-2 min-w-[250px]">
               <div id="date" className="flex items-center gap-10 mb-2  ">
-                <MyTime />
-                <span>{moment().format("dddd, D MMMM YYYY")}</span>
+                {caisse.isEdit === true ? <span className="text-2xl">{moment(caisse.time).format("HH:mm:ss")}</span> : <MyTime />}
+                <span>{moment(caisse.time).format("L")}</span>
               </div>
               <div id="date" className="flex items-center gap-10">
                 <div>
@@ -259,8 +269,21 @@ export default function Caisse() {
           <Wrapper>
             <div id="selectProduct" className="m-2 flex  text-white">
               <button
+                ref={addListBtn}
                 onClick={() => {
-                  addSelectedProductstoGrid();
+                  if (useStore.getState().caisse.selectedProduct != null) {
+                    useStore.setState((state) => ({
+                      caisse: {
+                        ...state.caisse,
+                        selectedProducts: [...state.caisse.selectedProducts, { ...state.caisse.selectedProduct, selectedQuantity: parseFloat(1), index: state.caisse.selectedProducts.length + 1 }],
+                      },
+                    }));
+                    autoCompleteObj.clear();
+                    useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProduct: null } }));
+                  } else {
+                    autoCompleteObj.showPopup();
+                    autoCompleteObj.focusIn();
+                  }
                 }}>
                 <svg className="w-8 hover:opacity-80 " viewBox="0 0 44 40">
                   <path fill="#7db382" d="M20,38.5C9.799,38.5,1.5,30.201,1.5,20S9.799,1.5,20,1.5S38.5,9.799,38.5,20S30.201,38.5,20,38.5z" />
@@ -281,7 +304,7 @@ export default function Caisse() {
                 popupHeight="500"
                 //customValueSpecifier={(e) => console.log(e)}
                 change={(e) => {
-                  e.value != null && addSelectedProducts(e);
+                  e.value != null && e.value != null && e.itemData.quantity > 0 && useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProduct: e.itemData } }));
                   setTotal();
                 }}
                 valueTemplate={productsTemplate}
@@ -324,6 +347,7 @@ export default function Caisse() {
                       className={`text-center ${activeRow && product._id === indexRow && "bg-sky-200"}`}
                       onClick={(e) => {
                         setIndexRow(product._id);
+                        useStore.setState({ indexRow: product._id });
                         setActiveRow(true);
                       }}
                       key={indx}>
@@ -407,6 +431,7 @@ export default function Caisse() {
           <div id="validation" className="flex gap-2 items-center p-2 min-w-[850px]">
             <div className="bg-emerald-600 hover:bg-emerald-400 p-4">
               <button
+                ref={addQtyBtn}
                 onClick={() => {
                   const UpdatedProducts = useStore
                     .getState()
@@ -425,6 +450,7 @@ export default function Caisse() {
             </div>
             <div className="bg-red-600 hover:bg-red-400 p-4">
               <button
+                ref={subQtyBtn}
                 onClick={() => {
                   const UpdatedProducts = useStore
                     .getState()
@@ -443,6 +469,7 @@ export default function Caisse() {
             </div>
             <div className="bg-green-500 hover:bg-green-700 p-[9px]">
               <button
+                ref={validateBtn}
                 onClick={() => {
                   if (caisse.isEdit === true) {
                     // update vending List
@@ -455,6 +482,7 @@ export default function Caisse() {
                     });
                     ipcRenderer.on("refreshGridVending:update", (e, res) => {
                       loadVendings();
+
                       caisse.selectedProducts.forEach((prod) => {
                         // quantity update
                         productsList.forEach((curProduct) => {
@@ -482,6 +510,7 @@ export default function Caisse() {
                         });
                         ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                           loadCustomers();
+                          ipcRenderer.removeAllListeners("refreshGridCustomer:update");
                         });
                       }
                       if (caisse.client.name != "Standard" && caisse.oldClient._id === caisse.client._id) {
@@ -495,11 +524,13 @@ export default function Caisse() {
                             });
                             ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                               loadCustomers();
+                              ipcRenderer.removeAllListeners("refreshGridCustomer:update");
                             });
                           }
                         });
                       }
                       setToastEdit(true);
+                      ipcRenderer.removeAllListeners("refreshGridVending:update");
                     });
                   } else {
                     // add new vending
@@ -538,19 +569,23 @@ export default function Caisse() {
                             ipcRenderer.send("updateCustomer", { _id: caisse.client._id, credit: (parseInt(customer.credit) + parseInt(caisse.amount - caisse.deposit)).toFixed(2) });
                             ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                               loadCustomers();
+                              ipcRenderer.removeAllListeners("refreshGridCustomer:update");
                             });
                           }
                         });
                       }
                       setToastAdd(true);
+                      ipcRenderer.removeAllListeners("refreshGridVending:add");
                     });
                   }
 
                   ipcRenderer.on("refreshGridProduct:update", (e, res) => {
                     loadProducts();
+                    ipcRenderer.removeAllListeners("refreshGridProduct:update");
                   });
-                  useStore.setState((state) => ({ caisse: { mode: "Détail", client: { name: "Standard" }, amount: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null } }));
-                  setClient({ name: "Standard" });
+                  useStore.setState((state) => ({
+                    caisse: { mode: "Détail", client: { name: "Standard" }, autoCompleteObj, amount: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null },
+                  }));
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <div className="flex flex-col">
@@ -561,7 +596,7 @@ export default function Caisse() {
               </button>
             </div>
             <div className="bg-lime-500 hover:bg-lime-700 p-[9px]">
-              <button className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
+              <button ref={printBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
                 <div className="flex flex-col">
                   <span>Imprimer</span>
                   <span className="text-base">(F2)</span>
@@ -571,6 +606,7 @@ export default function Caisse() {
             </div>
             <div className="bg-rose-500 hover:bg-rose-700 p-[9px]">
               <button
+                ref={deleteBtn}
                 onClick={() => {
                   useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProducts: [] } }));
                   setTotal();
@@ -584,7 +620,7 @@ export default function Caisse() {
               </button>
             </div>
             <div className="bg-blue-500 hover:bg-blue-700 p-[9px]">
-              <button className="text-xl  text-white gap-2 rounded-sm items-center flex">
+              <button ref={newTabBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <div className="flex flex-col">
                   <span>Nouveau</span>
                   <span className="text-base">(F6)</span>

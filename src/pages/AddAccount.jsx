@@ -8,7 +8,7 @@ import { setSwimLaneDefaults } from "@syncfusion/ej2/diagrams";
 
 const { ipcRenderer } = require("electron");
 
-export default function Register() {
+export default function AddAccount() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [cpassword, setCPassword] = useState("");
@@ -27,17 +27,16 @@ export default function Register() {
   };
   const store = new Store({ schema });
   const users = store?.get("users");
-    useEffect(() => {
-      if (isSpin) {
-        setTimeout(() => {
-          setIsSpin(false);
-          if (store?.get("user")?.userName != null) {
-            useStore.setState((state) => ({ isLoggedIn: true }));
-            navigate("/report");
-          }
-        }, 2000);
-      }
-    }, [isSpin]);
+  useEffect(() => {
+    if (isSpin) {
+      setTimeout(() => {
+        setIsSpin(false);
+        if (store?.get("user")?.userName != null) {
+           navigate("/settings/account");
+        }
+      }, 2000);
+    }
+  }, [isSpin]);
   return (
     <form onSubmit={(e) => e.preventDefault()}>
       <main className="bg-slate-200">
@@ -47,7 +46,7 @@ export default function Register() {
             <div className="min-h-screen h-full flex flex-col after:flex-1">
               {/* Header */}
               <div className="max-w-sm mx-auto px-4 py-8">
-                <h1 className="text-3xl text-slate-800 font-bold mb-6">Inscription ✨</h1>
+                <h1 className="text-3xl text-slate-800 font-bold mb-6">Ajouter un Compte ✨</h1>
                 {/* Form */}
                 <div className="space-y-4">
                   <div>
@@ -139,7 +138,7 @@ export default function Register() {
                     type="submit"
                     onClick={(e) => {
                       switch (true) {
-                        case users.find((user) => user.userName === userName)!==undefined:
+                        case users.find((user) => user.userName === userName) !== undefined:
                           setWrongUserName(true);
                           break;
                         case password != cpassword:
@@ -152,7 +151,7 @@ export default function Register() {
                           setIsSpin(true);
                           users.push({ userName, password });
                           store?.set("users", users);
-                          store?.set("user", { userName, password });
+                         
                           break;
                       }
                     }}

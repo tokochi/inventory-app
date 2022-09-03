@@ -19,7 +19,6 @@ export default function Profile() {
       ipcRenderer.send("updateUserPassword", { newPassword, password, _id: user._id });
       ipcRenderer.on("userPassword:failed", () => {
         setWrongPassword(true);
-        ipcRenderer.removeAllListeners("userPassword:failed");
       });
     }
   };

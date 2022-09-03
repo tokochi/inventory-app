@@ -11,12 +11,15 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
-    function toCurrency(num) {
-      let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+  function toCurrency(num) {
+    let str="0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
-      return str;
     }
+    return str;
+  }
   return (
     <>
       <button

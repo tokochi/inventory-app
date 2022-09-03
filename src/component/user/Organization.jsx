@@ -25,6 +25,7 @@ export default function Organization() {
       ipcRenderer.send("updateSetting", { company: { ...company,...useStore.getState().selectedSettings, logo: filePath }, _id: settingsId._id });
        ipcRenderer.on("refreshSetting:update", (e, res) => {
          loadSettings();
+         ipcRenderer.removeAllListeners("refreshSetting:update");
         
        });
   };

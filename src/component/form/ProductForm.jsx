@@ -41,19 +41,20 @@ export default function ProductForm(props) {
           <tr>
             <td className={labelclassName}>Désignation:</td>
             <td className="w-[320px]">
-              <TextBox type="text" id="name" width="full" value={props?.name} title="Désignation du Produit" />
+              <TextBox type="text" id="name" width="full" value={props?.name || ""} title="Désignation du Produit" />
             </td>
           </tr>
           <tr>
             <td className={labelclassName}>Marque:</td>
             <td>
               <div className="flex gap-2">
-                <TextBox type="dropdown" id="brand" width="full" value={props?.brand} dataSource={store?.get("brand")} popupHeight="200px" title="Choisir la Marque" />
+                <TextBox type="dropdown" id="brand" width="full" value={props?.brand || ""} dataSource={store?.get("brand")} popupHeight="200px" title="Choisir la Marque" />
                 <PopupDialog
                   id="addBrand"
                   close={close}
                   header="Ajouter une Marque"
                   width="330px"
+                  bg="bg-white"
                   svg={
                     <svg className="w-4 h-4 fill-current text-indigo-500 shrink-0" viewBox="0 0 16 16">
                       <path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" />
@@ -122,6 +123,7 @@ export default function ProductForm(props) {
                   close={close}
                   header="Ajouter une Unité"
                   width="330px"
+                  bg="bg-white"
                   svg={
                     <svg className="w-4 h-4 fill-current text-indigo-500 shrink-0" viewBox="0 0 16 16">
                       <path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" />
@@ -175,7 +177,7 @@ export default function ProductForm(props) {
             <td className={labelclassName}>Catégorie:</td>
             <td>
               <div className="flex gap-2">
-                <TextBox type="dropdown" id="category" width="full" value={props?.category} dataSource={store?.get("category")} popupHeight="200px" title="Choisir la Catégorie" />
+                <TextBox type="dropdown" id="category" width="full" value={props?.category || ""} dataSource={store?.get("category")} popupHeight="200px" title="Choisir la Catégorie" />
                 <PopupDialog
                   id="addCategory"
                   close={close}
@@ -366,7 +368,7 @@ export default function ProductForm(props) {
           <tr>
             <td className={labelclassName}>Remarque:</td>
             <td className="w-[320px]">
-              <TextBox type="text" multiline id="comment" width="full" value={props?.comment} title="Remarque sur le Produit" />
+              <TextBox type="text" multiline id="comment" width="full" value={props?.comment || ""} title="Remarque sur le Produit" />
             </td>
           </tr>
         </tbody>

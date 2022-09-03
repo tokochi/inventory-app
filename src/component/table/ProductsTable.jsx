@@ -28,13 +28,12 @@ const { ipcRenderer } = require("electron");
 // ******** Get Products List  ********
 
 Localization("produits");
-
 export default function ProductsTable() {
   // ******** Column Templates  ********
   const productsGridStatus = (props) => <Status {...props} />;
   const productsFormTemplate = (props) => <ProductFormTemplate {...props} />;
   const productsIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
-
+  
   // ******** Grid Table  ********
   const [active, setActive] = useState({ all: true, stock: false, alert: false, rupture: false });
   const activeButtoon =
@@ -112,6 +111,7 @@ export default function ProductsTable() {
         ipcRenderer.send("addProduct", args.data);
         ipcRenderer.on("refreshGridProduct:add", (e, res) => {
           loadProducts();
+          ipcRenderer.removeAllListeners("refreshGridProduct:add");
         });
         setToastAdd(true);
         break;
@@ -123,6 +123,7 @@ export default function ProductsTable() {
         ipcRenderer.send("updateProduct", args.data);
         ipcRenderer.on("refreshGridProduct:update", (e, res) => {
           loadProducts();
+          ipcRenderer.removeAllListeners("refreshGridProduct:update");
         });
         setToastEdit(true);
         break;
@@ -133,6 +134,7 @@ export default function ProductsTable() {
         ipcRenderer.send("deleteProduct", args.data[0]);
         ipcRenderer.on("refreshGridProduct:delete", (e, res) => {
           loadProducts();
+          ipcRenderer.removeAllListeners("refreshGridProduct:delete");
         });
         setToastRemove(true);
         break;
@@ -150,9 +152,12 @@ export default function ProductsTable() {
     }
   }
   function toCurrency(num) {
-    let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-    str = str.replace("DZD", "DA");
-    str = str.replace(",", " ");
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
     return str;
   }
   return (

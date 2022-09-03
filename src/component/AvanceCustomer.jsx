@@ -61,6 +61,7 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
                     ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                       loadCustomers();
                       setToastAdd(true);
+                      ipcRenderer.removeAllListeners("refreshGridCustomer:update");
                     });
                   }}>
                   Terminer

@@ -76,12 +76,15 @@ export default function BuyingTable() {
         ipcRenderer.send("previewComponent", url);
       }),
   });
-      function toCurrency(num) {
-        let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-        str = str.replace("DZD", "DA");
-        str = str.replace(",", " ");
-        return str;
-      }
+  function toCurrency(num) {
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
+    return str;
+  }
   function filterBuying(buying) {
     if (active.all === true) {
       return buying === buying;
@@ -151,6 +154,7 @@ export default function BuyingTable() {
         ipcRenderer.on("refreshGridBuying:delete", (e, res) => {
           loadBuyings();
           setToastRemove(true);
+          ipcRenderer.removeAllListeners("refreshGridBuying:delete");
         });
       }
       providersData.forEach((provider) => {
@@ -161,6 +165,7 @@ export default function BuyingTable() {
           });
           ipcRenderer.on("refreshGridProvider:update", (e, res) => {
             loadProviders();
+            ipcRenderer.removeAllListeners("refreshGridProvider:update");
           });
         }
       });

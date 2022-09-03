@@ -1,12 +1,9 @@
-import React from 'react'
+import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useStore, loadSettings } from "./../contexts/Store";
-
+import Store from "electron-store";
 
 export default function PrivateRoute() {
-
-let isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn")) || false;
-useStore.setState({ isLoggedIn: isLoggedIn });
-
-    return isLoggedIn ? <Outlet/>:<Navigate to="/login"/>
+ const isLoggedIn = useStore((state) => state.isLoggedIn);
+  return isLoggedIn ? <Outlet /> : <Navigate to="/login" />;
 }

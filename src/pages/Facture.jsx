@@ -18,7 +18,7 @@ import print from "./../data/icons/print.png";
 import Toast from "../component/Toast";
 import { ToWords } from "to-words";
 import { useReactToPrint } from "react-to-print";
-import PrintInvoice from '../component/PrintInvoiceFacture';
+import PrintInvoice from "../component/PrintInvoiceFacture";
 const { ipcRenderer } = require("electron");
 
 moment.locale("fr");
@@ -42,11 +42,8 @@ const Wrapper = styled.div`
   }
 `;
 export default function Facture(props) {
-  const schema = {
-    company: {
-      type: "object",
-    },
-  };
+  //************State**************************
+  const schema = { company: { type: "object" } };
   const store = new Store({ schema });
   const company = store?.get("company");
   const [activeRow, setActiveRow] = useState(false);
@@ -63,39 +60,31 @@ export default function Facture(props) {
   const gridRef = useRef();
   const [date, setDate] = useState(new Date());
   let autoCompleteObj;
-  const toWords = new ToWords({
-    localeCode: "fr-FR",
-    converterOptions: {
-      currency: false,
-      ignoreDecimal: false,
-      ignoreZeroCurrency: false,
-      doNotAddOnly: false,
-    },
-  });
-
   const normalButton =
     "inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-
-  function addSelectedProducts(e) {
-    e.value != null && e.itemData.quantity > 0 && useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: e.itemData } }));
-  }
-  function addSelectedProductstoGrid() {
-    if (useStore.getState().facture.selectedProduct != null) {
-      useStore.setState((state) => ({
-        facture: {
-          ...state.facture,
-          selectedProducts: [...state.facture.selectedProducts, { ...state.facture.selectedProduct, selectedQuantity: parseFloat(1), index: state.facture.selectedProducts.length + 1 }],
-        },
-      }));
-      autoCompleteObj.clear();
-      useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: null } }));
-    }
-  }
-  useHotkeys("f3", addSelectedProductstoGrid);
+  //************Keyboard shortcuts*********************
+  let validateBtn = useRef();
+  let addQtyBtn = useRef();
+  let subQtyBtn = useRef();
+  let deleteBtn = useRef();
+  let printBtn = useRef();
+  let addListBtn = useRef();
+  let newTabBtn = useRef();
+  useHotkeys("f1", () => validateBtn.current.click());
+  useHotkeys("f2", () => printBtn.current.click());
+  useHotkeys("Delete", () => deleteBtn.current.click());
+  useHotkeys("num_add", () => addQtyBtn.current.click());
+  useHotkeys("num_subtract", () => subQtyBtn.current.click());
+  useHotkeys("f5", () => addListBtn.current.click());
+  useHotkeys("f6", () => newTabBtn.current.click());
+  //************UseEffects*********************
   function toCurrency(num) {
-    let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-    str = str.replace("DZD", "DA");
-    str = str.replace(",", " ");
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
     return str;
   }
   useEffect(() => {
@@ -108,13 +97,11 @@ export default function Facture(props) {
     if (toastAdd) {
       setTimeout(() => setToastAdd(false), 4000);
     }
-
     if (toastEdit) {
       setTimeout(() => setToastEdit(false), 4000);
     }
   }, [toastAdd, toastEdit]);
   const reactToPrint = useReactToPrint({
-    
     content: () => gridRef.current,
     print: (target) =>
       new Promise(() => {
@@ -369,8 +356,21 @@ export default function Facture(props) {
           <Wrapper>
             <div id="selectProduct" className="p-2 flex bg-slate-500 text-white">
               <button
+                ref={addListBtn}
                 onClick={() => {
-                  addSelectedProductstoGrid();
+                  if (useStore.getState().facture.selectedProduct != null) {
+                    useStore.setState((state) => ({
+                      facture: {
+                        ...state.facture,
+                        selectedProducts: [...state.facture.selectedProducts, { ...state.facture.selectedProduct, selectedQuantity: parseFloat(1), index: state.facture.selectedProducts.length + 1 }],
+                      },
+                    }));
+                    autoCompleteObj.clear();
+                    useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: null } }));
+                  } else {
+                    autoCompleteObj.showPopup();
+                    autoCompleteObj.focusIn();
+                  }
                 }}>
                 <svg className="w-8 hover:opacity-80 " viewBox="0 0 44 40">
                   <path fill="#7db382" d="M20,38.5C9.799,38.5,1.5,30.201,1.5,20S9.799,1.5,20,1.5S38.5,9.799,38.5,20S30.201,38.5,20,38.5z" />
@@ -391,7 +391,7 @@ export default function Facture(props) {
                 popupHeight="500"
                 //customValueSpecifier={(e) => console.log(e)}
                 change={(e) => {
-                  e.value != null && addSelectedProducts(e);
+                  e.value != null && e.itemData.quantity > 0 && useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: e.itemData } }));
                   setTotalFacture();
                 }}
                 valueTemplate={productsTemplate}
@@ -485,6 +485,7 @@ export default function Facture(props) {
           <div id="validation" className="flex gap-2 items-center p-2 min-w-[850px]">
             <div className="bg-emerald-600 hover:bg-emerald-400 p-4">
               <button
+                ref={addQtyBtn}
                 onClick={() => {
                   const UpdatedProducts = useStore
                     .getState()
@@ -503,6 +504,7 @@ export default function Facture(props) {
             </div>
             <div className="bg-red-600 hover:bg-red-400 p-4">
               <button
+                ref={subQtyBtn}
                 onClick={() => {
                   const UpdatedProducts = useStore
                     .getState()
@@ -521,6 +523,7 @@ export default function Facture(props) {
             </div>
             <div className="bg-green-500 hover:bg-green-700 p-[9px]">
               <button
+                ref={validateBtn}
                 onClick={() => {
                   if (facture.isEdit === true) {
                     // update vending List
@@ -533,6 +536,7 @@ export default function Facture(props) {
                     });
                     ipcRenderer.on("refreshGridVending:update", (e, res) => {
                       loadVendings();
+
                       facture.selectedProducts.forEach((prod) => {
                         // quantity update
                         productsList.forEach((curProduct) => {
@@ -560,6 +564,7 @@ export default function Facture(props) {
                         });
                         ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                           loadCustomers();
+                          ipcRenderer.removeAllListeners("refreshGridCustomer:update");
                         });
                       }
                       // client didnt change
@@ -572,11 +577,13 @@ export default function Facture(props) {
                             });
                             ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                               loadCustomers();
+                              ipcRenderer.removeAllListeners("refreshGridCustomer:update");
                             });
                           }
                         });
                       }
                       setToastEdit(true);
+                      ipcRenderer.removeAllListeners("refreshGridVending:update");
                     });
                   } else {
                     // add new vending
@@ -617,21 +624,23 @@ export default function Facture(props) {
                             ipcRenderer.send("updateCustomer", { _id: facture.client._id, credit: (parseInt(customer.credit) + parseInt(facture.amount - facture.deposit)).toFixed(2) });
                             ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                               loadCustomers();
+                              ipcRenderer.removeAllListeners("refreshGridCustomer:update");
                             });
                           }
                         });
                       }
                       setToastAdd(true);
+                      ipcRenderer.removeAllListeners("refreshGridVending:add");
                     });
                   }
 
                   ipcRenderer.on("refreshGridProduct:update", (e, res) => {
                     loadProducts();
+                    ipcRenderer.removeAllListeners("refreshGridProduct:update");
                   });
                   useStore.setState((state) => ({
                     facture: { mode: "Détail", client: { name: "Standard" }, amount: 0, tva: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null },
                   }));
-                  setClient({ name: "Standard" });
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <div className="flex flex-col">
@@ -642,7 +651,7 @@ export default function Facture(props) {
               </button>
             </div>
             <div className="bg-lime-500 hover:bg-lime-700 p-[9px]">
-              <button className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
+              <button ref={printBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
                 <div className="flex flex-col">
                   <span>Imprimer</span>
                   <span className="text-base">(F2)</span>
@@ -652,6 +661,7 @@ export default function Facture(props) {
             </div>
             <div className="bg-rose-500 hover:bg-rose-700 p-[9px]">
               <button
+                ref={deleteBtn}
                 onClick={() => {
                   useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: [] } }));
                   setTotalFacture();
@@ -665,7 +675,7 @@ export default function Facture(props) {
               </button>
             </div>
             <div className="bg-blue-500 hover:bg-blue-700 p-[9px]">
-              <button className="text-xl  text-white gap-2 rounded-sm items-center flex">
+              <button ref={newTabBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <div className="flex flex-col">
                   <span>Nouveau</span>
                   <span className="text-base">(F6)</span>

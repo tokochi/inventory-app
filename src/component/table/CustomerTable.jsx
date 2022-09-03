@@ -98,6 +98,7 @@ export default function CustomersTable() {
         ipcRenderer.on("refreshGridCustomer:add", (e, res) => {
           setToastAdd(true);
           loadCustomers();
+          ipcRenderer.removeAllListeners("refreshGridCustomer:add");
         });
         break;
       case args.requestType === "beginEdit":
@@ -108,6 +109,7 @@ export default function CustomersTable() {
         ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
           setToastEdit(true);
           loadCustomers();
+          ipcRenderer.removeAllListeners("refreshGridCustomer:update");
         });
         break;
       case args.requestType === "add":
@@ -119,16 +121,20 @@ export default function CustomersTable() {
         ipcRenderer.on("refreshGridCustomer:delete", (e, res) => {
           setToastRemove(true);
           loadCustomers();
+          ipcRenderer.removeAllListeners("refreshGridCustomer:delete");
         });
         break;
     }
   }
-      function toCurrency(num) {
-        let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-        str = str.replace("DZD", "DA");
-        str = str.replace(",", " ");
-        return str;
-      }
+ function toCurrency(num) {
+   let str = "0.00DA";
+   if (num != null && !isNaN(num)) {
+     str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+     str = str.replace("DZD", "DA");
+     str = str.replace(",", " ");
+   }
+   return str;
+ }
   function actionBegin(args) {
     if (args.requestType === "delete") {
     }
@@ -250,7 +256,7 @@ export default function CustomersTable() {
                       <tr className="text-center " key={client._id}>
                         <td className=" p-2">{"#" + client?._id.slice(-6)}</td>
                         <td>{client?.name}</td>
-                        <td>{client?.phone.toString().match(/.{2}/g).join(" ")}</td>
+                        <td>{client?.phone?.toString()?.match(/.{2}/g)?.join(" ")}</td>
                         <td>{client?.address}</td>
                         <td>{toCurrency(client?.credit)}</td>
                       </tr>
