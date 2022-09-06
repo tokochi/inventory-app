@@ -8,7 +8,6 @@ import styled from "styled-components";
 import TextBox from "../component/button/TextBox";
 import MyTime from "../component/MyTime";
 import PrintInvoice from "../component/PrintInvoiceCaisse";
-import Toast from "../component/Toast";
 import { loadCustomers, loadProducts, loadVendings, useStore } from "../contexts/Store";
 import add from "./../data/icons/add.png";
 import box from "./../data/icons/box.png";
@@ -20,6 +19,8 @@ import minus from "./../data/icons/minus.png";
 import newPng from "./../data/icons/new.png";
 import nofav from "./../data/icons/nofav.png";
 import print from "./../data/icons/print.png";
+import { DialogComponent } from "@syncfusion/ej2-react-popups";
+import ProductFormPopUp from "./../component/form/ProductFormPopUp";
 const { ipcRenderer } = require("electron");
 
 moment.locale("fr");
@@ -48,14 +49,15 @@ export default function Caisse() {
   //************State**************************
   const [activeRow, setActiveRow] = useState(false);
   const [indexRow, setIndexRow] = useState(false);
+  const [title, setTitle] = useState(0);
+
   const productsData = useStore((state) => state.products).filter((product) => !useStore.getState().caisse.selectedProducts.some((selected) => selected._id === product._id));
   const productsList = useStore((state) => state.products);
   const caisse = useStore((state) => state.caisse);
   const setTotal = useStore((state) => state.setTotal);
   const customersData = useStore((state) => state.customers);
   const vendingsData = useStore((state) => state.vendings);
-  const [toastAdd, setToastAdd] = useState(false);
-  const [toastEdit, setToastEdit] = useState(false);
+
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   let autoCompleteObj;
@@ -80,7 +82,7 @@ export default function Caisse() {
   function toCurrency(num) {
     let str = "0.00DA";
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -106,14 +108,7 @@ export default function Caisse() {
   useEffect(() => {
     useStore.setState((state) => ({ caisse: { ...state.caisse, autoCompleteObj } }));
   }, [autoCompleteObj]);
-  useEffect(() => {
-    if (toastAdd) {
-      setTimeout(() => setToastAdd(false), 4000);
-    }
-    if (toastEdit) {
-      setTimeout(() => setToastEdit(false), 4000);
-    }
-  }, [toastAdd, toastEdit]);
+
   const productsTemplate = (props) => (
     <table className="table-auto w-full">
       <tbody>
@@ -246,10 +241,10 @@ export default function Caisse() {
           </div>
         </div>
         <div id="right" className="w-full flex flex-col  bg-slate-600 select-none">
-          <div id="black_screen" className="flex gap-4 bg-black rounded-sm">
+          <div id="black_screen" className="flex gap-4 bg-black rounded-sm ">
             <div id="info_screen" className="text-xl text-white p-2 min-w-[250px]">
               <div id="date" className="flex items-center gap-10 mb-2  ">
-                {caisse.isEdit === true ? <span className="text-2xl">{moment(caisse.time).format("HH:mm:ss")}</span> : <MyTime />}
+                {caisse.isEdit === true ? <span className="text-3xl">{moment(caisse.time).format("HH:mm:ss")}</span> : <MyTime />}
                 <span>{moment(caisse.time).format("L")}</span>
               </div>
               <div id="date" className="flex items-center gap-10">
@@ -278,11 +273,11 @@ export default function Caisse() {
                         selectedProducts: [...state.caisse.selectedProducts, { ...state.caisse.selectedProduct, selectedQuantity: parseFloat(1), index: state.caisse.selectedProducts.length + 1 }],
                       },
                     }));
-                    autoCompleteObj.clear();
+                    caisse.autoCompleteObj.clear();
                     useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProduct: null } }));
                   } else {
-                    autoCompleteObj.showPopup();
-                    autoCompleteObj.focusIn();
+                    //autoCompleteObj.showPopup();
+                    caisse.autoCompleteObj.focusIn();
                   }
                 }}>
                 <svg className="w-8 hover:opacity-80 " viewBox="0 0 44 40">
@@ -302,15 +297,64 @@ export default function Caisse() {
                 showClearButton
                 allowCustom
                 popupHeight="500"
-                //customValueSpecifier={(e) => console.log(e)}
+                customValueSpecifier={(e) => {
+                  setTitle(parseInt(e.text));
+                  caisse.autoCompleteObj.clear();
+                  useStore.setState(()=>({ dropdownOpen:true }));
+                }}
                 change={(e) => {
-                  e.value != null && e.value != null && e.itemData.quantity > 0 && useStore.setState((state) => ({ caisse: { ...state.caisse, selectedProduct: e.itemData } }));
-                  setTotal();
+                  if (e.itemData?._id != null) {
+                    if (useStore.getState().caisse.selectedProducts.some((selected) => selected._id === e.itemData._id) === false) {
+                      useStore.setState((state) => ({
+                        caisse: {
+                          ...state.caisse,
+                          selectedProducts: [...state.caisse.selectedProducts, { ...e.itemData, selectedQuantity: parseInt(1), index: state.caisse.selectedProducts.length + 1 }],
+                        },
+                      }));
+                    } else {
+                      useStore.setState((state) => ({
+                        caisse: {
+                          ...state.caisse,
+                          selectedProducts: useStore
+                            .getState()
+                            .caisse.selectedProducts.map((prod) => (prod._id === e.itemData._id ? { ...prod, selectedQuantity: parseInt(prod.selectedQuantity + 1) } : prod)),
+                        },
+                      }));
+                    }
+                    caisse.autoCompleteObj.clear();
+                    setTotal();
+                  }
+                }}
+                filtering={(e) => {
+                  const barCodeProd = productsList.find((prod) => prod.barCode === e.text);
+                  if (barCodeProd != undefined) {
+                    if (caisse.selectedProducts.some((selected) => selected._id === barCodeProd._id) === false) {
+                      useStore.setState((state) => ({
+                        caisse: {
+                          ...state.caisse,
+                          selectedProducts: [
+                            ...state.caisse.selectedProducts,
+                            { ...productsList.find((prod) => prod.barCode === e.text), selectedQuantity: parseInt(1), index: state.caisse.selectedProducts.length + 1 },
+                          ],
+                        },
+                      }));
+                    } else {
+                      useStore.setState((state) => ({
+                        caisse: {
+                          ...state.caisse,
+                          selectedProducts: caisse.selectedProducts.map((prod) => (prod._id === barCodeProd._id ? { ...prod, selectedQuantity: parseInt(prod.selectedQuantity + 1) } : prod)),
+                        },
+                      }));
+                    }
+                    caisse.autoCompleteObj.focusOut();
+                    caisse.autoCompleteObj.clear();
+                    caisse.autoCompleteObj.focusIn();
+                  }
                 }}
                 valueTemplate={productsTemplate}
                 itemTemplate={productsTemplate}
                 dataSource={productsData}
-                fields={{ value: "name", text: "name" }}
+                fields={{ value: "barCode", text: "barCode" }}
                 placeholder="Ajouter un Produit (F5)"
               />
             </div>
@@ -529,7 +573,7 @@ export default function Caisse() {
                           }
                         });
                       }
-                      setToastEdit(true);
+
                       ipcRenderer.removeAllListeners("refreshGridVending:update");
                     });
                   } else {
@@ -557,7 +601,14 @@ export default function Caisse() {
                         // quantity update
                         productsList.forEach((curProduct) => {
                           if (curProduct._id === prod._id) {
-                            ipcRenderer.send("updateProduct", { _id: prod._id, quantity: parseInt(prod.quantity) - parseInt(prod.selectedQuantity) });
+                            ipcRenderer.send("updateProduct", {
+                              _id: prod._id,
+                              quantity: parseInt(prod.quantity) - parseInt(prod.selectedQuantity),
+                              lastTime: new Date(),
+                              quantitySell: parseInt(curProduct?.quantitySell || 0) + parseInt(prod.selectedQuantity),
+                              revenue: parseInt(curProduct?.revenue || 0) + parseInt(prod.selectedQuantity * prod.sellPrice) - parseInt(prod.selectedQuantity * prod.buyPrice),
+                              total: parseInt(curProduct?.total || 0) + parseInt(prod.selectedQuantity * prod.sellPrice),
+                            });
                           }
                         });
                       });
@@ -574,7 +625,7 @@ export default function Caisse() {
                           }
                         });
                       }
-                      setToastAdd(true);
+
                       ipcRenderer.removeAllListeners("refreshGridVending:add");
                     });
                   }
@@ -630,16 +681,11 @@ export default function Caisse() {
             </div>
           </div>
         </div>
+        <ProductFormPopUp  title={title} />
         <div ref={gridRef} className={`${showPrintDiv && "hidden"} `}>
           <PrintInvoice />
         </div>
       </div>
-      <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
-        Vente Modifier avec succès.
-      </Toast>
-      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
-        Nouvelle Vente Ajouter avec succès.
-      </Toast>
     </div>
   );
 }

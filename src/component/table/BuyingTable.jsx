@@ -1,19 +1,19 @@
 import {
-  ColumnChooser,
-  ColumnDirective,
-  ColumnsDirective,
-  Edit,
-  Filter,
-  GridComponent,
-  Inject,
-  PdfExport,
-  Print,
-  Reorder,
-  Resize,
-  Search,
-  Selection,
-  Sort,
-  Toolbar,
+    ColumnChooser,
+    ColumnDirective,
+    ColumnsDirective,
+    Edit,
+    Filter,
+    GridComponent,
+    Inject,
+    PdfExport,
+    Print,
+    Reorder,
+    Resize,
+    Search,
+    Selection,
+    Sort,
+    Toolbar
 } from "@syncfusion/ej2-react-grids";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import Store from "electron-store";
@@ -23,7 +23,8 @@ import { useReactToPrint } from "react-to-print";
 import { loadBuyings, loadProviders, useStore } from "../../contexts/Store";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import Toast from "../Toast";
+import AddDepense from './../AddDepense';
+import DepenseList from './../DepenseList';
 import SelectedProductsView from "./templates/SelectedProductsbuy";
 import Status from "./templates/VendingsStatus";
 
@@ -56,7 +57,7 @@ export default function BuyingTable() {
   };
   const store = new Store({ schema });
   const restorQty = store?.get("restorQty");
-  const [toastRemove, setToastRemove] = useState(false);
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
@@ -79,7 +80,7 @@ export default function BuyingTable() {
   function toCurrency(num) {
     let str = "0.00DA";
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -99,11 +100,7 @@ export default function BuyingTable() {
       return buying?.amount > 0 && buying?.amount > buying?.deposit;
     }
   }
-  useEffect(() => {
-    if (toastRemove) {
-      setTimeout(() => setToastRemove(false), 4000);
-    }
-  }, [toastRemove]);
+
   useEffect(() => {
     if (!showPrintDiv) {
       reactToPrint();
@@ -153,7 +150,6 @@ export default function BuyingTable() {
         });
         ipcRenderer.on("refreshGridBuying:delete", (e, res) => {
           loadBuyings();
-          setToastRemove(true);
           ipcRenderer.removeAllListeners("refreshGridBuying:delete");
         });
       }
@@ -223,10 +219,11 @@ export default function BuyingTable() {
             </button>
           </li>
         </ul>
+        <div className="flex gap-2">
+        <AddDepense />
+        <DepenseList /></div>
       </div>
-      <Toast type="error" open={toastRemove} setOpen={setToastRemove}>
-        Achat Supprimer avec succès.
-      </Toast>
+
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
@@ -271,11 +268,11 @@ export default function BuyingTable() {
                     <span className="ml-1  text-emerald-600">{buyingData?.length}</span>
                   </button>
                   <button className={normalButton}>
-                    Total Quantité:
+                    Nombre Articles:
                     <span className="ml-1  text-emerald-600">{buyingData?.reduce((acc, buying) => acc + buying.grid.reduce((accu, product) => accu + parseInt(product.selectedQuantity), 0), 0)}</span>
                   </button>
                   <button className={normalButton}>
-                    Capital Achat:
+                    Total Achats:
                     <span className="ml-1  text-emerald-600">{toCurrency(buyingData.reduce((acc, cur) => acc + cur.amount, 0))}</span>
                   </button>
                   {/* <button className={normalButton}>

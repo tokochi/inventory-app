@@ -6,6 +6,8 @@ const store = new Store();
 export const useStore = create((set) => ({
   isLoggedIn: store?.get("reset") && !store?.get("user")?.userName ? false : true,
   dropdownOpen: false,
+  dropDownObj: {},
+  gridProduct: {},
   indexRow: false,
   caisse: {
     mode: "Détail",
@@ -161,6 +163,9 @@ export const useStore = create((set) => ({
   getBuyings: () => {
     ipcRenderer.send("buyingList:load");
   },
+  getDepenses: () => {
+    ipcRenderer.send("depenseList:load");
+  },
   getNotifications: () => {
     ipcRenderer.send("notificationList:load");
   },
@@ -186,6 +191,9 @@ ipcRenderer.on("vendingList:get", (e, res) => {
 });
 ipcRenderer.on("buyingList:get", (e, res) => {
   useStore.setState({ buyings: JSON.parse(res) });
+});
+ipcRenderer.on("depenseList:get", (e, res) => {
+  useStore.setState({ depenses: JSON.parse(res) });
 });
 ipcRenderer.on("notificationList:get", (e, res) => {
   useStore.setState({ notifications: JSON.parse(res) });

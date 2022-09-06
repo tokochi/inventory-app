@@ -9,7 +9,6 @@ import { useReactToPrint } from "react-to-print";
 import styled from "styled-components";
 import TextBox from "../component/button/TextBox";
 import PrintInvoice from "../component/PrintInvoiceBonAchat";
-import Toast from "../component/Toast";
 import { loadBuyings, loadProducts, loadProviders, useStore } from "../contexts/Store";
 import add from "./../data/icons/add.png";
 import deletePng from "./../data/icons/delete.png";
@@ -18,6 +17,7 @@ import done from "./../data/icons/done.png";
 import minus from "./../data/icons/minus.png";
 import newPng from "./../data/icons/new.png";
 import print from "./../data/icons/print.png";
+import ProductFormPopUp from './../component/form/ProductFormPopUp';
 const { ipcRenderer } = require("electron");
 
 moment.locale("fr");
@@ -56,8 +56,7 @@ export default function BonAchat() {
   const setTotalBonAchat = useStore((state) => state.setTotalBonAchat);
   const providersData = useStore((state) => state.providers);
   const buyingsData = useStore((state) => state.buyings);
-  const [toastAdd, setToastAdd] = useState(false);
-  const [toastEdit, setToastEdit] = useState(false);
+const [title, setTitle] = useState(0);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   const [date, setDate] = useState(new Date());
@@ -116,18 +115,14 @@ export default function BonAchat() {
       </tbody>
     </table>
   );
-  useEffect(() => {
-    if (toastAdd) {
-      setTimeout(() => setToastAdd(false), 4000);
-    }
-    if (toastEdit) {
-      setTimeout(() => setToastEdit(false), 4000);
-    }
-  }, [toastAdd, toastEdit]);
+ useEffect(() => {
+   useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, autoCompleteObj } }));
+ }, [autoCompleteObj]);
+
   function toCurrency(num) {
     let str = "0.00DA";
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -277,7 +272,7 @@ export default function BonAchat() {
                     autoCompleteObj.clear();
                     useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProduct: null } }));
                   } else {
-                    autoCompleteObj.showPopup();
+                   // autoCompleteObj.showPopup();
                     autoCompleteObj.focusIn();
                   }
                 }}>
@@ -298,15 +293,64 @@ export default function BonAchat() {
                 showClearButton
                 allowCustom
                 popupHeight="500"
-                //customValueSpecifier={(e) => console.log(e)}
+                customValueSpecifier={(e) => {
+                  setTitle(parseInt(e.text));
+                  bonAchat.autoCompleteObj.clear();
+                  useStore.setState(() => ({ dropdownOpen: true }));
+                }}
                 change={(e) => {
-                  e.value != null && useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProduct: e.itemData } }));
-                  setTotalBonAchat();
+                  if (e.itemData?._id != null) {
+                    if (useStore.getState().bonAchat.selectedProducts.some((selected) => selected._id === e.itemData._id) === false) {
+                      useStore.setState((state) => ({
+                        bonAchat: {
+                          ...state.bonAchat,
+                          selectedProducts: [...state.bonAchat.selectedProducts, { ...e.itemData, selectedQuantity: parseInt(1), index: state.bonAchat.selectedProducts.length + 1 }],
+                        },
+                      }));
+                    } else {
+                      useStore.setState((state) => ({
+                        bonAchat: {
+                          ...state.bonAchat,
+                          selectedProducts: useStore
+                            .getState()
+                            .bonAchat.selectedProducts.map((prod) => (prod._id === e.itemData._id ? { ...prod, selectedQuantity: parseInt(prod.selectedQuantity + 1) } : prod)),
+                        },
+                      }));
+                    }
+                    bonAchat.autoCompleteObj.clear();
+                    setTotal();
+                  }
+                }}
+                filtering={(e) => {
+                  const barCodeProd = productsList.find((prod) => prod.barCode === e.text);
+                  if (barCodeProd != undefined) {
+                    if (bonAchat.selectedProducts.some((selected) => selected._id === barCodeProd._id) === false) {
+                      useStore.setState((state) => ({
+                        bonAchat: {
+                          ...state.bonAchat,
+                          selectedProducts: [
+                            ...state.bonAchat.selectedProducts,
+                            { ...productsList.find((prod) => prod.barCode === e.text), selectedQuantity: parseInt(1), index: state.bonAchat.selectedProducts.length + 1 },
+                          ],
+                        },
+                      }));
+                    } else {
+                      useStore.setState((state) => ({
+                        bonAchat: {
+                          ...state.bonAchat,
+                          selectedProducts: bonAchat.selectedProducts.map((prod) => (prod._id === barCodeProd._id ? { ...prod, selectedQuantity: parseInt(prod.selectedQuantity + 1) } : prod)),
+                        },
+                      }));
+                    }
+                    bonAchat.autoCompleteObj.focusOut();
+                    bonAchat.autoCompleteObj.clear();
+                    bonAchat.autoCompleteObj.focusIn();
+                  }
                 }}
                 valueTemplate={productsTemplate}
                 itemTemplate={productsTemplate}
                 dataSource={productsData}
-                fields={{ value: "name", text: "name" }}
+                fields={{ value: "barCode", text: "barCode" }}
                 placeholder="Ajouter un Produit (F5)"
               />
             </div>
@@ -515,7 +559,7 @@ export default function BonAchat() {
                           }
                         });
                       }
-                      setToastEdit(true);
+
                       ipcRenderer.removeAllListeners("refreshGridBuying:update");
                     });
                   } else {
@@ -556,7 +600,7 @@ export default function BonAchat() {
                           }
                         });
                       }
-                      setToastAdd(true);
+
                       ipcRenderer.removeAllListeners("refreshGridBuying:add");
                     });
                   }
@@ -623,15 +667,10 @@ export default function BonAchat() {
           </div>
         </div>
       </div>
+      <ProductFormPopUp title={title} />
       <div ref={gridRef} className={`${showPrintDiv && "hidden"} `}>
         <PrintInvoice />
       </div>
-      <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
-        Bon d'achat Modifier avec succès.
-      </Toast>
-      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
-        Bon d'achat Ajouter avec succès.
-      </Toast>
     </div>
   );
 }

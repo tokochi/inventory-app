@@ -1,23 +1,28 @@
-import React, { useState, useEffect } from "react";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import { useStore, loadProviders } from "../contexts/Store";
 import moment from "moment";
+import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-
+import { loadProviders, useStore } from "../contexts/Store";
+import deletePng2 from "./../data/icons/delete2.png";
+const { ipcRenderer } = require("electron");
 
 
 export default function ProviderCreditList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const providersData = () => useStore((state) => state.providers);
+  const avanceList = () => useStore((state) => state.providers).reduce((acc, cur) => acc.concat(cur.avance), []);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
-function toCurrency(num) {
-  let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-  str = str.replace("DZD", "DA");
-  str = str.replace(",", " ");
-  return str;
-}
+  function toCurrency(num) {
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
+    return str;
+  }
   return (
     <>
       <button
@@ -40,71 +45,103 @@ function toCurrency(num) {
         closeOnEscape
         width="900px"
         open={() => setDropdownOpen(true)}
-        close={() => setDropdownOpen(false)}>
-        <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
-          <div>
-            <div className="overflow-x-auto">
-              <table className="table-auto w-full divide-y divide-slate-200">
-                {/* Table header */}
-                <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
-                  <tr>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">ID</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Date</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Fournisseur</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Ancien Credit</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Versement</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Reste à payer</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Status</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Payment type</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {providersData().map((provider, index) => (
-                    <tr className="text-center" key={uuidv4()}>
-                      {provider.avance.map((avance, indx) => (
+        close={() => setDropdownOpen(false)}
+        content={() => (
+          <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+            <div>
+              <div className="overflow-x-auto">
+                <table className="table-auto w-full divide-y divide-slate-200">
+                  {/* Table header */}
+                  <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                    <tr>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">ID</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Date</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Fournisseur</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Ancien Credit</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Versement</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Reste à payer</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Status</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Payment type</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {avanceList().map((avance, indx) => (
+                      <tr className="text-center" key={uuidv4()}>
                         <React.Fragment key={uuidv4()}>
                           <td key={uuidv4()} className="text-left p-2">
                             {"#" + avance?._id.slice(-6)}
                           </td>
-                          <td key={uuidv4()}>{moment(provider?.date).format("DD/MM/YYYY")}</td>
-                          <td key={uuidv4()}>{provider?.name}</td>
+                          <td key={uuidv4()}>{moment(avance?.date).format("DD/MM/YYYY")}</td>
+                          <td key={uuidv4()}>{avance?.name}</td>
                           <td key={uuidv4()}>{avance?.credit && toCurrency(avance?.credit)}</td>
                           <td key={uuidv4()}>{avance?.amount && toCurrency(avance?.amount)}</td>
                           <td key={uuidv4()}>{avance?.amount && toCurrency(avance?.credit - avance.amount)}</td>
                           <td key={uuidv4()}>
                             {avance?.credit - avance.amount > 0 ? (
-                              <p className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-rose-100 text-rose-500">Endetté</p>
+                              <p key={uuidv4()} className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-rose-100 text-rose-500">
+                                Crédit
+                              </p>
                             ) : (
-                              <p className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-emerald-100 text-emerald-600 ">Acquitté</p>
+                              <p key={uuidv4()} className="capitalize text-center rounded-3xl px-1 py-1 my-1 bg-emerald-100 text-emerald-600 ">
+                                Acquitté
+                              </p>
                             )}
                           </td>
                           <td key={uuidv4()}>{avance?.paymentType}</td>
+                          <td key={uuidv4()}>
+                            <button
+                              id={avance?.providerId}
+                              idd={avance?._id}
+                              amount={avance?.amount}
+                              className=" p-1.5"
+                              onClick={(e) => {
+                                setDropdownOpen(false);
+                                const provID = e.target.parentElement.attributes[0].value;
+                                const avanceID = e.target.parentElement.attributes[1].value;
+                                const avanceAmount = parseInt(e.target.parentElement.attributes[2].value);
+                                useStore.getState().providers.forEach((provider, index) => {
+                                  if (provider._id === provID) {
+                                    ipcRenderer.send("updateProvider", {
+                                      _id: provID,
+                                      credit: parseInt(provider.credit) + avanceAmount,
+                                      avance: provider.avance.filter((avance) => avance._id !== avanceID),
+                                    });
+                                  }
+                                });
+                                ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                                  loadProviders();
+                                  ipcRenderer.removeAllListeners("refreshGridProvider:update");
+                                });
+                              }}>
+                              <img src={deletePng2} width="25" />
+                            </button>
+                          </td>
                         </React.Fragment>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
-      </DialogComponent>
+        )}></DialogComponent>
     </>
   );
 }

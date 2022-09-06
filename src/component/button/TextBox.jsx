@@ -53,7 +53,8 @@ export default function TextBox({ type, onChange, dataSource, value, id, require
           change={onChange}
           floatLabelType="Never"
           popupHeight="200px"
-          placeholder={title}></DropDownListComponent>
+          placeholder={title}
+          {...rest}></DropDownListComponent>
       </div>
     );
 }

@@ -21,8 +21,7 @@ export default function Login() {
   };
   const store = new Store({ schema });
   const users = store?.get("users");
-  const [checked, setChecked] = useState(store?.get("reset"));
-  console.log("🚀 ~ reset", store?.get("reset"))
+  const [checked, setChecked] = useState(!store?.get("reset"));
 
   useEffect(() => {
     if (isSpin) {

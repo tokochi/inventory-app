@@ -6,6 +6,7 @@ import caisse from "./../../data/icons/caisse.png";
 import invoice from "./../../data/icons/document.png";
 import report from "./../../data/icons/report.png";
 import wallet from "./../../data/icons/wallet.png";
+import zakat from "./../../data/icons/estimate.png";
 import { NavLink } from "react-router-dom";
 import { useStore, loadSettings } from "../../contexts/Store";
 
@@ -39,6 +40,10 @@ export default function Navbar() {
             <NavLink to="/report" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
               <img src={report} width="40" className="m-2" />
               Rapport
+            </NavLink>
+            <NavLink to="/zakat" className={({ isActive }) => (isActive ? activeButtoon : normalButton)}>
+              <img src={zakat} width="40" className="m-2" />
+              El-Zakat
             </NavLink>
           </div>
           {/* Header: Right side */}

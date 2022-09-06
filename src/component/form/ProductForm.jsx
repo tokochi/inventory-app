@@ -3,20 +3,69 @@ import Store from "electron-store";
 import TextBox from "../button/TextBox";
 import PopupDialog from "../dialog/PopupDialog";
 import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
-
+import { UploaderComponent } from '@syncfusion/ej2-react-inputs';
+import deletePng2 from "./../../data/icons/delete2.png";
 export default function ProductForm(props) {
   const labelclassName = "p-4 w-[170px] text-sm font-medium";
+  const brandTemplate = (props) => (
+    <div className="flex justify-between items-center">
+      <div>{props.name}</div>
+      <div>
+        <button
+          className=""
+          onClick={(e) => {
+            const temp = store?.get("brand").filter(brand => brand.name !== props.name);
+            store?.set("brand", temp);
+          }}>
+          <img src={deletePng2} width="15" />
+        </button>
+      </div>
+    </div>
+  );
+  const unitTemplate = (props) => (
+    <div className="flex justify-between items-center">
+      <div>{props.name}</div>
+      <div>
+        <button
+          className=""
+          onClick={(e) => {
+            const temp = store?.get("unit").filter(unit => unit.name !== props.name);
+            store?.set("unit", temp);
+          }}>
+          <img src={deletePng2} width="15" />
+        </button>
+      </div>
+    </div>
+  );
+  const categoryTemplate = (props) => (
+    <div className="flex justify-between items-center">
+      <div>{props.name}</div>
+      <div>
+        <button
+          className=""
+          onClick={(e) => {
+            const temp = store?.get("category").filter(category => category.name !== props.name);
+            store?.set("category", temp);
+          }}>
+          <img src={deletePng2} width="15" />
+        </button>
+      </div>
+    </div>
+  );
   const schema = {
-    unit: { type: "array" },
-    brand: { type: "array" },
-    category: { type: "array" },
+    unit: { type: "array", default: [{name:"U"}] },
+    brand: { type: "array", default: [] },
+    category: { type: "array", default: [] },
   };
   const store = new Store({ schema });
-  //  store?.delete("unit");
-  //  store?.delete("brand");
-  //  store?.delete("category");
   const [close, setClose] = useState(false);
+  const [name, setName] = useState(props?.name);
+  const [barCode, setBarCode] = useState(props?.barCode);
+  const [expireDate, setExpireDate] = useState(props?.expireDate);
+  const [comment, setComment] = useState(props?.comment);
   const [unit, setUnit] = useState(props?.unit || "U");
+  const [brand, setBrand] = useState(props?.brand || []);
+  const [category, setCategory] = useState(props?.category || []);
   const [quantity, setQuantity] = useState(props?.quantity || null);
   const [qtyAlert, setQtyAlert] = useState(props?.qtyAlert);
   const [buyPrice, setBuyPrice] = useState(props?.buyPrice);
@@ -26,9 +75,9 @@ export default function ProductForm(props) {
   const [addUnit, setAddUnit] = useState("");
   const [addBrand, setAddBrand] = useState("");
   const [addCategory, setAddCategory] = useState("");
-  const unitList = store?.get("unit") || [];
-  const brand = store?.get("brand") || [];
-  const category = store?.get("category") || [];
+  const unitList = store?.get("unit");
+  const brandList = store?.get("brand");
+  const categoryList = store?.get("category");
   const [margin, setMargin] = useState((sellPrice - buyPrice) / sellPrice);
   const [marginGros, setMarginGros] = useState((sellPriceGros - buyPrice) / sellPriceGros);
   useEffect(() => {
@@ -41,14 +90,31 @@ export default function ProductForm(props) {
           <tr>
             <td className={labelclassName}>Désignation:</td>
             <td className="w-[320px]">
-              <TextBox type="text" id="name" width="full" value={props?.name || ""} title="Désignation du Produit" />
+              <TextBox type="text" id="name" width="full" onChange={(e) => e.value != null && setName(e.value)} value={name} title="Désignation du Produit" />
+            </td>
+          </tr>
+          <tr>
+            <td className={labelclassName}>Code Barre:</td>
+            <td className="w-[320px]">
+              <TextBox type="number" format="N0" showSpinButton={false} id="barCode" width="w-full" onChange={(e) => e.value != null && setBarCode(e.value)} value={barCode} title="Code Barre" />
             </td>
           </tr>
           <tr>
             <td className={labelclassName}>Marque:</td>
             <td>
               <div className="flex gap-2">
-                <TextBox type="dropdown" id="brand" width="full" value={props?.brand || ""} dataSource={store?.get("brand")} popupHeight="200px" title="Choisir la Marque" />
+                <TextBox
+                  type="dropdown"
+                  id="brand"
+                  width="w-[200px]"
+                  itemTemplate={brandTemplate}
+                  value={brand}
+                  fields={{ text: "name", value: "name" }}
+                  onChange={(e) => e.value != null && setBrand(e.value)}
+                  dataSource={store?.get("brand")}
+                  popupHeight="200px"
+                  title="Choisir la Marque"
+                />
                 <PopupDialog
                   id="addBrand"
                   close={close}
@@ -69,8 +135,8 @@ export default function ProductForm(props) {
                             onClick={(e) => {
                               setClose(true);
                               if (addBrand.length > 0) {
-                                brand.push(addBrand);
-                                store.set("brand", [...new Set(brand)]);
+                                brandList.push({ name: addBrand });
+                                store.set("brand", [...new Set(brandList)]);
                               }
                             }}>
                             Ajouter
@@ -111,8 +177,10 @@ export default function ProductForm(props) {
                 <TextBox
                   type="dropdown"
                   id="unit"
-                  width="full"
+                  width="w-[200px]"
                   value={unit}
+                  itemTemplate={unitTemplate}
+                  fields={{ text: "name", value: "name" }}
                   onChange={(e) => e.value != null && setUnit(e.value)}
                   dataSource={store?.get("unit")}
                   popupHeight="200px"
@@ -138,7 +206,7 @@ export default function ProductForm(props) {
                             onClick={() => {
                               setClose(true);
                               if (addUnit.length > 0) {
-                                unitList.push(addUnit);
+                                unitList.push({ name: addUnit });
                                 store.set("unit", [...new Set(unitList)]);
                               }
                             }}>
@@ -177,7 +245,18 @@ export default function ProductForm(props) {
             <td className={labelclassName}>Catégorie:</td>
             <td>
               <div className="flex gap-2">
-                <TextBox type="dropdown" id="category" width="full" value={props?.category || ""} dataSource={store?.get("category")} popupHeight="200px" title="Choisir la Catégorie" />
+                <TextBox
+                  type="dropdown"
+                  id="category"
+                  width="w-[200px]"
+                  value={category}
+                  itemTemplate={categoryTemplate}
+                  fields={{ text: "name", value: "name" }}
+                  onChange={(e) => e.value != null && setCategory(e.value)}
+                  dataSource={store?.get("category")}
+                  popupHeight="200px"
+                  title="Choisir la Catégorie"
+                />
                 <PopupDialog
                   id="addCategory"
                   close={close}
@@ -197,8 +276,8 @@ export default function ProductForm(props) {
                             onClick={() => {
                               setClose(true);
                               if (addCategory.length > 0) {
-                                category.push(addCategory);
-                                store.set("category", [...new Set(category)]);
+                                categoryList.push({ name: addCategory });
+                                store.set("category", [...new Set(categoryList)]);
                               }
                             }}>
                             Ajouter
@@ -242,7 +321,8 @@ export default function ProductForm(props) {
                     name="expired"
                     enabled={expired}
                     width="175"
-                    value={props?.expired}
+                    onChange={(e) => e.value != null && setExpireDate(e.value)}
+                    value={expireDate}
                     placeholder="Date d'expiration"
                     format="dddd MMMM y"
                     floatLabelType="Never"></DatePickerComponent>
@@ -368,7 +448,7 @@ export default function ProductForm(props) {
           <tr>
             <td className={labelclassName}>Remarque:</td>
             <td className="w-[320px]">
-              <TextBox type="text" multiline id="comment" width="full" value={props?.comment || ""} title="Remarque sur le Produit" />
+              <TextBox type="text" multiline id="comment" width="full" onChange={(e) => e.value != null && setComment(e.value)} value={comment} title="Remarque sur le Produit" />
             </td>
           </tr>
         </tbody>

@@ -1,5 +1,19 @@
 import {
-  ColumnChooser, ColumnDirective, ColumnsDirective, Edit, Filter, GridComponent, Inject, PdfExport, Print, Reorder, Resize, Search, Selection, Sort, Toolbar
+    ColumnChooser,
+    ColumnDirective,
+    ColumnsDirective,
+    Edit,
+    Filter,
+    GridComponent,
+    Inject,
+    PdfExport,
+    Print,
+    Reorder,
+    Resize,
+    Search,
+    Selection,
+    Sort,
+    Toolbar
 } from "@syncfusion/ej2-react-grids";
 import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -7,7 +21,7 @@ import { loadCustomers, useStore } from "../../contexts/Store";
 import AvanceCustomer from "../AvanceCustomer";
 import CustomerFormTemplate from "../form/CustomerForm";
 import Localization from "../Localization";
-import Toast from "../Toast";
+
 import CustomerCreditList from "./../CustomerCreditList";
 import Status from "./templates/CustomerStatus";
 const { ipcRenderer } = require("electron");
@@ -32,15 +46,11 @@ export default function CustomersTable() {
   const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: customersFormTemplate };
   let grid;
-  const [toastRemove, setToastRemove] = useState(false);
-  const [toastAdd, setToastAdd] = useState(false);
-  const [toastEdit, setToastEdit] = useState(false);
+
   const [showPrintDiv, setShowPrintDiv] = useState(true);
-  const [close, setClose] = useState(false);
+  const totalCredit = useStore((state) => state.customers).reduce((acc, cur) => acc + cur.credit, 0);
   const gridRef = useRef();
-  useEffect(() => {
-    setClose(false);
-  }, [close]);
+
   function filterCustomer(customer) {
     if (active.all === true) {
       return customer === customer;
@@ -59,17 +69,7 @@ export default function CustomersTable() {
         ipcRenderer.send("previewComponent", url);
       }),
   });
-  useEffect(() => {
-    if (toastAdd) {
-      setTimeout(() => setToastAdd(false), 4000);
-    }
-    if (toastRemove) {
-      setTimeout(() => setToastRemove(false), 4000);
-    }
-    if (toastEdit) {
-      setTimeout(() => setToastEdit(false), 4000);
-    }
-  }, [toastAdd, toastRemove, toastEdit]);
+
   useEffect(() => {
     if (!showPrintDiv) {
       reactToPrint();
@@ -96,7 +96,7 @@ export default function CustomersTable() {
       case args.requestType === "save" && args.action === "add":
         ipcRenderer.send("addCustomer", args.data);
         ipcRenderer.on("refreshGridCustomer:add", (e, res) => {
-          setToastAdd(true);
+
           loadCustomers();
           ipcRenderer.removeAllListeners("refreshGridCustomer:add");
         });
@@ -107,7 +107,7 @@ export default function CustomersTable() {
       case args.requestType === "save" && args.action === "edit":
         ipcRenderer.send("updateCustomer", args.data);
         ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-          setToastEdit(true);
+        
           loadCustomers();
           ipcRenderer.removeAllListeners("refreshGridCustomer:update");
         });
@@ -117,24 +117,24 @@ export default function CustomersTable() {
         break;
       case args.requestType === "delete":
         ipcRenderer.send("deleteCustomer", args.data[0]);
-        
+
         ipcRenderer.on("refreshGridCustomer:delete", (e, res) => {
-          setToastRemove(true);
+
           loadCustomers();
           ipcRenderer.removeAllListeners("refreshGridCustomer:delete");
         });
         break;
     }
   }
- function toCurrency(num) {
-   let str = "0.00DA";
-   if (num != null && !isNaN(num)) {
-     str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-     str = str.replace("DZD", "DA");
-     str = str.replace(",", " ");
-   }
-   return str;
- }
+  function toCurrency(num) {
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
+    return str;
+  }
   function actionBegin(args) {
     if (args.requestType === "delete") {
     }
@@ -169,20 +169,15 @@ export default function CustomersTable() {
             </button>
           </li>
         </ul>
+        <div className={normalButton}>
+          Total Crédits Clients:<span className="text-rose-500 ml-2">{toCurrency(totalCredit)}</span>
+        </div>
         <div className="flex gap-2">
-          <AvanceCustomer close={close} />
-          <CustomerCreditList close={close} />
+          <AvanceCustomer />
+          <CustomerCreditList />
         </div>
       </div>
-      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
-        Nouveau Client Ajouter au Stock avec succès.
-      </Toast>
-      <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
-        Client Modifier avec succès.
-      </Toast>
-      <Toast type="error" open={toastRemove} setOpen={setToastRemove}>
-        Client Supprimer avec succès.
-      </Toast>
+
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}

@@ -13,14 +13,14 @@ import {
   Search,
   Selection,
   Sort,
-  Toolbar,
+  Toolbar
 } from "@syncfusion/ej2-react-grids";
+import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { loadProducts, useStore } from "../../contexts/Store";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import Toast from "../Toast";
 import ProductsInventory from "./../ProductsInventory";
 import Status from "./templates/ProductsStatus";
 const { ipcRenderer } = require("electron");
@@ -33,7 +33,10 @@ export default function ProductsTable() {
   const productsGridStatus = (props) => <Status {...props} />;
   const productsFormTemplate = (props) => <ProductFormTemplate {...props} />;
   const productsIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
-  
+  const productsLastTimeTemplate = (props) => <div>{props.lastTime && Math.abs(moment(props.lastTime).diff(moment(), "days")) + " jours"}</div>;
+  const productsNumericRTemplate = (props) => <div>{toCurrency(props.revenue)}</div>;
+  const productsNumericTemplate = (props) => <div>{toCurrency(props.total)}</div>;
+
   // ******** Grid Table  ********
   const [active, setActive] = useState({ all: true, stock: false, alert: false, rupture: false });
   const activeButtoon =
@@ -43,9 +46,7 @@ export default function ProductsTable() {
   const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: productsFormTemplate };
   let grid;
-  const [toastRemove, setToastRemove] = useState(false);
-  const [toastAdd, setToastAdd] = useState(false);
-  const [toastEdit, setToastEdit] = useState(false);
+
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   const productsData = useStore((state) => state.products).filter((product) => filterProduct(product));
@@ -63,6 +64,15 @@ export default function ProductsTable() {
       return product?.quantity === 0;
     }
   }
+  function toCurrency(num) {
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
+    return str;
+  }
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
@@ -79,17 +89,7 @@ export default function ProductsTable() {
       setShowPrintDiv(true);
     }
   }, [showPrintDiv]);
-  useEffect(() => {
-    if (toastAdd) {
-      setTimeout(() => setToastAdd(false), 4000);
-    }
-    if (toastRemove) {
-      setTimeout(() => setToastRemove(false), 4000);
-    }
-    if (toastEdit) {
-      setTimeout(() => setToastEdit(false), 4000);
-    }
-  }, [toastAdd, toastRemove, toastEdit]);
+
   function toolbarClick(args) {
     switch (true) {
       case args.item.id.includes("print"):
@@ -110,10 +110,10 @@ export default function ProductsTable() {
       case args.requestType === "save" && args.action === "add":
         ipcRenderer.send("addProduct", args.data);
         ipcRenderer.on("refreshGridProduct:add", (e, res) => {
-          loadProducts();
           ipcRenderer.removeAllListeners("refreshGridProduct:add");
+          loadProducts();
         });
-        setToastAdd(true);
+
         break;
       case args.requestType === "beginEdit":
         useStore.setState((state) => ({ productForm: { ...args.rowData } }));
@@ -125,7 +125,7 @@ export default function ProductsTable() {
           loadProducts();
           ipcRenderer.removeAllListeners("refreshGridProduct:update");
         });
-        setToastEdit(true);
+
         break;
       case args.requestType === "add":
         args.dialog.header = "Ajouter un Produit";
@@ -136,7 +136,7 @@ export default function ProductsTable() {
           loadProducts();
           ipcRenderer.removeAllListeners("refreshGridProduct:delete");
         });
-        setToastRemove(true);
+
         break;
     }
   }
@@ -151,10 +151,13 @@ export default function ProductsTable() {
     if (args.requestType === "beginEdit") {
     }
   }
+   useEffect(() => {
+     useStore.setState((state) => ({ gridProduct: grid }));
+   }, [grid]);
   function toCurrency(num) {
     let str = "0.00DA";
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -201,17 +204,9 @@ export default function ProductsTable() {
             </button>
           </li>
         </ul>
-        <ProductsInventory close={close} />
+        <ProductsInventory />
       </div>
-      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
-        Nouveau Produit Ajouter au Stock avec succès.
-      </Toast>
-      <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
-        Produit Modifier avec succès.
-      </Toast>
-      <Toast type="error" open={toastRemove} setOpen={setToastRemove}>
-        Produit Supprimer avec succès.
-      </Toast>
+
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
@@ -233,12 +228,17 @@ export default function ProductsTable() {
           allowSorting>
           <ColumnsDirective>
             <ColumnDirective field="id" headerText="ID" textAlign="center" headerTextAlign="center" width="30" template={productsIdTemplate} />
-            <ColumnDirective field="name" headerText="Désignation" textAlign="center" headerTextAlign="center" width="120" />
+            <ColumnDirective field="barCode" headerText="Code Barre" textAlign="center" headerTextAlign="center" width="30" visible={false} />
+            <ColumnDirective field="name" headerText="Désignation" textAlign="center" headerTextAlign="center" width="60" />
             <ColumnDirective field="unit" headerText="Unité" textAlign="center" headerTextAlign="center" width="15" />
-            <ColumnDirective field="quantity" headerText="Quantité" textAlign="center" headerTextAlign="center" width="20" format="n0" />
+            <ColumnDirective field="quantity" headerText="Qté" textAlign="center" headerTextAlign="center" width="20" format="n0" />
+            <ColumnDirective field="quantitySell" headerText="Qté Vendu" textAlign="center" headerTextAlign="center" width="20" format="n0" />
+            <ColumnDirective field="lastTime" headerText="Dérnier Achat" textAlign="center" headerTextAlign="center" width="30" format="n0" template={productsLastTimeTemplate} />
+            <ColumnDirective field="total" headerText="Chiffre d'affaire" textAlign="center" headerTextAlign="center" width="30" format="c2" />
+            <ColumnDirective field="revenue" headerText="Bénéfice" textAlign="center" headerTextAlign="center" width="30" format="c2" />
             <ColumnDirective field="buyPrice" headerText="Prix Achat" textAlign="center" headerTextAlign="center" width="40" format="c2" />
             <ColumnDirective field="sellPrice" headerText="Prix Vente Détail" textAlign="center" headerTextAlign="center" width="40" format="c2" />
-            <ColumnDirective field="sellPriceGros" headerText="Prix Vente Gros" textAlign="center" headerTextAlign="center" width="40" format="c2" />
+            <ColumnDirective field="sellPriceGros" headerText="Prix Vente Gros" textAlign="center" headerTextAlign="center" visible={false} width="40" format="c2" />
             <ColumnDirective field="expired" headerText="Expiration" textAlign="center" headerTextAlign="center" visible={false} width="30" type="datetime" format="dd/MM/yyyy" />
             <ColumnDirective field="comment" headerText="Commentaire" textAlign="center" headerTextAlign="center" visible={false} width="40" />
             <ColumnDirective field="status" headerText="Status" headerTextAlign="center" textAlign="center" template={productsGridStatus} width="30" />
@@ -252,15 +252,15 @@ export default function ProductsTable() {
                 <div className="flex gap-2 p-2">
                   <span className="text-lg mr-2">Liste Inventaire:</span>
                   <button className={normalButton}>
-                    Total Produits:
+                    Nombre Produits:
                     <span className="ml-1  text-emerald-600">{productsData.length}</span>
                   </button>
                   <button className={normalButton}>
-                    Total Quantité:
+                    Nombre Articles:
                     <span className="ml-1  text-emerald-600">{productsData.reduce((acc, cur) => acc + cur.quantity, 0)}</span>
                   </button>
                   <button className={normalButton}>
-                    Capital Achat:
+                    Capital Stock:
                     <span className="ml-1  text-emerald-600">{toCurrency(productsData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0))}</span>
                   </button>
                   {/* <button className={normalButton}>

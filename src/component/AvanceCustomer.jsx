@@ -4,24 +4,25 @@ import TextBox from "./button/TextBox";
 import { useStore, loadCustomers } from "../contexts/Store";
 const { ipcRenderer } = require("electron");
 import { DateTimePickerComponent } from "@syncfusion/ej2-react-calendars";
-import Toast from "./Toast";
+import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
+import deletePng2 from "./../data/icons/delete2.png";
+
+
 
 export default function AvanceCustomer({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
-  const customersData = () => useStore((state) => state.customers);
+  const customersData = useStore((state) => state.customers);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [amount, setAmount] = useState(0);
   const [paymentType, setPaymentType] = useState("cash");
-  const [toastAdd, setToastAdd] = useState(false);
+
   const [date, setDate] = useState(new Date());
   const [slectedCustomer, setSlectedCustomer] = useState("");
-  useEffect(() => {
-    close && setDropdownOpen(false);
-  }, [close]);
-  useEffect(() => {
-    if (toastAdd) {
-      setTimeout(() => setToastAdd(false), 4000);
-    }
-  }, [toastAdd]);
+  let dropDown;
+
+
+    useEffect(() => {
+  useStore.setState((state) => ({ dropDownObj: dropDown }));
+    }, [dropDown]);
 
   return (
     <>
@@ -57,11 +58,15 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
                   onClick={() => {
                     setDropdownOpen(false);
                     amount > 0 &&
-                      ipcRenderer.send("updateCustomer", { credit: slectedCustomer.credit - amount, _id: slectedCustomer._id, avance: { credit: slectedCustomer.credit, date, amount, paymentType } });
+                      ipcRenderer.send("updateCustomer", {
+                        credit: slectedCustomer.credit - amount,
+                        _id: slectedCustomer._id,
+                        avance: [...slectedCustomer.avance, { credit: slectedCustomer.credit, date, amount, paymentType,name:slectedCustomer.name,customerId: slectedCustomer._id }],
+                      });
                     ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                      loadCustomers();
-                      setToastAdd(true);
                       ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+                      loadCustomers();
+                      window.location.reload();
                     });
                   }}>
                   Terminer
@@ -85,40 +90,46 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
               <tr>
                 <td className="p-4 w-[220px] text-sm font-medium">Choisir Client:</td>
                 <td className="w-[320px]">
-                  <TextBox
-                    type="dropdown"
-                    id="customer"
-                    width="full"
-                    onChange={(e) => e.itemData != null && setSlectedCustomer(e.itemData)}
-                    dataSource={customersData()}
-                    fields={{ value: "_id", text: "name" }}
-                    popupHeight="200px"
-                    title="Choisir le Client"
-                  />
+                  <div className="border-slate-200 border w-[262px] rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm">
+                    <DropDownListComponent
+                      ref={(g) => dropDown=g}
+                      type="dropdown"
+                      id="customer"
+                      width="full"
+                      value={slectedCustomer}
+                      change={(e) => e.itemData != null && setSlectedCustomer(e.itemData)}
+                      dataSource={customersData}
+                      fields={{ value: "_id", text: "name" }}
+                      popupHeight="200px"
+                      placeholder="Choisir le Client"
+                    />
+                  </div>
                 </td>
               </tr>
               <tr>
                 <td className="p-4 w-[220px] text-sm font-medium">Date Réglement:</td>
 
                 <td className="w-[320px]">
-                  <DateTimePickerComponent
-                    id="date"
-                    name="date"
-                    width="260"
-                    value={date}
-                    onChange={(e) => setDate(e.value)}
-                    placeholder="Date de paiment"
-                    format="dddd MMMM y - HH:mm"
-                    floatLabelType="Never"></DateTimePickerComponent>
+                  <div className="border-slate-200 border w-[262px]  rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm">
+                    <DateTimePickerComponent
+                      id="date"
+                      name="date"
+                      width="260"
+                      value={date}
+                      onChange={(e) => setDate(e.value)}
+                      placeholder="Date de paiment"
+                      format="dddd MMMM y - HH:mm"
+                      floatLabelType="Never"></DateTimePickerComponent>
+                  </div>
                 </td>
               </tr>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Choisir Client:</td>
+                <td className="p-4 w-[220px] text-sm font-medium">Mode de Paiement:</td>
                 <td className="w-[320px]">
                   <TextBox
                     type="dropdown"
                     id="paymentType"
-                    width="full"
+                    width="w-[262px]"
                     value={paymentType}
                     onChange={(e) => e.value != null && setPaymentType(e.value)}
                     dataSource={["Espéce", "Chéque", "Virement"]}
@@ -175,9 +186,7 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
           </table>
         </div>
       </DialogComponent>
-      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
-        Vérsement Ajouter au Stock avec succès.
-      </Toast>
+
     </>
   );
 }

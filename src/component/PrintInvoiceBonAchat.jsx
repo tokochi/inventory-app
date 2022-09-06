@@ -15,7 +15,7 @@ export default function PrintInvoiceBonAchat() {
   function toCurrency(num) {
     let str;
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -31,7 +31,7 @@ export default function PrintInvoiceBonAchat() {
     },
   });
   return (
-    <div className={`p-10 relative font-sans h-[297mm] w-[210mm] `}>
+    <div className={`p-10 relative font-sans h-[297mm] w-[210mm] bg-white`}>
       <div className="flex justify-between">
         <div id="title" className="flex flex-col">
           <span className="text-xl font-semibold">
@@ -50,7 +50,7 @@ export default function PrintInvoiceBonAchat() {
         <div id="comapnyInfo" className="flex flex-col mt-4">
           <span className="font-semibold">{store?.get("company")?.name}</span>
           <span className="">{store?.get("company")?.address}</span>
-          <span className="">{store?.get("company")?.phone?.toString()?.match(/.{2}/g)?.join(" ")}</span>
+          <span className="">Tél:{store?.get("company")?.phone?.toString()?.match(/.{2}/g)?.join(" ")}</span>
         </div>
       </div>
       <div className="flex justify-between mb-4">

@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from "react";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import { useStore } from "../contexts/Store";
 import moment from "moment";
+import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import Toast from "./Toast";
+import { loadCustomers, useStore } from "../contexts/Store";
+import deletePng2 from "./../data/icons/delete2.png";
+const { ipcRenderer } = require("electron");
+
 
 export default function CustomerCreditList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
-  const customersData = () => useStore((state) => state.customers);
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  useEffect(() => {
-    close && setDropdownOpen(false);
-  }, [close]);
+  const avanceList = () => useStore((state) => state.customers).reduce((acc, cur) => acc.concat(cur.avance), []);
   function toCurrency(num) {
-    let str="0.00DA";
+    let str = "0.00DA";
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -42,50 +42,51 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
         closeOnEscape
         width="900px"
         open={() => setDropdownOpen(true)}
-        close={() => setDropdownOpen(false)}>
-        <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
-          <div>
-            <div className="overflow-x-auto">
-              <table className="table-auto w-full divide-y divide-slate-200">
-                {/* Table header */}
-                <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
-                  <tr>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">ID</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Date</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Client</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Ancien Credit</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Versement</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Reste à payer</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Status</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Payment type</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {customersData().map((customer, index) => (
-                    <tr className="text-center" key={uuidv4()}>
-                      {customer.avance.map((avance, indx) => (
+        close={() => setDropdownOpen(false)}
+        content={() => (
+          <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+            <div>
+              <div className="overflow-x-auto">
+                <table className="table-auto w-full divide-y divide-slate-200">
+                  {/* Table header */}
+                  <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                    <tr>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">ID</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Date</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Client</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Ancien Credit</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Versement</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Reste à payer</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Status</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Payment type</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {avanceList().map((avance, indx) => (
+                      <tr className="text-center" key={uuidv4()}>
                         <React.Fragment key={uuidv4()}>
                           <td key={uuidv4()} className="text-left p-2">
                             {"#" + avance?._id.slice(-6)}
                           </td>
-                          <td key={uuidv4()}>{moment(customer?.date).format("DD/MM/YYYY")}</td>
-                          <td key={uuidv4()}>{customer?.name}</td>
+                          <td key={uuidv4()}>{moment(avance?.date).format("DD/MM/YYYY")}</td>
+                          <td key={uuidv4()}>{avance?.name}</td>
                           <td key={uuidv4()}>{avance?.credit && toCurrency(avance?.credit)}</td>
                           <td key={uuidv4()}>{avance?.amount && toCurrency(avance?.amount)}</td>
                           <td key={uuidv4()}>{avance?.amount && toCurrency(avance?.credit - avance.amount)}</td>
@@ -101,16 +102,43 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
                             )}
                           </td>
                           <td key={uuidv4()}>{avance?.paymentType}</td>
+                          <td key={uuidv4()}>
+                            <button
+                              id={avance?.customerId}
+                              idd={avance?._id}
+                              amount={avance?.amount}
+                              className=" p-1.5"
+                              onClick={(e) => {
+                                setDropdownOpen(false);
+                                const custID = e.target.parentElement.attributes[0].value;
+                                const avanceID = e.target.parentElement.attributes[1].value;
+                                const avanceAmount = parseInt(e.target.parentElement.attributes[2].value);
+                                useStore.getState().customers.forEach((customer, index) => {
+                                  if (customer._id === custID) {
+                                    ipcRenderer.send("updateCustomer", {
+                                      _id: custID,
+                                      credit: parseInt(customer.credit) + avanceAmount,
+                                      avance: customer.avance.filter((avance) => avance._id !== avanceID),
+                                    });
+                                  }
+                                });
+                                ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                                  loadCustomers();
+                                  ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+                                });
+                              }}>
+                              <img src={deletePng2} width="25" />
+                            </button>
+                          </td>
                         </React.Fragment>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
-      </DialogComponent>
+        )}></DialogComponent>
     </>
   );
 }

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
+import React, { useEffect, useState } from "react";
 import { useStore } from "../contexts/Store";
 
 import Status from "./table/templates/ProductsStatus";
 
 export default function ProductsInventory({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
-  const productsData = () => useStore((state) => state.products);
+  const productsData =  useStore((state) => state.products);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const normalButton =
     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
@@ -13,12 +13,15 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
- function toCurrency(num) {
-   let str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-   str = str.replace("DZD", "DA");
-   str = str.replace(",", " ");
-   return str;
- }
+  function toCurrency(num) {
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
+    return str;
+  }
   return (
     <>
       <button
@@ -42,26 +45,22 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
         closeOnEscape
         width="900px"
         open={() => setDropdownOpen(true)}
-        close={() => setDropdownOpen(false)}>
-        <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+        close={() => setDropdownOpen(false)}
+        content={()=>         <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
           <div>
             <div className="overflow-x-auto">
               <div className="flex gap-2 p-2">
                 <button className={normalButton}>
-                  Total Produits:
-                  <span className="ml-1  text-emerald-600">{productsData().length}</span>
+                  Nombre Produits:
+                  <span className="ml-1  text-emerald-600">{productsData.length}</span>
                 </button>
                 <button className={normalButton}>
-                  Capital Achat:
-                  <span className="ml-1  text-emerald-600">{toCurrency(productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0))}</span>
+                  Nombre Articles:
+                  <span className="ml-1  text-emerald-600">{productsData.reduce((acc, cur) => acc + cur.quantity, 0)}</span>
                 </button>
                 <button className={normalButton}>
-                  Capital Détail:
-                  <span className="ml-1  text-emerald-600">{toCurrency(productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPrice, 0))}</span>
-                </button>
-                <button className={normalButton}>
-                  Capital Gros:
-                  <span className="ml-1  text-emerald-600">{toCurrency(productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPriceGros, 0))}</span>
+                  Capital Stock:
+                  <span className="ml-1  text-emerald-600">{toCurrency(productsData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0))}</span>
                 </button>
               </div>
               <table className="table-auto w-full divide-y divide-slate-200 ">
@@ -85,7 +84,7 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
                   </tr>
                 </thead>
                 <tbody>
-                  {productsData().map((product) => (
+                  {productsData.map((product) => (
                     <tr className="text-center " key={product._id}>
                       <td className=" p-2">{"#" + product?._id.slice(-6)}</td>
                       <td>{product?.name}</td>
@@ -101,7 +100,8 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
               </table>
             </div>
           </div>
-        </div>
+        </div>}>
+
       </DialogComponent>
     </>
   );

@@ -15,23 +15,19 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import BonAchat from "./pages/BonAchat";
 import AddAccount from "./pages/AddAccount";
-import { useStore, loadCustomers,loadBuyings, loadVendings,loadProviders, loadProducts } from "./contexts/Store";
+import { useStore, loadCustomers, loadBuyings, loadVendings, loadProviders, loadProducts, loadDepenses } from "./contexts/Store";
 import Settings from './pages/Settings';
 import PrivateRoute from "./component/PrivateRoute";
 import Store from "electron-store";
+import Zakat from './pages/Zakat';
 loadCustomers();
 loadVendings();
 loadProducts();
 loadProviders();
 loadBuyings();
+loadDepenses();
 
 const App = () => {
-  // const isLoggedIn = useStore((state) => state.isLoggedIn);
-  // const store = new Store();
-  // const user = store?.get("user");
-  // console.log("🚀 ~ isLoggedIn", isLoggedIn);
-  // console.log("🚀 ~ user", user);
-  // console.log("🚀 ~ users", store?.get("users"));
   return (
     <div className="flex">
       <HashRouter>
@@ -49,6 +45,7 @@ const App = () => {
               <Route path="/caisse" element={<Caisse />} />
               <Route path="/facture" element={<Facture />} />
               <Route path="/report" element={<Report />} />
+              <Route path="/zakat" element={<Zakat />} />
               <Route path="/bonAchat" element={<BonAchat />} />
               <Route path="/add" element={<AddAccount />} />
               <Route path="/settings/*" element={<Settings />} />

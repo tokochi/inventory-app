@@ -23,6 +23,10 @@ const productSchema = new mongoose.Schema({
   category: "string",
   brand: "string",
   unit: "string",
+  lastTime: { type: Date },
+  quantitySell: "number",
+  revenue: "number",
+  total: "number",
   quantity: "number",
   qtyAlert: "number",
   buyPrice: "number",
@@ -50,7 +54,7 @@ const customerSchema = new mongoose.Schema({
   ccp: "string",
   rib: "string",
   credit: "number",
-  avance: [{ date: { type: Date }, amount: "number", credit: "number", paymentType: "string" }],
+  avance: [{ date: { type: Date }, amount: "number", credit: "number", paymentType: "string", name: "string", customerId: mongoose.Schema.ObjectId }],
 });
 
 const providerSchema = new mongoose.Schema({
@@ -69,7 +73,7 @@ const providerSchema = new mongoose.Schema({
   ccp: "string",
   rib: "string",
   credit: "number",
-  avance: [{ date: { type: Date }, amount: "number", credit: "number", paymentType: "string" }],
+  avance: [{ date: { type: Date }, amount: "number", credit: "number", paymentType: "string", name: "string", providerId: mongoose.Schema.ObjectId }],
 });
 const userSchema = new mongoose.Schema({
   id: "number",
@@ -169,6 +173,9 @@ ipcMain.on("addProduct", (event, data) => {
     category: data.category,
     brand: data.brand,
     unit: data.unit,
+    quantitySell: 0,
+    revenue: 0,
+    total: 0,
     quantity: data.quantity,
     qtyAlert: data.qtyAlert,
     buyPrice: data.buyPrice,
@@ -272,7 +279,7 @@ ipcMain.on("addDepense", (event, data) => {
     comment: data.comment,
   });
   depense.save().catch((err) => console.log("cannot create Depense", err));
-  win.webContents.send("refreshGridTeacher:add");
+  win.webContents.send("refreshDepense:add");
 });
 // ****** New Revenue *********
 ipcMain.on("addRevenue", (event, data) => {
@@ -567,9 +574,10 @@ async function createWindow() {
 app.whenReady().then(createWindow)
 
 app.on('window-all-closed', () => {
-  win = null
-  if (process.platform !== 'darwin') app.quit()
+  console.log(store?.get("user"));
   store?.get("reset") === true && store?.set("user",{});
+  win = null;
+  if (process.platform !== 'darwin') app.quit();
 })
 
 app.on('second-instance', () => {

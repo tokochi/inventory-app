@@ -1,15 +1,6 @@
 @import "../node_modules/@syncfusion/ej2/material.css";
 /* @import "../node_modules/@syncfusion/ej2/material-dark.css"; */
-::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: rgb(205, 198, 198);
-  border-radius: 30px;
-}
-::-webkit-scrollbar-track {
-  background-color: transparent;
-}
+
 input[type='number']:focus{
 box-shadow:none;
 }
@@ -20,6 +11,9 @@ background-color: transparent;
   padding: 0;
 }
 /* Grid */
+.e-treeview .e-ul {
+    padding: 0 !important;
+}
 .e-grid td.e-active {
   background-color: rgb(213, 230, 244) ;
 }

@@ -1,19 +1,19 @@
 import {
-  ColumnChooser,
-  ColumnDirective,
-  ColumnsDirective,
-  Edit,
-  Filter,
-  GridComponent,
-  Inject,
-  PdfExport,
-  Print,
-  Reorder,
-  Resize,
-  Search,
-  Selection,
-  Sort,
-  Toolbar,
+    ColumnChooser,
+    ColumnDirective,
+    ColumnsDirective,
+    Edit,
+    Filter,
+    GridComponent,
+    Inject,
+    PdfExport,
+    Print,
+    Reorder,
+    Resize,
+    Search,
+    Selection,
+    Sort,
+    Toolbar
 } from "@syncfusion/ej2-react-grids";
 import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -21,7 +21,7 @@ import { loadProviders, useStore } from "../../contexts/Store";
 import AvanceProvider from "../AvanceProvider";
 import ProviderFormTemplate from "../form/ProviderForm";
 import Localization from "../Localization";
-import Toast from "../Toast";
+
 import ProviderCreditList from "./../ProviderCreditList";
 import Status from "./templates/ProviderStatus";
 const { ipcRenderer } = require("electron");
@@ -46,15 +46,11 @@ export default function ProvidersTable() {
   const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: providersFormTemplate };
   let grid;
-  const [toastRemove, setToastRemove] = useState(false);
-  const [toastAdd, setToastAdd] = useState(false);
-  const [toastEdit, setToastEdit] = useState(false);
+
   const [showPrintDiv, setShowPrintDiv] = useState(true);
-  const [close, setClose] = useState(false);
+  const providerCredit = useStore((state) => state.providers).reduce((acc, cur) => acc + cur.credit, 0);
   const gridRef = useRef();
-  useEffect(() => {
-    setClose(false);
-  }, [close]);
+
   function filterProvider(provider) {
     if (active.all === true) {
       return provider === provider;
@@ -73,17 +69,7 @@ export default function ProvidersTable() {
         ipcRenderer.send("previewComponent", url);
       }),
   });
-  useEffect(() => {
-    if (toastAdd) {
-      setTimeout(() => setToastAdd(false), 4000);
-    }
-    if (toastRemove) {
-      setTimeout(() => setToastRemove(false), 4000);
-    }
-    if (toastEdit) {
-      setTimeout(() => setToastEdit(false), 4000);
-    }
-  }, [toastAdd, toastRemove, toastEdit]);
+
   useEffect(() => {
     if (!showPrintDiv) {
       reactToPrint();
@@ -139,7 +125,7 @@ export default function ProvidersTable() {
   function toCurrency(num) {
     let str = "0.00DA";
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -175,24 +161,19 @@ export default function ProvidersTable() {
               onClick={() => {
                 setActive((state) => ({ all: false, debt: true }));
               }}>
-              Endetté <span className="ml-1  text-rose-600">{useStore.getState().providers.filter((provider) => provider?.credit > 0).length}</span>
+              Endetté <span className="ml-1  text-rose-500">{useStore.getState().providers.filter((provider) => provider?.credit > 0).length}</span>
             </button>
           </li>
         </ul>
+        <div className={normalButton}>
+          Total Déttes Fournisseurs:<span className="text-rose-500 ml-2">{toCurrency(providerCredit)}</span>
+        </div>
         <div className="flex gap-2">
-          <AvanceProvider close={close} />
-          <ProviderCreditList close={close} />
+          <AvanceProvider />
+          <ProviderCreditList  />
         </div>
       </div>
-      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
-        Nouveau Fournisseur Ajouter au Stock avec succès.
-      </Toast>
-      <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
-        Fournisseur Modifier avec succès.
-      </Toast>
-      <Toast type="error" open={toastRemove} setOpen={setToastRemove}>
-        Fournisseur Supprimer avec succès.
-      </Toast>
+
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}

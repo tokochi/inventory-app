@@ -3,11 +3,13 @@ import { AutoCompleteComponent } from "@syncfusion/ej2-react-dropdowns";
 import Store from "electron-store";
 import "moment/locale/fr";
 import moment from "moment/min/moment-with-locales";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useReactToPrint } from "react-to-print";
 import styled from "styled-components";
 import TextBox from "../component/button/TextBox";
-import { loadCustomers, loadVendings, loadProducts, useStore } from "../contexts/Store";
+import PrintInvoice from "../component/PrintInvoiceFacture";
+import { loadCustomers, loadProducts, loadVendings, useStore } from "../contexts/Store";
 import add from "./../data/icons/add.png";
 import deletePng from "./../data/icons/delete.png";
 import deletePng2 from "./../data/icons/delete2.png";
@@ -15,10 +17,7 @@ import done from "./../data/icons/done.png";
 import minus from "./../data/icons/minus.png";
 import newPng from "./../data/icons/new.png";
 import print from "./../data/icons/print.png";
-import Toast from "../component/Toast";
-import { ToWords } from "to-words";
-import { useReactToPrint } from "react-to-print";
-import PrintInvoice from "../component/PrintInvoiceFacture";
+import ProductFormPopUp from './../component/form/ProductFormPopUp';
 const { ipcRenderer } = require("electron");
 
 moment.locale("fr");
@@ -54,10 +53,9 @@ export default function Facture(props) {
   const customersData = useStore((state) => state.customers);
   const productsList = useStore((state) => state.products);
   const vendingsData = useStore((state) => state.vendings);
-  const [toastAdd, setToastAdd] = useState(false);
-  const [toastEdit, setToastEdit] = useState(false);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
+  const [title, setTitle] = useState(0);
   const [date, setDate] = useState(new Date());
   let autoCompleteObj;
   const normalButton =
@@ -81,7 +79,7 @@ export default function Facture(props) {
   function toCurrency(num) {
     let str = "0.00DA";
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -93,14 +91,10 @@ export default function Facture(props) {
       setShowPrintDiv(true);
     }
   }, [showPrintDiv]);
-  useEffect(() => {
-    if (toastAdd) {
-      setTimeout(() => setToastAdd(false), 4000);
-    }
-    if (toastEdit) {
-      setTimeout(() => setToastEdit(false), 4000);
-    }
-  }, [toastAdd, toastEdit]);
+ useEffect(() => {
+   useStore.setState((state) => ({ facture: { ...state.facture, autoCompleteObj } }));
+ }, [autoCompleteObj]);
+
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
@@ -368,7 +362,7 @@ export default function Facture(props) {
                     autoCompleteObj.clear();
                     useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: null } }));
                   } else {
-                    autoCompleteObj.showPopup();
+                    //autoCompleteObj.showPopup();
                     autoCompleteObj.focusIn();
                   }
                 }}>
@@ -389,15 +383,64 @@ export default function Facture(props) {
                 showClearButton
                 allowCustom
                 popupHeight="500"
-                //customValueSpecifier={(e) => console.log(e)}
+                customValueSpecifier={(e) => {
+                  setTitle(parseInt(e.text));
+                  facture.autoCompleteObj.clear();
+                  useStore.setState(() => ({ dropdownOpen: true }));
+                }}
                 change={(e) => {
-                  e.value != null && e.itemData.quantity > 0 && useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: e.itemData } }));
-                  setTotalFacture();
+                  if (e.itemData?._id != null) {
+                    if (useStore.getState().facture.selectedProducts.some((selected) => selected._id === e.itemData._id) === false) {
+                      useStore.setState((state) => ({
+                        facture: {
+                          ...state.facture,
+                          selectedProducts: [...state.facture.selectedProducts, { ...e.itemData, selectedQuantity: parseInt(1), index: state.facture.selectedProducts.length + 1 }],
+                        },
+                      }));
+                    } else {
+                      useStore.setState((state) => ({
+                        facture: {
+                          ...state.facture,
+                          selectedProducts: useStore
+                            .getState()
+                            .facture.selectedProducts.map((prod) => (prod._id === e.itemData._id ? { ...prod, selectedQuantity: parseInt(prod.selectedQuantity + 1) } : prod)),
+                        },
+                      }));
+                    }
+                    facture.autoCompleteObj.clear();
+                    setTotal();
+                  }
+                }}
+                filtering={(e) => {
+                  const barCodeProd = productsList.find((prod) => prod.barCode === e.text);
+                  if (barCodeProd != undefined) {
+                    if (facture.selectedProducts.some((selected) => selected._id === barCodeProd._id) === false) {
+                      useStore.setState((state) => ({
+                        facture: {
+                          ...state.facture,
+                          selectedProducts: [
+                            ...state.facture.selectedProducts,
+                            { ...productsList.find((prod) => prod.barCode === e.text), selectedQuantity: parseInt(1), index: state.facture.selectedProducts.length + 1 },
+                          ],
+                        },
+                      }));
+                    } else {
+                      useStore.setState((state) => ({
+                        facture: {
+                          ...state.facture,
+                          selectedProducts: facture.selectedProducts.map((prod) => (prod._id === barCodeProd._id ? { ...prod, selectedQuantity: parseInt(prod.selectedQuantity + 1) } : prod)),
+                        },
+                      }));
+                    }
+                    facture.autoCompleteObj.focusOut();
+                    facture.autoCompleteObj.clear();
+                    facture.autoCompleteObj.focusIn();
+                  }
                 }}
                 valueTemplate={productsTemplate}
                 itemTemplate={productsTemplate}
                 dataSource={productsData}
-                fields={{ value: "name", text: "name" }}
+                fields={{ value: "barCode", text: "barCode" }}
                 placeholder="Ajouter un Produit (F5)"
               />
             </div>
@@ -582,7 +625,7 @@ export default function Facture(props) {
                           }
                         });
                       }
-                      setToastEdit(true);
+
                       ipcRenderer.removeAllListeners("refreshGridVending:update");
                     });
                   } else {
@@ -629,7 +672,7 @@ export default function Facture(props) {
                           }
                         });
                       }
-                      setToastAdd(true);
+
                       ipcRenderer.removeAllListeners("refreshGridVending:add");
                     });
                   }
@@ -685,16 +728,11 @@ export default function Facture(props) {
             </div>
           </div>
         </div>
+        <ProductFormPopUp title={title} />
         <div ref={gridRef} className={`${showPrintDiv && "hidden"} `}>
           <PrintInvoice />
         </div>
       </div>
-      <Toast type="success" open={toastEdit} setOpen={setToastEdit}>
-        Facture Modifier avec succès.
-      </Toast>
-      <Toast type="success" open={toastAdd} setOpen={setToastAdd}>
-        Nouvelle Facture Ajouter avec succès.
-      </Toast>
     </div>
   );
 }

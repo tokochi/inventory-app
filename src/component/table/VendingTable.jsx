@@ -1,5 +1,5 @@
 import {
-  ColumnChooser, ColumnDirective, ColumnsDirective, Edit, Filter, GridComponent, Inject, PdfExport, Print, Reorder, Resize, Search, Selection, Sort, Toolbar
+    ColumnChooser, ColumnDirective, ColumnsDirective, Edit, Filter, GridComponent, Inject, PdfExport, Print, Reorder, Resize, Search, Selection, Sort, Toolbar
 } from "@syncfusion/ej2-react-grids";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import Store from "electron-store";
@@ -9,7 +9,6 @@ import { useReactToPrint } from "react-to-print";
 import { loadCustomers, loadProducts, loadVendings, useStore } from "../../contexts/Store";
 import VendingFormTemplate from "../../pages/Facture";
 import Localization from "../Localization";
-import Toast from "../Toast";
 import SelectedProductsView from "./templates/SelectedProductsView";
 import Status from "./templates/VendingsStatus";
 const { ipcRenderer } = require("electron");
@@ -38,7 +37,7 @@ export default function VendingTable() {
   const restorQty = store?.get("restorQty");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const productsList = useStore((state) => state.products);
-  const [toastRemove, setToastRemove] = useState(false);
+
   const activeButtoon =
     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
   const normalButton =
@@ -74,11 +73,7 @@ export default function VendingTable() {
         ipcRenderer.send("previewComponent", url);
       }),
   });
-  useEffect(() => {
-    if (toastRemove) {
-      setTimeout(() => setToastRemove(false), 4000);
-    }
-  }, [toastRemove]);
+
   useEffect(() => {
     if (!showPrintDiv) {
       reactToPrint();
@@ -144,7 +139,7 @@ export default function VendingTable() {
           });
         });
         ipcRenderer.on("refreshGridVending:delete", (e, res) => {
-          setToastRemove(true);
+  
           loadVendings();
           loadProducts();
           ipcRenderer.removeAllListeners("refreshGridVending:delete");
@@ -168,7 +163,7 @@ export default function VendingTable() {
   function toCurrency(num) {
     let str = "0.00DA";
     if (num != null && !isNaN(num)) {
-      str = num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
       str = str.replace("DZD", "DA");
       str = str.replace(",", " ");
     }
@@ -227,9 +222,7 @@ export default function VendingTable() {
           </li>
         </ul>
       </div>
-      <Toast type="error" open={toastRemove} setOpen={setToastRemove}>
-        Vente Supprimer avec succès.
-      </Toast>
+
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
@@ -276,11 +269,11 @@ export default function VendingTable() {
                     <span className="ml-1  text-emerald-600">{vendingData?.length}</span>
                   </button>
                   <button className={normalButton}>
-                    Total Quantité:
+                    Articles Vendu:
                     <span className="ml-1  text-emerald-600">{vendingData?.reduce((acc, buying) => acc + buying.grid.reduce((accu, product) => accu + parseInt(product.selectedQuantity), 0), 0)}</span>
                   </button>
                   <button className={normalButton}>
-                    Capital Vente:
+                    Chiffre D'affaires:
                     <span className="ml-1  text-emerald-600">{toCurrency(vendingData.reduce((acc, cur) => acc + cur.amount, 0))}</span>
                   </button>
                   {/* <button className={normalButton}>

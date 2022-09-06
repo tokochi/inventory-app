@@ -10,7 +10,7 @@ import { NavLink } from "react-router-dom";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import Caisse from './Caisse';
 import Facture from './Facture';
-import Revenu from './Revenu';
+import Revenu from './Zakat';
 
 export default function Vending() {
 const [active, setActive] = useState({ list: true, caisse: false, facture: false, revenu: false });

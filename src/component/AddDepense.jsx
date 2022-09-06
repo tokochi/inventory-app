@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import TextBox from "../component/button/TextBox";
-import { useStore, loadProviders } from "../contexts/Store";
+import TextBox from "./button/TextBox";
+import { useStore, loadDepenses } from "../contexts/Store";
 const { ipcRenderer } = require("electron");
 import { DateTimePickerComponent } from "@syncfusion/ej2-react-calendars";
+import { HashRouter } from 'react-router-dom';
 
 
+export default function AddDepense({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
 
-export default function AvanceProvider({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
-  const providersData = () => useStore((state) => state.providers);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [amount, setAmount] = useState(0);
+  const [comment, setComment] = useState("");
 
-
-  const [paymentType, setPaymentType] = useState("cash");
+  const [description, setDescription] = useState("");
   const [date, setDate] = useState(new Date());
-  const [slectedProvider, setSlectedProvider] = useState("");
-
+  const [slectedDepense, setSlectedDepense] = useState("");
 
   return (
     <>
@@ -29,13 +28,13 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
         <svg className="w-4 h-4 fill-current opacity-50 shrink-0" viewBox="0 0 16 16">
           <path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" />
         </svg>
-        <span className="hidden xs:block ml-2">Ajouter Versement</span>
+        <span className="hidden xs:block ml-2">Ajouter Dépense</span>
       </button>
       <DialogComponent
         id={id}
         isModal
         allowDragging
-        header="Réglement Crédits"
+        header="Ajouter une Dépense"
         visible={dropdownOpen}
         showCloseIcon={true}
         closeOnEscape
@@ -51,16 +50,16 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                   className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
                   onClick={() => {
                     setDropdownOpen(false);
-                    amount > 0 &&
-                      ipcRenderer.send("updateProvider", {
-                        credit: slectedProvider.credit - amount,
-                        _id: slectedProvider._id,
-                        avance: [...slectedProvider.avance, { credit: slectedProvider.credit, date, amount, paymentType, name: slectedProvider.name, providerId: slectedProvider._id }],
-                      });
-                    ipcRenderer.on("refreshGridProvider:update", (e, res) => {
-                      ipcRenderer.removeAllListeners("refreshGridProvider:update");
-                      loadProviders();
-                      window.location.reload();
+                    amount > 0 && ipcRenderer.send("addDepense", { amount, comment, description, date, type: slectedDepense });
+                    setAmount(0);
+                    setComment("");
+                    setDescription("");
+                    setSlectedDepense("");
+                    ipcRenderer.on("refreshDepense:add", (e, res) => {
+                      setDropdownOpen(false);
+
+                      loadDepenses();
+                      ipcRenderer.removeAllListeners("refreshDepense:add");
                     });
                   }}>
                   Terminer
@@ -82,22 +81,21 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
           <table>
             <tbody>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Choisir Fournisseur:</td>
+                <td className="p-4 w-[220px] text-sm font-medium">Type:</td>
                 <td className="w-[320px]">
                   <TextBox
                     type="dropdown"
                     id="provider"
                     width="full"
-                    onChange={(e) => e.itemData != null && setSlectedProvider(e.itemData)}
-                    dataSource={providersData()}
-                    fields={{ value: "_id", text: "name" }}
+                    onChange={(e) => e.value != null && setSlectedDepense(e.value)}
+                    dataSource={["Facture élec/Gaz", "Salaire Employée", "Frais Location", "Maintenance", "Sérvices", "Frais Transport", "Autre Frais"]}
                     popupHeight="200px"
-                    title="Choisir le Fournisseur"
+                    title="Type Dépense"
                   />
                 </td>
               </tr>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Date Réglement:</td>
+                <td className="p-4 w-[220px] text-sm font-medium">Date:</td>
 
                 <td className="w-[320px]">
                   <DateTimePickerComponent
@@ -106,43 +104,15 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                     width="260"
                     value={date}
                     onChange={(e) => setDate(e.value)}
-                    placeholder="Date de paiment"
+                    placeholder="Date"
                     format="dddd MMMM y - HH:mm"
                     floatLabelType="Never"></DateTimePickerComponent>
                 </td>
               </tr>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Mode de Paiement:</td>
+                <td className="p-4 w-[220px] text-sm font-medium">Déscription:</td>
                 <td className="w-[320px]">
-                  <TextBox
-                    type="dropdown"
-                    id="paymentType"
-                    width="full"
-                    value={paymentType}
-                    onChange={(e) => e.value != null && setPaymentType(e.value)}
-                    dataSource={["Espéce", "Chéque", "Virement"]}
-                    popupHeight="200px"
-                    title="Mode de Paiement"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Crédits initial:</td>
-                <td className="w-[320px] text-rose-500 select-none">
-                  <TextBox
-                    type="number"
-                    // readonly
-                    // showSpinButton={false}
-                    enabled={false}
-                    format="N2"
-                    label="DA"
-                    id="credit"
-                    width="w-[200px]"
-                    value={slectedProvider.credit}
-                    step={100}
-                    min={0}
-                    title="Montant Avance"
-                  />
+                  <TextBox type="text" id="paymentType" width="full" value={description} onChange={(e) => e.value != null && setDescription(e.value)} title="Déscription" />
                 </td>
               </tr>
               <tr>
@@ -154,22 +124,23 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                     label="DA"
                     id="amount"
                     width="w-[200px]"
-                    max={slectedProvider.credit}
+                    value={amount}
                     onChange={(e) => {
                       e.value != null && setAmount(e.value);
                     }}
                     step={100}
                     min={0}
-                    title="Montant Avance"
+                    title="Montant Dépense"
                   />
                 </td>
               </tr>
               <tr>
-                <td className={`p-4 w-[220px] text-sm font-medium`}>Crédits restant:</td>
-                <td className={`w-[320px] select-none ${slectedProvider.credit === amount ? "text-emerald-500" : "text-amber-500"}`}>
-                  <TextBox type="number" enabled={false} format="N2" label="DA" id="creditLeft" width="w-[200px]" step={100} min={0} value={slectedProvider.credit - amount} title="Crédits restant" />
+                <td className="p-4 w-[220px] text-sm font-medium">Remarque:</td>
+                <td className="w-[320px] text-rose-500 select-none">
+                  <TextBox type="text" multiline id="comment" width="full" onChange={(e) => e.value != null && setComment(e.value)} value={comment} title="Remarque sur la Dépense" />
                 </td>
               </tr>
+              <tr></tr>
             </tbody>
           </table>
         </div>
