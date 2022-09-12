@@ -10,14 +10,13 @@ import styled from "styled-components";
 import TextBox from "../component/button/TextBox";
 import PrintInvoice from "../component/PrintInvoiceFacture";
 import { loadCustomers, loadProducts, loadVendings, useStore } from "../contexts/Store";
+import ProductFormPopUp from "./../component/form/ProductFormPopUp";
 import add from "./../data/icons/add.png";
 import deletePng from "./../data/icons/delete.png";
 import deletePng2 from "./../data/icons/delete2.png";
 import done from "./../data/icons/done.png";
 import minus from "./../data/icons/minus.png";
-import newPng from "./../data/icons/new.png";
 import print from "./../data/icons/print.png";
-import ProductFormPopUp from './../component/form/ProductFormPopUp';
 const { ipcRenderer } = require("electron");
 
 moment.locale("fr");
@@ -76,24 +75,16 @@ export default function Facture(props) {
   useHotkeys("f5", () => addListBtn.current.click());
   useHotkeys("f6", () => newTabBtn.current.click());
   //************UseEffects*********************
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
   useEffect(() => {
     if (!showPrintDiv) {
       reactToPrint();
       setShowPrintDiv(true);
     }
   }, [showPrintDiv]);
- useEffect(() => {
-   useStore.setState((state) => ({ facture: { ...state.facture, autoCompleteObj } }));
- }, [autoCompleteObj]);
+  useEffect(() => {
+    useStore.setState((state) => ({ facture: { ...state.facture, autoCompleteObj } }));
+  }, [autoCompleteObj]);
 
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
@@ -102,7 +93,7 @@ export default function Facture(props) {
         let data = target.contentWindow.document.documentElement.outerHTML;
         let blob = new Blob([data], { type: "text/html; charset=utf-8" });
         let url = URL.createObjectURL(blob);
-        ipcRenderer.send("previewComponent", url);
+        ipcRenderer.send("previewComponent2", url);
       }),
   });
   const productsTemplate = (props) => (
@@ -352,19 +343,7 @@ export default function Facture(props) {
               <button
                 ref={addListBtn}
                 onClick={() => {
-                  if (useStore.getState().facture.selectedProduct != null) {
-                    useStore.setState((state) => ({
-                      facture: {
-                        ...state.facture,
-                        selectedProducts: [...state.facture.selectedProducts, { ...state.facture.selectedProduct, selectedQuantity: parseFloat(1), index: state.facture.selectedProducts.length + 1 }],
-                      },
-                    }));
-                    autoCompleteObj.clear();
-                    useStore.setState((state) => ({ facture: { ...state.facture, selectedProduct: null } }));
-                  } else {
-                    //autoCompleteObj.showPopup();
-                    autoCompleteObj.focusIn();
-                  }
+                  useStore.setState(() => ({ dropdownOpen: true }));
                 }}>
                 <svg className="w-8 hover:opacity-80 " viewBox="0 0 44 40">
                   <path fill="#7db382" d="M20,38.5C9.799,38.5,1.5,30.201,1.5,20S9.799,1.5,20,1.5S38.5,9.799,38.5,20S30.201,38.5,20,38.5z" />
@@ -383,11 +362,6 @@ export default function Facture(props) {
                 showClearButton
                 allowCustom
                 popupHeight="500"
-                customValueSpecifier={(e) => {
-                  setTitle(parseInt(e.text));
-                  facture.autoCompleteObj.clear();
-                  useStore.setState(() => ({ dropdownOpen: true }));
-                }}
                 change={(e) => {
                   if (e.itemData?._id != null) {
                     if (useStore.getState().facture.selectedProducts.some((selected) => selected._id === e.itemData._id) === false) {
@@ -408,10 +382,11 @@ export default function Facture(props) {
                       }));
                     }
                     facture.autoCompleteObj.clear();
-                    setTotal();
+                    setTotalFacture();
                   }
                 }}
                 filtering={(e) => {
+                  setTitle(e.text);
                   const barCodeProd = productsList.find((prod) => prod.barCode === e.text);
                   if (barCodeProd != undefined) {
                     if (facture.selectedProducts.some((selected) => selected._id === barCodeProd._id) === false) {
@@ -440,14 +415,14 @@ export default function Facture(props) {
                 valueTemplate={productsTemplate}
                 itemTemplate={productsTemplate}
                 dataSource={productsData}
-                fields={{ value: "barCode", text: "barCode" }}
+                fields={{ value: "name", text: "name" }}
                 placeholder="Ajouter un Produit (F5)"
               />
             </div>
           </Wrapper>
-          <div id="grid" className=" bg-white border  border-slate-200 ">
+          <div id="grid" className=" bg-white border shrink-0 border-slate-200 ">
             <div className="bg-white overflow-y-auto h-[530px] shadow-lg rounded-sm border border-slate-200">
-              <table className="w-full relative  divide-y divide-slate-200">
+              <table className="w-full relative   divide-slate-200">
                 <thead className="text-xs sticky top-0 z-10 uppercase  text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                   <tr className="sticky top-0 z-10 ">
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-40">
@@ -460,11 +435,11 @@ export default function Facture(props) {
                       <div className="font-semibold text-center">Quantité</div>
                     </th>
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/4">
-                      <div className="font-semibold text-center">Prix Vente</div>
+                      <div className="font-semibold text-center">PUHT</div>
                     </th>
 
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/4">
-                      <div className="font-semibold text-center">Montant</div>
+                      <div className="font-semibold text-center">Total</div>
                     </th>
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/4">
                       <div className="font-semibold text-center"></div>
@@ -525,8 +500,8 @@ export default function Facture(props) {
               Produits:<span className="text-green-600"> {facture.selectedProducts.length}</span>
             </div>
           </div>
-          <div id="validation" className="flex gap-2 items-center p-2 min-w-[850px]">
-            <div className="bg-emerald-600 hover:bg-emerald-400 p-4">
+          <div id="validation" className="flex gap-2 items-center p-2 ">
+            <div className="bg-emerald-600 shrink-0 hover:bg-emerald-400 p-4">
               <button
                 ref={addQtyBtn}
                 onClick={() => {
@@ -545,7 +520,7 @@ export default function Facture(props) {
                 <img src={add} className="w-10" />
               </button>
             </div>
-            <div className="bg-red-600 hover:bg-red-400 p-4">
+            <div className="bg-red-600 shrink-0 hover:bg-red-400 p-4">
               <button
                 ref={subQtyBtn}
                 onClick={() => {
@@ -564,22 +539,41 @@ export default function Facture(props) {
                 <img src={minus} className="w-10" />
               </button>
             </div>
-            <div className="bg-green-500 hover:bg-green-700 p-[9px]">
+            <div className="bg-green-500 shrink-0 hover:bg-green-700 p-[9px]">
               <button
                 ref={validateBtn}
                 onClick={() => {
                   if (facture.isEdit === true) {
                     // update vending List
                     ipcRenderer.send("updateVending", {
-                      ...facture,
                       client: { name: facture.client.name, _id: facture.client._id, credit: facture.client.credit },
+                      mode: facture.mode,
+                      tva: facture.tva,
+                      rebate: facture.rebate.toFixed(2),
+                      deposit: facture.deposit.toFixed(2),
+                      amount: facture.amount.toFixed(2),
+                      total: facture.total.toFixed(2),
                       totalbuyPrice: facture.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
-                      totalSellPriceGros: facture.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
                       grid: facture.selectedProducts,
                     });
                     ipcRenderer.on("refreshGridVending:update", (e, res) => {
+                      store?.set("activity", [
+                        ...store?.get("activity"),
+                        {
+                          date: new Date(),
+                          page: "Facture",
+                          action: "modifier",
+                          title:"Facture Modifier",
+                          item: JSON.parse(res),
+                          user: store?.get("user")?.userName,
+                          role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                        },
+                      ]);
                       loadVendings();
-
+                      useStore.setState({ toast: { show: true, title: "Vente Modifier Avec Succés", type: "success" } });
+                      setTimeout(() => {
+                        useStore.setState({ toast: { show: false } });
+                      }, 2000);
                       facture.selectedProducts.forEach((prod) => {
                         // quantity update
                         productsList.forEach((curProduct) => {
@@ -644,10 +638,25 @@ export default function Facture(props) {
                         amount: facture.amount.toFixed(2),
                         total: facture.total.toFixed(2),
                         totalbuyPrice: facture.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
-                        totalSellPriceGros: facture.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
                         grid: facture.selectedProducts,
                       });
                     ipcRenderer.on("refreshGridVending:add", (e, res) => {
+                      store?.set("activity", [
+                        ...store?.get("activity"),
+                        {
+                          date: new Date(),
+                          page: "Facture",
+                          action: "ajouter",
+                          item: JSON.parse(res),
+                          title: "Nouvelle Facture Ajouter",
+                          user: store?.get("user")?.userName,
+                          role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                        },
+                      ]);
+                      useStore.setState({ toast: { show: true, title: "Vente Ajouter Avec Succés", type: "success" } });
+                      setTimeout(() => {
+                        useStore.setState({ toast: { show: false } });
+                      }, 2000);
                       loadVendings();
                       facture.selectedProducts.forEach((prod) => {
                         // quantity update
@@ -693,7 +702,7 @@ export default function Facture(props) {
                 <img src={done} className="w-10" />
               </button>
             </div>
-            <div className="bg-lime-500 hover:bg-lime-700 p-[9px]">
+            <div className="bg-lime-500 shrink-0 hover:bg-lime-700 p-[9px]">
               <button ref={printBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
                 <div className="flex flex-col">
                   <span>Imprimer</span>
@@ -702,7 +711,7 @@ export default function Facture(props) {
                 <img src={print} className="w-10" />
               </button>
             </div>
-            <div className="bg-rose-500 hover:bg-rose-700 p-[9px]">
+            <div className="bg-rose-500 shrink-0 hover:bg-rose-700 p-[9px]">
               <button
                 ref={deleteBtn}
                 onClick={() => {
@@ -715,15 +724,6 @@ export default function Facture(props) {
                   <span className="text-base">(Suppr)</span>
                 </div>
                 <img src={deletePng} className="w-10" />
-              </button>
-            </div>
-            <div className="bg-blue-500 hover:bg-blue-700 p-[9px]">
-              <button ref={newTabBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <div className="flex flex-col">
-                  <span>Nouveau</span>
-                  <span className="text-base">(F6)</span>
-                </div>
-                <img src={newPng} className="w-10" />
               </button>
             </div>
           </div>

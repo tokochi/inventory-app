@@ -98,6 +98,10 @@ export default function PrintInvoiceCaisse() {
           <span className="">VENDEUR: </span>
           <span className=""> {store?.get("user").name}</span>
         </div>
+        <div id="comapnyInfo" className="flex gap-2">
+          <span className="">CAISSE N°: </span>
+          <span className=""> {store?.get("user")?.caisse}</span>
+        </div>
         <div id="comapnyInfo" className="flex flex-col w-full  text-center uppercase">
           <span>merci pour votre visit</span>
           <span>bienvenue a tout moment</span>

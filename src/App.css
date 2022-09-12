@@ -120,3 +120,22 @@ background-color: transparent;
   content: "\e934";
   color: rgba(0, 0, 0, 0.54);
 }
+/* ******switch****/
+.e-switch-wrapper .e-switch-handle.e-switch-active, .e-css.e-switch-wrapper .e-switch-handle.e-switch-active,.e-css.e-switch-wrapper .e-switch-handle.e-switch-active {
+    background-color: rgb(99 102 241) !important;
+}
+.e-switch-wrapper .e-switch-on, .e-css.e-switch-wrapper .e-switch-on,.e-css.e-switch-wrapper:hover .e-switch-inner.e-switch-active .e-switch-on {
+    background-color: rgb(99 102 241) !important;
+    color: #fff;
+}
+
+.e-tab  {
+    background-color: transparent !important;
+}
+/* .e-tab .e-tab-header {
+
+    background-color: white ;
+} */
+.e-tab .e-tab-header .e-toolbar-item .e-tab-wrap {
+ background-color: white
+}

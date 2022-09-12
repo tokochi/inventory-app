@@ -3,20 +3,22 @@ import SettingsSidebar from "../component/settings/SettingsSidebar";
 import AccountPanel from "../component/settings/AccountPanel";
 import NotificationsPanel from "../component/settings/NotificationsPanel";
 import Theme from "../component/settings/Theme";
-import Preferance from "../component/settings/Preferance";
+import BackUp from "../component/settings/BackUp";
 import Company from "../component/settings/Company";
 import { Routes, Route } from "react-router-dom";
+import Activity from "../component/settings/Activity";
+import Security from './../component/settings/Security';
 export default function Settings() {
 
   return (
     <div className="flex h-screen ">
-      <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden mb-20">
+      <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden ">
         <main>
-          <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+          <div className="px-8 py-4 w-full max-w-9xl mx-auto">
             {/* Page header */}
-            <div className="mb-8">
+            <div className="mb-4">
               {/* Title */}
-              <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">Paramètres ✨</h1>
+              <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">Paramètres 🛠</h1>
             </div>
 
             {/* Content */}
@@ -25,10 +27,11 @@ export default function Settings() {
                 <SettingsSidebar />
                 <Routes>
                   <Route path="account" element={<AccountPanel />} />
+                  <Route path="security" element={<Security />} />
                   <Route path="notifications" element={<NotificationsPanel />} />
-                  <Route path="preferance" element={<Preferance />} />
+                  <Route path="backup" element={<BackUp />} />
                   <Route path="company" element={<Company />} />
-                 <Route path="theme" element={<Theme />} /> 
+                  <Route path="activity" element={<Activity />} />
                 </Routes>
               </div>
             </div>

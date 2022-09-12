@@ -8,18 +8,17 @@ import Provider from "./pages/Provider";
 import Customer from "./pages/Customer";
 import Buying from "./pages/Buying";
 import Vending from "./pages/Vending";
-import Caisse from './pages/Caisse';
-import Facture from './pages/Facture';
+import CaisseContainer from "./pages/CaisseContainer";
+import Facture from "./pages/Facture";
 import Report from "./pages/Report";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import BonAchat from "./pages/BonAchat";
 import AddAccount from "./pages/AddAccount";
 import { useStore, loadCustomers, loadBuyings, loadVendings, loadProviders, loadProducts, loadDepenses } from "./contexts/Store";
-import Settings from './pages/Settings';
+import Settings from "./pages/Settings";
 import PrivateRoute from "./component/PrivateRoute";
-import Store from "electron-store";
-import Zakat from './pages/Zakat';
+import Zakat from "./pages/Zakat";
 loadCustomers();
 loadVendings();
 loadProducts();
@@ -36,16 +35,16 @@ const App = () => {
           <Navbar />
           <Routes>
             <Route element={<PrivateRoute />}>
+              <Route path="/zakat" element={<Zakat />} />
               <Route path="/" element={<Report />} />
+              <Route path="/report" element={<Report />} />
               <Route path="/products" element={<Products />} />
               <Route path="/provider" element={<Provider />} />
               <Route path="/customers" element={<Customer />} />
               <Route path="/sell" element={<Vending />} />
               <Route path="/buy" element={<Buying />} />
-              <Route path="/caisse" element={<Caisse />} />
+              <Route path="/caisse" element={<CaisseContainer />} />
               <Route path="/facture" element={<Facture />} />
-              <Route path="/report" element={<Report />} />
-              <Route path="/zakat" element={<Zakat />} />
               <Route path="/bonAchat" element={<BonAchat />} />
               <Route path="/add" element={<AddAccount />} />
               <Route path="/settings/*" element={<Settings />} />
@@ -57,8 +56,6 @@ const App = () => {
       </HashRouter>
     </div>
   );
-   
 };
-
 
 export default App;

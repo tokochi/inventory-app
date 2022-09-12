@@ -66,14 +66,7 @@ export default function Report() {
     const result = Object.keys(sumPerMonth).map((e) => ({ time: new Date(e), amount: sumPerMonth[e] }));
     return result;
   }
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-    }
-    return str;
-  }
+const toCurrency = useStore((state) => state.toCurrency);
   return (
     <div className="p-5  h-screen overflow-y-auto">
       <div className="mb-4  flex gap-2 justify-end items-center">

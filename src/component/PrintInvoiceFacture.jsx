@@ -4,9 +4,6 @@ import React from "react";
 import { ToWords } from "to-words";
 import { useStore } from "../contexts/Store";
 
-
-
-
 export default function PrintInvoiceFacture() {
   const vendingsData = useStore((state) => state.vendings);
   const facture = useStore((state) => state.facture);
@@ -16,15 +13,7 @@ export default function PrintInvoiceFacture() {
     },
   };
   const store = new Store({ schema });
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
   const toWords = new ToWords({
     localeCode: "fr-FR",
     converterOptions: {
@@ -72,7 +61,7 @@ export default function PrintInvoiceFacture() {
           {moment(facture.time).format("D/M/yyyy")}
         </div>
       </div>
-      <table className="table-auto w-full divide-y divide-slate-200 border ">
+      <table className="table-auto w-full  divide-slate-200 border ">
         <thead className="text-xs uppercase text-center text-slate-600 bg-slate-50 border-t border-slate-200">
           <tr>
             <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">

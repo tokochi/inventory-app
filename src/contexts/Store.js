@@ -1,13 +1,32 @@
 import create from "zustand";
 const { ipcRenderer } = require("electron");
 import Store from "electron-store";
+import { useReactToPrint } from "react-to-print";
+
+
+
 
 const store = new Store();
 export const useStore = create((set) => ({
-  isLoggedIn: store?.get("reset") && !store?.get("user")?.userName ? false : true,
+  isLoggedIn: store?.get("isLoggedIn") ? true : false,
   dropdownOpen: false,
   dropDownObj: {},
   gridProduct: {},
+  tabObj: {},
+  tabs: 1,
+  showTabs1: false,
+  showTabs2: false,
+  showTabs3: false,
+  toast: { show: false, title: "", type: "" },
+  toCurrency: function (num) {
+    let str = "0.00DA";
+    if (num != null && !isNaN(num)) {
+      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
+      str = str.replace("DZD", "DA");
+      str = str.replace(",", " ");
+    }
+    return str;
+  },
   indexRow: false,
   caisse: {
     mode: "Détail",

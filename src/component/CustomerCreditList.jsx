@@ -4,22 +4,14 @@ import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { loadCustomers, useStore } from "../contexts/Store";
 import deletePng2 from "./../data/icons/delete2.png";
+import Store from "electron-store";
 const { ipcRenderer } = require("electron");
 
-
 export default function CustomerCreditList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
-
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const avanceList = () => useStore((state) => state.customers).reduce((acc, cur) => acc.concat(cur.avance), []);
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
+  const store = new Store();
   return (
     <>
       <button
@@ -47,7 +39,7 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
           <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
             <div>
               <div className="overflow-x-auto">
-                <table className="table-auto w-full divide-y divide-slate-200">
+                <table className="table-auto w-full  divide-slate-200">
                   {/* Table header */}
                   <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                     <tr>
@@ -107,6 +99,7 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
                               id={avance?.customerId}
                               idd={avance?._id}
                               amount={avance?.amount}
+                              name={avance?.name}
                               className=" p-1.5"
                               onClick={(e) => {
                                 setDropdownOpen(false);
@@ -117,12 +110,24 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
                                   if (customer._id === custID) {
                                     ipcRenderer.send("updateCustomer", {
                                       _id: custID,
-                                      credit: parseInt(customer.credit) + avanceAmount,
+                                      credit: parseInt(customer.credit) + parseInt(avanceAmount),
                                       avance: customer.avance.filter((avance) => avance._id !== avanceID),
                                     });
                                   }
                                 });
                                 ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                                  store?.set("activity", [
+                                    ...store?.get("activity"),
+                                    {
+                                      date: new Date(),
+                                      page: "Avance Client",
+                                      action: "supprimer",
+                                      title: "Avance Client Supprimer",
+                                      item: { name: e?.target?.parentElement?.attributes[3]?.value, type: "Avance", amount: parseInt(avanceAmount) },
+                                      user: store?.get("user")?.userName,
+                                      role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                                    },
+                                  ]);
                                   loadCustomers();
                                   ipcRenderer.removeAllListeners("refreshGridCustomer:update");
                                 });

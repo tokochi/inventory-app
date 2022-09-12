@@ -5,7 +5,7 @@ import { useStore } from "../contexts/Store";
 import Status from "./table/templates/ProductsStatus";
 
 export default function ProductsInventory({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
-  const productsData =  useStore((state) => state.products);
+  const productsData = () => useStore((state) => state.products);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const normalButton =
     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
@@ -13,15 +13,7 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
   return (
     <>
       <button
@@ -46,63 +38,63 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
         width="900px"
         open={() => setDropdownOpen(true)}
         close={() => setDropdownOpen(false)}
-        content={()=>         <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
-          <div>
-            <div className="overflow-x-auto">
-              <div className="flex gap-2 p-2">
-                <button className={normalButton}>
-                  Nombre Produits:
-                  <span className="ml-1  text-emerald-600">{productsData.length}</span>
-                </button>
-                <button className={normalButton}>
-                  Nombre Articles:
-                  <span className="ml-1  text-emerald-600">{productsData.reduce((acc, cur) => acc + cur.quantity, 0)}</span>
-                </button>
-                <button className={normalButton}>
-                  Capital Stock:
-                  <span className="ml-1  text-emerald-600">{toCurrency(productsData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0))}</span>
-                </button>
-              </div>
-              <table className="table-auto w-full divide-y divide-slate-200 ">
-                <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
-                  <tr>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">ID</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Désignation</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Quantité</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Prix Achat</div>
-                    </th>
-                    <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                      <div className="font-semibold text-center">Status</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {productsData.map((product) => (
-                    <tr className="text-center " key={product._id}>
-                      <td className=" p-2">{"#" + product?._id.slice(-6)}</td>
-                      <td>{product?.name}</td>
-                      <td>{product?.quantity}</td>
-                      <td>{product?.buyPrice && toCurrency(product?.buyPrice)}</td>
-                      <td>
-                        <Status {...product} />
-                      </td>
-                      <td>{product?.paymentType}</td>
+        content={() => (
+          <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+            <div>
+              <div className="overflow-x-auto">
+                <div className="flex gap-2 p-2">
+                  <button className={normalButton}>
+                    Nombre Produits:
+                    <span className="ml-1  text-emerald-600">{productsData().length}</span>
+                  </button>
+                  <button className={normalButton}>
+                    Nombre Articles:
+                    <span className="ml-1  text-emerald-600">{productsData().reduce((acc, cur) => acc + cur.quantity, 0)}</span>
+                  </button>
+                  <button className={normalButton}>
+                    Capital Stock:
+                    <span className="ml-1  text-emerald-600">{toCurrency(productsData().reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0))}</span>
+                  </button>
+                </div>
+                <table className="table-auto w-full  divide-slate-200 ">
+                  <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                    <tr>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">ID</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Désignation</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Quantité</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Prix Achat</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-center">Status</div>
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {productsData().map((product) => (
+                      <tr className="text-center " key={product._id}>
+                        <td className=" p-2">{"#" + product?._id.slice(-6)}</td>
+                        <td>{product?.name}</td>
+                        <td>{product?.quantity}</td>
+                        <td>{product?.buyPrice && toCurrency(product?.buyPrice)}</td>
+                        <td>
+                          <Status {...product} />
+                        </td>
+                        <td>{product?.paymentType}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>}>
-
-      </DialogComponent>
+        )}></DialogComponent>
     </>
   );
 }

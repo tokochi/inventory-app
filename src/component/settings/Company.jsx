@@ -1,159 +1,138 @@
 import React, { useState, useEffect } from "react";
-import Image from "../../data/icons/user.png";
+import facebook from "../../data/icons/facebook.png";
+import instagram from "../../data/icons/Instagram_240px.png";
+import logo from "../../data/icons/logo.png";
+import card from "../../data/icons/visit.png";
 import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
 import { loadCustomers, loadVendings, loadProducts, useStore } from "../../contexts/Store";
 import Store from "electron-store";
 
 export default function Company() {
   const schema = { company: { type: "object" } };
-  const store = new Store({ schema });
-  const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState("");
   const [refresh, setRefresh] = useState(false);
+  const store = new Store({ schema });
+
   return (
-    <div className="grow">
-      <div className=" p-6 space-y-6">
-        <h2 className="text-2xl text-slate-800 font-bold mb-5">Entreprise</h2>
-        <section>
-          <div className="p-4 font-semibold w-[300px] text-lg text-slate-600 rounded-t-md border border-slate-300  bg-slate-200 ">Logo de l'entreprise</div>
-          <div className="w-[300px] border text-center shadow-md border-gray-300">
-            <div className="flex gap-5 items-center justify-between p-2">
-              <div className="">
-                <img className="w-[100px] h-[100px] rounded-full bg-contain" src={store?.get("company")?.logo || Image} width="80" height="80" alt="User upload" />
-              </div>
-              <div className="flex p-2 items-center ">
-                <label
-                  htmlFor="dropzone-file"
-                  className="flex flex-col justify-center items-center h-32 p-4 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer  hover:bg-gray-10">
-                  <div className="flex flex-col justify-center items-center pt-5 pb-6">
-                    <svg aria-hidden="true" className="mb-3 w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                    </svg>
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Changer Logo</p>
-                  </div>
-                  <input
-                    id="dropzone-file"
-                    onChange={(e) => {
-                      const temp = store.get("company");
-                      store.set("company", { ...temp, logo: e.target.files[0].path });
-                      setRefresh(!refresh);
-                    }}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section>
-          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Détails de l'èntreprise</h2>
-          <div className="flex items-center  space-x-4 mt-5">
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1" htmlFor="name">
-                Nom de l'èntreprise
-              </label>
+    <div className="grow overflow-y-auto h-[600px] ">
+      <div className="p-6">
+        <h2 className="text-2xl text-slate-800 font-bold ">Entreprise</h2>
+        <section className="flex  items-center justify-center">
+          <div className="relative shrink-0 ">
+            <img className="w-[700px] bg-transparent drop-shadow-md rounded-3xl" src={card} />
+            <input
+              id="name"
+              onChange={(e) => {
+                const temp = store.get("company");
+                e.target.value != null && store.set("company", { ...temp, userName: e.target.value });
+                setRefresh(!refresh);
+              }}
+              value={store?.get("company")?.userName}
+              className="p-0 w-[300px] border-none  absolute font-semibold bg-transparent  text-2xl top-[40px] capitalize left-[70px] z-10"
+              type="text"
+            />
+            <textarea
+              id="name"
+              onChange={(e) => {
+                const temp = store.get("company");
+                e.target.value != null && store.set("company", { ...temp, address: e.target.value });
+                setRefresh(!refresh);
+              }}
+              value={store?.get("company")?.address}
+              className="p-0 w-[250px] border-none absolute bg-transparent  text-lg top-[100px] capitalize left-[120px] z-10"
+              type="text"
+            />
+            <input
+              id="name"
+              onChange={(e) => {
+                const temp = store.get("company");
+                e.target.value != null && store.set("company", { ...temp, email: e.target.value });
+                setRefresh(!refresh);
+              }}
+              value={store?.get("company")?.email}
+              className="p-0 w-[250px] border-none absolute bg-transparent  text-lg top-[180px] capitalize left-[120px] z-10"
+              type="text"
+            />
+            <input
+              id="name"
+              onChange={(e) => {
+                const temp = store.get("company");
+                e.target.value != null && store.set("company", { ...temp, phone: e.target.value });
+                setRefresh(!refresh);
+              }}
+              value={store?.get("company")?.phone}
+              className="p-0 w-[250px] border-none absolute bg-transparent text-lg top-[240px] capitalize left-[120px] z-10"
+              type="text"
+            />
+            <input
+              id="name"
+              onChange={(e) => {
+                const temp = store.get("company");
+                e.target.value != null && store.set("company", { ...temp, fax: e.target.value });
+                setRefresh(!refresh);
+              }}
+              value={store?.get("company")?.fax}
+              className="p-0 w-[250px] border-none absolute bg-transparent text-lg top-[260px] capitalize left-[120px] z-10"
+              type="text"
+            />
+            <input
+              id="name"
+              onChange={(e) => {
+                const temp = store.get("company");
+                e.target.value != null && store.set("company", { ...temp, site: e.target.value });
+                setRefresh(!refresh);
+              }}
+              value={store?.get("company")?.site}
+              className="p-0 w-[250px] border-none absolute bg-transparent text-lg top-[320px]  left-[120px] z-10"
+              type="text"
+            />
+            <input
+              id="name"
+              onChange={(e) => {
+                const temp = store.get("company");
+                e.target.value != null && store.set("company", { ...temp, name: e.target.value });
+                setRefresh(!refresh);
+              }}
+              value={store?.get("company")?.name}
+              className="p-0 w-[250px] border-none absolute bg-transparent text-center text-2xl font-semibold text-white top-[150px]  left-[420px] z-10"
+              type="text"
+            />
+            <div className="flex gap-2 top-[350px] absolute left-[470px]">
+              <img className="w-[30px] h-[30px]" src={facebook} />
               <input
                 id="name"
                 onChange={(e) => {
                   const temp = store.get("company");
-                  e.target.value != null && store.set("company", { ...temp, userName: e.target.value });
+                  e.target.value != null && store.set("company", { ...temp, name: e.target.value });
                   setRefresh(!refresh);
                 }}
-                value={store?.get("company")?.userName}
-                className="form-input w-full"
+                value={store?.get("company")?.name}
+                className="p-0 w-[150px] border-none bg-transparent text-center text-white z-10"
                 type="text"
               />
             </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1" htmlFor="name">
-                Email
+            <div className="absolute bg-transparent top-[50px]  left-[480px] ">
+              <label htmlFor="dropzone-file" className="flex flex-col justify-center items-center h-20 p-4 bg-transparent rounded-lg  border-gray-300 border-dashed cursor-pointer  hover:bg-gray-10">
+                <div className="flex flex-col justify-center items-center pt-5 pb-4">
+                  <img htmlFor="dropzone-file" className="w-[100px] h-[100px] rounded-full bg-contain" src={store?.get("company")?.logo || logo} width="80" height="80" alt="User upload" />
+                </div>
+                <input
+                  id="dropzone-file"
+                  onChange={(e) => {
+                    const temp = store.get("company");
+                    store.set("company", { ...temp, logo: e.target?.files[0]?.path });
+                    setRefresh(!refresh);
+                  }}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                />
               </label>
-              <input
-                id="name"
-                onChange={(e) => {
-                  const temp = store.get("company");
-                  e.target.value != null && store.set("company", { ...temp, email: e.target.value });
-                  setRefresh(!refresh);
-                }}
-                value={store?.get("company")?.email}
-                className="form-input w-full"
-                type="text"
-              />
-            </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1" htmlFor="business-id">
-                Télephone
-              </label>
-              <input
-                id="business-id"
-                onChange={(e) => {
-                  const temp = store.get("company");
-                  e.target.value != null && store.set("company", { ...temp, phone: e.target.value });
-                  setRefresh(!refresh);
-                }}
-                value={store?.get("company")?.phone}
-                className="form-input w-full"
-                type="text"
-              />
             </div>
           </div>
         </section>
+
         <section>
-          <div className="flex items-center  space-x-4 mt-5">
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1" htmlFor="location">
-                Addresse
-              </label>
-              <input
-                id="location"
-                onChange={(e) => {
-                  const temp = store.get("company");
-                  e.target.value != null && store.set("company", { ...temp, address: e.target.value });
-                  setRefresh(!refresh);
-                }}
-                value={store?.get("company")?.address}
-                className="form-input w-full"
-                type="text"
-              />
-            </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1" htmlFor="business-id">
-                Facebook
-              </label>
-              <input
-                id="business-id"
-                onChange={(e) => {
-                  const temp = store.get("company");
-                  e.target.value != null && store.set("company", { ...temp, facebook: e.target.value });
-                  setRefresh(!refresh);
-                }}
-                value={store?.get("company")?.facebook}
-                className="form-input w-full"
-                type="text"
-              />
-            </div>
-            <div className="w-1/3">
-              <label className="block text-sm font-medium mb-1" htmlFor="location">
-                Fax
-              </label>
-              <input
-                id="location"
-                onChange={(e) => {
-                  const temp = store.get("company");
-                  e.target.value != null && store.set("company", { ...temp, fax: e.target.value });
-                  setRefresh(!refresh);
-                }}
-                value={store?.get("company")?.fax}
-                className="form-input w-full"
-                type="text"
-              />
-            </div>
-          </div>
-        </section>
-        <section>
-          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Informations Financière</h2>
+          <h2 className="text-xl leading-snug text-slate-800 font-bold mt-5">Informations Financière</h2>
           <div className="flex items-center  space-x-4 mt-5">
             <div className="w-1/3">
               <label className="block text-sm font-medium mb-1" htmlFor="location">

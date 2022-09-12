@@ -1,19 +1,19 @@
 import {
-    ColumnChooser,
-    ColumnDirective,
-    ColumnsDirective,
-    Edit,
-    Filter,
-    GridComponent,
-    Inject,
-    PdfExport,
-    Print,
-    Reorder,
-    Resize,
-    Search,
-    Selection,
-    Sort,
-    Toolbar
+  ColumnChooser,
+  ColumnDirective,
+  ColumnsDirective,
+  Edit,
+  Filter,
+  GridComponent,
+  Inject,
+  PdfExport,
+  Print,
+  Reorder,
+  Resize,
+  Search,
+  Selection,
+  Sort,
+  Toolbar,
 } from "@syncfusion/ej2-react-grids";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import Store from "electron-store";
@@ -23,10 +23,11 @@ import { useReactToPrint } from "react-to-print";
 import { loadBuyings, loadProviders, useStore } from "../../contexts/Store";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import AddDepense from './../AddDepense';
-import DepenseList from './../DepenseList';
+import AddDepense from "./../AddDepense";
+import DepenseList from "./../DepenseList";
 import SelectedProductsView from "./templates/SelectedProductsbuy";
 import Status from "./templates/VendingsStatus";
+import TextBox from './../button/TextBox';
 
 const { ipcRenderer } = require("electron");
 
@@ -46,9 +47,12 @@ export default function BuyingTable() {
   const [active, setActive] = useState({ all: true, paid: false, unpaid: false, deposit: false });
   const editing = { allowDeleting: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: buyingFormTemplate };
   let grid;
-
+  const [pin, setPin] = useState(false);
+  const [selectedProd, setSelectedProd] = useState();
+  const [wrongPin, setWrongPin] = useState(false);
   const navigate = useNavigate();
   const productsList = useStore((state) => state.products);
+  const toCurrency = useStore((state) => state.toCurrency);
   const schema = {
     restorQty: {
       type: "boolean",
@@ -59,6 +63,7 @@ export default function BuyingTable() {
   const restorQty = store?.get("restorQty");
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownOpen2, setDropdownOpen2] = useState(false);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   const buyingData = useStore((state) => state.buyings).filter((buying) => filterBuying(buying));
@@ -74,18 +79,10 @@ export default function BuyingTable() {
         let data = target.contentWindow.document.documentElement.outerHTML;
         let blob = new Blob([data], { type: "text/html; charset=utf-8" });
         let url = URL.createObjectURL(blob);
-        ipcRenderer.send("previewComponent", url);
+        ipcRenderer.send("previewComponent2", url);
       }),
   });
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+
   function filterBuying(buying) {
     if (active.all === true) {
       return buying === buying;
@@ -113,28 +110,27 @@ export default function BuyingTable() {
         setShowPrintDiv(false);
         break;
       case args.item.id.includes("edit"):
-        if (grid?.getSelectedRecords().length > 0) {
-          const selectedProducts = grid.getSelectedRecords()[0].grid.map((prod) => {
-            return { ...prod, oldSelectedQty: prod.selectedQuantity };
-          });
-          if (grid.getSelectedRecords()[0].type === "bonAchat") {
-            navigate("/bonAchat");
-            useStore.setState((state) => ({
-              bonAchat: {
-                ...grid?.getSelectedRecords()[0],
-                selectedProducts,
-                oldSupplier: grid.getSelectedRecords()[0].supplier,
-                oldAmount: grid.getSelectedRecords()[0].amount,
-                oldDeposit: grid.getSelectedRecords()[0].deposit,
-                isEdit: true,
-                selectedProduct: null,
-              },
-            }));
-            break;
-          }
+        if (grid?.getSelectedRecords().length === 0) {
+          setDropdownOpen(true);
+        } else if (store?.get("buyingPin")) {
+          setSelectedProd(grid?.getSelectedRecords()[0]);
+          setDropdownOpen2(true);
+        } else if (grid.getSelectedRecords()[0].type === "bonAchat") {
+          navigate("/bonAchat");
+          useStore.setState((state) => ({
+            bonAchat: {
+              ...grid?.getSelectedRecords()[0],
+              selectedProducts: grid.getSelectedRecords()[0].grid.map((prod) => {
+                return { ...prod, oldSelectedQty: prod.selectedQuantity };
+              }),
+              oldSupplier: grid.getSelectedRecords()[0].supplier,
+              oldAmount: grid.getSelectedRecords()[0].amount,
+              oldDeposit: grid.getSelectedRecords()[0].deposit,
+              isEdit: true,
+              selectedProduct: null,
+            },
+          }));
         }
-        setDropdownOpen(true);
-        break;
     }
   }
   function actionComplete(args) {
@@ -149,6 +145,22 @@ export default function BuyingTable() {
           });
         });
         ipcRenderer.on("refreshGridBuying:delete", (e, res) => {
+          store?.set("activity", [
+            ...store?.get("activity"),
+            {
+              date: new Date(),
+              page: "Achat",
+              action: "Supprimer",
+              title: "Achat Supprimer",
+              item: args?.data,
+              user: store?.get("user")?.userName,
+              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+            },
+          ]);
+          useStore.setState({ toast: { show: true, title: "Achat Supprimer Du Stock", type: "error" } });
+          setTimeout(() => {
+            useStore.setState({ toast: { show: false } });
+          }, 2000);
           loadBuyings();
           ipcRenderer.removeAllListeners("refreshGridBuying:delete");
         });
@@ -220,8 +232,9 @@ export default function BuyingTable() {
           </li>
         </ul>
         <div className="flex gap-2">
-        <AddDepense />
-        <DepenseList /></div>
+          <AddDepense />
+          <DepenseList />
+        </div>
       </div>
 
       <div className="mx-2 mb-4">
@@ -246,7 +259,7 @@ export default function BuyingTable() {
           <ColumnsDirective>
             <ColumnDirective field="id" headerText="ID" textAlign="center" headerTextAlign="center" width="15" template={buyingIdTemplate} />
             <ColumnDirective field="time" headerText="Date" textAlign="center" headerTextAlign="center" width="30" type="datetime" format="dd/MM/yyyy" />
-            <ColumnDirective field="grid" headerText="Produits" textAlign="center" headerTextAlign="center" width="40" template={selectedProductsView} />
+            <ColumnDirective field="grid" headerText="Produits" textAlign="center" headerTextAlign="center" width="50" template={selectedProductsView} />
             <ColumnDirective field="supplier.name" headerText="Fournisseur" textAlign="center" headerTextAlign="center" width="40" />
             <ColumnDirective field="total" headerText="Montant" textAlign="center" headerTextAlign="center" width="40" format="c2" />
             <ColumnDirective field="rebate" headerText="Remise" textAlign="center" headerTextAlign="center" width="40" format="c2" />
@@ -257,7 +270,7 @@ export default function BuyingTable() {
           </ColumnsDirective>
           <Inject services={[Resize, Selection, Reorder, Search, Toolbar, Edit, ColumnChooser, Sort, Print, Filter, PdfExport]} />
         </GridComponent>
-        <div ref={gridRef} className={`mx-2 mb-4 ${showPrintDiv && "hidden"} h-[297mm] w-[210mm] `}>
+        <div ref={gridRef} className={` ${showPrintDiv && "hidden"} h-[297mm] w-[210mm] `}>
           <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
             <div>
               <div className="overflow-x-auto">
@@ -280,7 +293,7 @@ export default function BuyingTable() {
                     <span className="ml-1  text-emerald-600">{toCurrency(buyingData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPrice, 0))}</span>
                   </button> */}
                 </div>
-                <table className="table-auto w-full divide-y divide-slate-200 ">
+                <table className="table-auto w-full  divide-slate-200 ">
                   <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                     <tr>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
@@ -324,7 +337,7 @@ export default function BuyingTable() {
       <DialogComponent
         visible={dropdownOpen}
         closeOnEscape
-        width="300"
+        width="400"
         open={() => setDropdownOpen(true)}
         close={() => setDropdownOpen(false)}
         footerTemplate={() => (
@@ -343,6 +356,80 @@ export default function BuyingTable() {
           </div>
         )}>
         Aucune ligne sélectionnée pour la modification
+      </DialogComponent>
+      <DialogComponent
+        header="Autorisation 🔒"
+        visible={dropdownOpen2}
+        showCloseIcon={true}
+        closeOnEscape
+       width="200"
+        open={() => setDropdownOpen2(true)}
+        close={() => setDropdownOpen2(false)}
+        footerTemplate={() => (
+          <div>
+            <ul className="flex items-center justify-end gap-6">
+              <li>
+                <button
+                  className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
+                  onClick={() => {
+                    if (pin === store.get("pin")) {
+                      if (selectedProd?.type === "bonAchat") {
+                        navigate("/bonAchat");
+                        useStore.setState((state) => ({
+                          bonAchat: {
+                            ...selectedProd,
+                            selectedProducts: selectedProd.grid.map((prod) => {
+                              return { ...prod, oldSelectedQty: prod.selectedQuantity };
+                            }),
+                            oldSupplier: selectedProd.supplier,
+                            oldAmount: selectedProd.amount,
+                            oldDeposit: selectedProd.deposit,
+                            isEdit: true,
+                            selectedProduct: null,
+                          },
+                        }));
+                      }
+
+                      setDropdownOpen2(false);
+                    } else {
+                      setWrongPin(true);
+                    }
+                  }}>
+                  Ajouter
+                </button>
+              </li>
+              <li>
+                <button
+                  className="btn-xs bg-white border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-600"
+                  onClick={(e) => {
+                    setDropdownOpen2(false);
+                  }}>
+                  Annuler
+                </button>
+              </li>
+            </ul>
+          </div>
+        )}>
+        {" "}
+        <div className="flex flex-col justify-start items-start">
+          <label className="text-sm font-medium mr-2 mb-1" htmlFor="name">
+            Code Pin
+          </label>
+          <TextBox
+            id="name"
+            onChange={(e) => {
+              setWrongPin(false);
+              setPin(e.value);
+            }}
+            className="form-input w-full"
+            min={0}
+            htmlAttributes={{ maxlength: "6", type: "password" }}
+            type="number"
+            showSpinButton={false}
+            format="N0"
+          />
+          {wrongPin && <span className="m-1 text-xs text-red-400">Code pin inccorecte</span>}
+        </div>
       </DialogComponent>
     </div>
   );

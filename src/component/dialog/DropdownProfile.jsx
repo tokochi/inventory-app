@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import Transition from "../../utils/Transition";
-import UserAvatar from "../../data/icons/user.png";
-import { useStore } from "../../contexts/Store";
 import Store from "electron-store";
+import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { useStore } from "../../contexts/Store";
+import UserAvatar from "../../data/icons/user.png";
+import Transition from "../../utils/Transition";
 function DropdownProfile({ align }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const trigger = useRef(null);
@@ -11,7 +11,7 @@ function DropdownProfile({ align }) {
   const schema = { user: { type: "object" } };
   const store = new Store({ schema });
   const loggedUser = useStore((state) => state.user);
-  const isLoggedIn = useStore((state) => state.isLoggedIn);
+  const isLoggedIn = store?.get("isLoggedIn");
   // close on click outside
   useEffect(() => {
     const clickHandler = ({ target }) => {
@@ -75,6 +75,8 @@ function DropdownProfile({ align }) {
                 to="/login"
                 onClick={() => {
                   store?.set("user", {});
+                  store?.set("reset", true);
+                  store?.set("isLoggedIn", false);
                   useStore.setState((state) => ({ isLoggedIn: false }));
                   setDropdownOpen(!dropdownOpen);
                 }}>

@@ -1,10 +1,6 @@
-import React from "react";
-import { useState, useEffect } from "react";
-import { useStore } from "../contexts/Store";
-import { NavLink, useNavigate, Link } from "react-router-dom";
-import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
 import Store from "electron-store";
-import { setSwimLaneDefaults } from "@syncfusion/ej2/diagrams";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const { ipcRenderer } = require("electron");
 
@@ -14,6 +10,7 @@ export default function AddAccount() {
   const [cpassword, setCPassword] = useState("");
   const [pin, setPin] = useState("");
   const navigate = useNavigate();
+  const [checked, setChecked] = useState(true);
   const [wrongPassword, setWrongPassword] = useState(false);
   const [wrongPin, setWrongPin] = useState(false);
   const [wrongUserName, setWrongUserName] = useState(false);
@@ -32,7 +29,7 @@ export default function AddAccount() {
       setTimeout(() => {
         setIsSpin(false);
         if (store?.get("user")?.userName != null) {
-           navigate("/settings/account");
+          navigate("/settings/account");
         }
       }, 2000);
     }
@@ -133,7 +130,23 @@ export default function AddAccount() {
                   {wrongPin && <span className="m-1 text-xs text-red-400">Code Pin incorrecte</span>}
                 </div>
                 <div className="flex items-center justify-between mt-6">
-                  <div className="mr-1"></div>
+                  <div className="mr-1">
+                    <div className="flex items-center">
+                      <input
+                        id="default-checkbox"
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => {
+                          setChecked(e.target.checked);
+                        }}
+                        value={store?.get("reset")}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500"
+                      />
+                      <label htmlFor="default-checkbox" className="ml-2 text-sm font-medium text-gray-600">
+                        Administrateur
+                      </label>
+                    </div>
+                  </div>
                   <button
                     type="submit"
                     onClick={(e) => {
@@ -144,14 +157,26 @@ export default function AddAccount() {
                         case password != cpassword:
                           setWrongPassword(true);
                           break;
-                        case pin != 1990:
+                        case pin != store.get("pin"):
                           setWrongPin(true);
                           break;
                         default:
+                          store?.set("activity", [
+                            ...store?.get("activity"),
+                            {
+                              date: new Date(),
+                              page: "Inscription",
+                              action: "ajouter",
+                              item: JSON.parse(res),
+                              title: "Nouveau Compte Ajouter",
+                              user: store?.get("user")?.userName,
+                              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                            },
+                          ]);
                           setIsSpin(true);
-                          users.push({ userName, password });
+                          users.push({ userName, password, isAdmin: checked, caisse: 1, pages: ["/products", "/provider", "/customers", "/sell", "/buy", "/caisse", "/facture", "/bonAchat"] });
                           store?.set("users", users);
-                         
+                          //store?.set("user", { userName, password, isAdmin: checked, pages: ["vente", "achat", "product", "customer", "provider", "caisse", "facture", "bonAchat"] });
                           break;
                       }
                     }}

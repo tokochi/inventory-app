@@ -1,14 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
+import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
+import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import Store from "electron-store";
+import React, { useEffect, useState } from "react";
+import { loadProducts, useStore } from "../../contexts/Store";
 import TextBox from "../button/TextBox";
 import PopupDialog from "../dialog/PopupDialog";
-import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
+import alarm from "./../../data/icons/alarm.png";
 import deletePng2 from "./../../data/icons/delete2.png";
-import { loadProducts,useStore } from "../../contexts/Store";
 const { ipcRenderer } = require("electron");
 
-export default function ProductFormPopUp({  title }) {
+export default function ProductFormPopUp({ title }) {
   const labelclassName = "p-4 w-[170px] text-sm font-medium";
   const brandTemplate = (props) => (
     <div className="flex justify-between items-center">
@@ -63,6 +64,7 @@ export default function ProductFormPopUp({  title }) {
   const store = new Store({ schema });
   const [close, setClose] = useState(false);
   const [name, setName] = useState();
+  const [notification, setNotification] = useState(true);
   const [barCode, setBarCode] = useState();
   const [expireDate, setExpireDate] = useState();
   const [comment, setComment] = useState();
@@ -78,21 +80,26 @@ export default function ProductFormPopUp({  title }) {
   const [addUnit, setAddUnit] = useState("");
   const [addBrand, setAddBrand] = useState("");
   const [addCategory, setAddCategory] = useState("");
+  const [requiredName, setRequiredName] = useState(false);
+  const [requiredQuantity, setRequiredQuantity] = useState(false);
+  const [requiredPrice, setRequiredPrice] = useState(false);
+  const [requiredSellPrice, setRequiredSellPrice] = useState(false);
   const unitList = store?.get("unit");
   const brandList = store?.get("brand");
   const categoryList = store?.get("category");
   const [margin, setMargin] = useState((sellPrice - buyPrice) / sellPrice);
   const [marginGros, setMarginGros] = useState((sellPriceGros - buyPrice) / sellPriceGros);
+
   useEffect(() => {
     setClose(false);
   }, [close]);
- const dropdownOpen = () => useStore((state) => state.dropdownOpen);
+  const dropdownOpen = () => useStore((state) => state.dropdownOpen);
   return (
     <DialogComponent
       header="Ajouter un Nouveau Produit"
       allowDragging
       width="550"
-      height="700"
+      height="720"
       open={() => useStore.setState(() => ({ dropdownOpen: true }))}
       cloose={() => useStore.setState(() => ({ dropdownOpen: false }))}
       visible={dropdownOpen()}
@@ -103,13 +110,53 @@ export default function ProductFormPopUp({  title }) {
               <button
                 className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
                 onClick={(e) => {
-                  useStore.setState(() => ({ dropdownOpen: false }));
-                  ipcRenderer.send("addProduct", { name, barCode, expired: expireDate, comment, quantity, brand, unit, category, qtyAlert, buyPrice, sellPrice, sellPriceGros });
-                  ipcRenderer.on("refreshGridProduct:add", (e, res) => {
-                    ipcRenderer.removeAllListeners("refreshGridProduct:add");
-                    loadProducts();
-                    window.location.reload();
-                  });
+                  switch (true) {
+                    case name == null:
+                      setRequiredName(true);
+                      break;
+                    case quantity == null:
+                      setRequiredQuantity(true);
+                      break;
+                    case buyPrice == null:
+                      setRequiredPrice(true);
+                      break;
+                    case sellPrice == null:
+                      setRequiredSellPrice(true);
+                      break;
+                    default:
+                      ipcRenderer.send("addProduct", { name, barCode, expired: expireDate, comment, notification, quantity, brand, unit, category, qtyAlert, buyPrice, sellPrice, sellPriceGros });
+                      ipcRenderer.on("refreshGridProduct:add", (e, res) => {
+                        store?.set("activity", [
+                          ...store?.get("activity"),
+                          {
+                            date: new Date(),
+                            page: "Caisse",
+                            action: "ajouter",
+                            title:"Nouveau Produit Ajouter",
+                            item: JSON.parse(res),
+                            user: store?.get("user")?.userName,
+                            role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                          },
+                        ]);
+                        ipcRenderer.removeAllListeners("refreshGridProduct:add");
+                        loadProducts();
+                        setName("");
+                        setBarCode();
+                        setExpireDate();
+                        setComment();
+                        setUnit("U");
+                        setBrand();
+                        setCategory();
+                        setQuantity();
+                        setQtyAlert();
+                        setBuyPrice();
+                        setSellPrice();
+                        setSellPriceGros();
+                        // window.location.reload();
+                        useStore.setState(() => ({ dropdownOpen: false }));
+                      });
+                      break;
+                  }
                 }}>
                 Ajouter
               </button>
@@ -118,6 +165,18 @@ export default function ProductFormPopUp({  title }) {
               <button
                 className="btn-xs bg-white border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-600"
                 onClick={(e) => {
+                  setName("");
+                  setBarCode();
+                  setExpireDate();
+                  setComment();
+                  setUnit("U");
+                  setBrand();
+                  setCategory();
+                  setQuantity();
+                  setQtyAlert();
+                  setBuyPrice();
+                  setSellPrice();
+                  setSellPriceGros();
                   useStore.setState(() => ({ dropdownOpen: false }));
                 }}>
                 Annuler
@@ -131,13 +190,25 @@ export default function ProductFormPopUp({  title }) {
           <tbody>
             <tr>
               <td className={labelclassName}>Désignation:</td>
-              <td className="w-[320px]">
-                <TextBox type="text" id="name" width="full" onChange={(e) => e.value != null && setName(e.value)} value={name} title="Désignation du Produit" />
+              <td className="w-[350px]">
+                <TextBox
+                  type="text"
+                  id="name"
+                  width="full"
+                  dataBound
+                  onChange={(e) => {
+                    e.value != null && setName(e.value);
+                    setRequiredName(false);
+                  }}
+                  value={(isNaN(parseInt(title)) && title) || name}
+                  title="Désignation du Produit"
+                />
+                {requiredName && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
               </td>
             </tr>
             <tr>
               <td className={labelclassName}>Code Barre:</td>
-              <td className="w-[320px]">
+              <td className="w-[350px]">
                 <TextBox
                   type="number"
                   format="N0"
@@ -145,7 +216,7 @@ export default function ProductFormPopUp({  title }) {
                   id="barCode"
                   width="w-full"
                   onChange={(e) => e.value != null && setBarCode(e.value)}
-                  value={title || barCode}
+                  value={(typeof parseInt(title) === "number" && parseInt(title)) || barCode}
                   title="Code Barre"
                 />
               </td>
@@ -364,7 +435,7 @@ export default function ProductFormPopUp({  title }) {
             </tr>
             <tr>
               <td className={labelclassName}>Expiration:</td>
-              <td className="w-[320px]">
+              <td className="w-[350px]">
                 <div className="flex gap-2">
                   <div className="border-slate-200 w-[177px]  border rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm">
                     <DatePickerComponent
@@ -396,28 +467,41 @@ export default function ProductFormPopUp({  title }) {
                   step={5}
                   min={0}
                   value={quantity}
-                  onChange={(e) => e.value != null && setQuantity(e.value)}
+                  onChange={(e) => {
+                    e.value != null && setQuantity(e.value);
+                    setRequiredQuantity(false);
+                  }}
                   title="Quantité"
                 />
+                {requiredQuantity && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
               </td>
             </tr>
             <tr>
               <td className={labelclassName}>Quantité Alerté:</td>
               <td>
-                <TextBox
-                  type="number"
-                  format="N0"
-                  width="w-[200px]"
-                  enabled={quantity}
-                  label={unit}
-                  min={0}
-                  step={5}
-                  max={quantity}
-                  id="qtyAlert"
-                  value={qtyAlert}
-                  onChange={(e) => e.value != null && setQtyAlert(e.value)}
-                  title="Quantité Alerté"
-                />
+                <div className="flex gap-2 items-center">
+                  <TextBox
+                    type="number"
+                    format="N0"
+                    width="w-[200px]"
+                    enabled={quantity}
+                    label={unit}
+                    min={0}
+                    step={5}
+                    max={quantity}
+                    id="qtyAlert"
+                    value={qtyAlert}
+                    onChange={(e) => e.value != null && setQtyAlert(e.value)}
+                    title="Quantité Alerté"
+                  />
+                  <img src={alarm} width="20" />
+                  <div className="form-switch">
+                    <input type="checkbox" id="comments" className="sr-only" checked={notification} onChange={() => setNotification(!notification)} />
+                    <label className="bg-slate-400" htmlFor="comments">
+                      <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    </label>
+                  </div>
+                </div>
               </td>
             </tr>
             <tr>
@@ -434,11 +518,13 @@ export default function ProductFormPopUp({  title }) {
                   id="buyPrice"
                   value={buyPrice}
                   onChange={(e) => {
+                    setRequiredPrice(false);
                     e.value != null && setBuyPrice(e.value);
                     setMargin((sellPrice - e.value) / e.value);
                   }}
                   title="Prix d'achat"
                 />
+                {requiredPrice && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
               </td>
             </tr>
             <tr>
@@ -455,6 +541,7 @@ export default function ProductFormPopUp({  title }) {
                     step={100}
                     value={sellPrice}
                     onChange={(e) => {
+                      setRequiredSellPrice(false);
                       e.value != null && setSellPrice(e.value);
                       setMargin((e.value - buyPrice) / buyPrice);
                     }}
@@ -466,6 +553,7 @@ export default function ProductFormPopUp({  title }) {
                     </div>
                   )}
                 </div>
+                {requiredSellPrice && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
               </td>
             </tr>
             <tr>
@@ -495,10 +583,9 @@ export default function ProductFormPopUp({  title }) {
                 </div>
               </td>
             </tr>
-
             <tr>
               <td className={labelclassName}>Remarque:</td>
-              <td className="w-[320px]">
+              <td className="w-[350px]">
                 <TextBox type="text" multiline id="comment" width="full" onChange={(e) => e.value != null && setComment(e.value)} value={comment} title="Remarque sur le Produit" />
               </td>
             </tr>

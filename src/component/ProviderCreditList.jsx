@@ -4,25 +4,18 @@ import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { loadProviders, useStore } from "../contexts/Store";
 import deletePng2 from "./../data/icons/delete2.png";
+import Store from "electron-store";
 const { ipcRenderer } = require("electron");
-
 
 export default function ProviderCreditList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const providersData = () => useStore((state) => state.providers);
   const avanceList = () => useStore((state) => state.providers).reduce((acc, cur) => acc.concat(cur.avance), []);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const store = new Store();
   useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
   return (
     <>
       <button
@@ -50,7 +43,7 @@ export default function ProviderCreditList({ header, id, svg, children, width, f
           <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
             <div>
               <div className="overflow-x-auto">
-                <table className="table-auto w-full divide-y divide-slate-200">
+                <table className="table-auto w-full  divide-slate-200">
                   {/* Table header */}
                   <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                     <tr>
@@ -110,6 +103,7 @@ export default function ProviderCreditList({ header, id, svg, children, width, f
                               id={avance?.providerId}
                               idd={avance?._id}
                               amount={avance?.amount}
+                              name={avance?.name}
                               className=" p-1.5"
                               onClick={(e) => {
                                 setDropdownOpen(false);
@@ -126,6 +120,18 @@ export default function ProviderCreditList({ header, id, svg, children, width, f
                                   }
                                 });
                                 ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                                  store?.set("activity", [
+                                    ...store?.get("activity"),
+                                    {
+                                      date: new Date(),
+                                      page: "Avance Fournisseur",
+                                      action: "supprimer",
+                                      title: "Avance Fournisseur Supprimer",
+                                      item: { name: e?.target?.parentElement?.attributes[3]?.value, type: "Avance", amount: parseInt(avanceAmount) },
+                                      user: store?.get("user")?.userName,
+                                      role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                                    },
+                                  ]);
                                   loadProviders();
                                   ipcRenderer.removeAllListeners("refreshGridProvider:update");
                                 });

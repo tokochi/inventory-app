@@ -15,20 +15,13 @@ export default function Zakat() {
   const [amount, setAmount] = useState(0);
   const [credit, setCredit] = useState(0);
   const totalZakat = parseInt(total) + parseInt(amount) + parseInt(customerCredit) - parseInt(providerCredit) - parseInt(credit);
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-    }
-    return str;
-  }
+const toCurrency = useStore((state) => state.toCurrency);
   return (
     <>
       <Header title="El-Zakat ☪" />
       <div className="bg-slate-700  shadow-lg rounded-sm border border-slate-200 relative mx-10">
-        <div className="flex gap-2 min-w-[1120px]">
-          <div id="left" className="p-4">
+        <div className="flex gap-2">
+          <div id="left" className="p-4 shrink-0 flex-0">
             <div className="flex flex-col gap-4 mb-4 rounded-sm border border-slate-200 p-2">
               <div className="flex gap-2 items-center justify-between ">
                 <span className="text-white text-xl font-semibold">رأس المال بسعر التجزئة : </span>
@@ -86,10 +79,10 @@ export default function Zakat() {
               </div>
             </div>
           </div>
-          <div id="right" className="rounded-sm border border-slate-200 p-2 my-4">
+          <div id="right" className="rounded-sm  border border-slate-200 p-2 m-4">
             <div className="text-white text-xl flex flex-col items-center gap-10">
               <span className=" font-semibold ">: كيفية حساب المبلغ الاجمالي</span>
-              <span className=" ">قيمة السلعة (بسعر السوق) + رأس المال نقدا + الديون المنتظر سدادها + ما على التاجر من ديون</span>
+              <span className="text-center ">قيمة السلعة (بسعر السوق) + رأس المال نقدا + الديون المنتظر سدادها + ما على التاجر من ديون</span>
               <span className=" font-semibold ">: كيفية حساب المبلغ الواجب اخراجه للزكاة</span>
               <span className=" ">المبلغ الاجمالي x 2.5%</span>
             </div>

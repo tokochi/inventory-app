@@ -1,4 +1,3 @@
-import { refreshAggregateCell } from "@syncfusion/ej2-react-grids";
 import Store from "electron-store";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -28,6 +27,7 @@ export default function Login() {
       setTimeout(() => {
         setIsSpin(false);
         if (store?.get("user")?.userName != null) {
+          store?.set("isLoggedIn", true);
           useStore.setState((state) => ({ isLoggedIn: true }));
           navigate("/report");
         }

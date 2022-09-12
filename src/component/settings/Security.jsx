@@ -1,73 +1,305 @@
-import { useState } from "react";
-import { TextBoxComponent } from "@syncfusion/ej2-react-inputs";
-import passwordPng from "../../data/icons/password.png";
-import { useStore } from "../../contexts/Store";
-const { ipcRenderer } = require("electron");
-import TextBox from "../../component/button/TextBox";
-import { ProgressButtonComponent } from "@syncfusion/ej2-react-splitbuttons";
+import Store from "electron-store";
+import React, { useState } from "react";
+import TextBox from "../button/TextBox";
 
-export default function Profile() {
-  const user = JSON.parse(localStorage.getItem("user"));
-    const required = { required: true, oninvalid: `setCustomValidity('ce champ est obligatoire');`, oninput: `setCustomValidity('');` };
-
-  const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [wrongPassword, setWrongPassword] = useState(false);
-  const [validatePassword, setValidatePassword] = useState("");
-  const handleClick = function () {
-    if (newPassword === validatePassword) {
-      ipcRenderer.send("updateUserPassword", { newPassword, password, _id: user._id });
-      ipcRenderer.on("userPassword:failed", () => {
-        setWrongPassword(true);
-      });
-    }
+export default function Security() {
+  const schema = {
+    user: { default: { pages: [] }, type: "object" },
+    users: {
+      type: "array",
+      default: [],
+    },
   };
+
+  const store = new Store({ schema });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPin, setShowPin] = useState(false);
+  const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
+  const [wrongPin, setWrongPin] = useState(false);
+  const [wrongPassword, setWrongPassword] = useState(false);
+  const [productPin, setProductPin] = useState(store?.get("productPin"));
+  const [customerPin, setCustomerPin] = useState(store?.get("customerPin"));
+  const [providerPin, setProviderPin] = useState(store?.get("providerPin"));
+  const [vendingPin, setVendingPin] = useState(store?.get("vendingPin"));
+  const [buyingPin, setBuyingPin] = useState(store?.get("buyingPin"));
+
   return (
-    <div className="m-4  w-1/2 shadow-md">
-      <div className="p-4 font-semibold  text-lg text-gray-600 rounded-t-md border border-gray-300  bg-gray-200 ">Changer le mot de passe</div>
-      <div className=" flex flex-col items-center  w-full  ">
-        <div className=" flex flex-col gap-4 items-center w-full p-4 border  border-gray-300">
-          <TextBox
-            id="Password"
-            name="Password"
-            type="Password"
-            value={password}
-            img={passwordPng}
-            htmlAttributes={required}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setWrongPassword(false);
-            }}
-            title="Mot de passe actuelle"></TextBox>
-          {wrongPassword && <span className="m-1 text-xs text-red-400">Utilisateur ou Mot de passe incorrecte</span>}
+    <div className="grow overflow-y-auto h-[600px]">
+      <div className=" p-6 space-y-6 ">
+        <h2 className="text-2xl text-slate-800 font-bold mb-5">Sécurité</h2>
 
-          <TextBox
-            id="newPassword"
-            name="newPassword"
-            type="password"
-            value={newPassword}
-            img={passwordPng}
-            htmlAttributes={required}
-            onChange={(e) => setNewPassword(e.target.value)}
-            title="Nouveau Mot de passe"></TextBox>
+        <section>
+          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Mot de passe</h2>
+          <div className="mt-5">
+            <button
+              onClick={(e) => {
+                setShowPassword(true);
+              }}
+              className={`btn ${showPassword && "hidden"} border-slate-200 shadow-sm text-indigo-500`}>
+              Definir un nouveau mot de passe
+            </button>
+          </div>
+          {showPassword && (
+            <div className="flex gap-4">
+              <div className="sm:w-1/3">
+                <label className="block text-sm font-medium mb-1" htmlFor="name">
+                  Mot de passe
+                </label>
+                <input
+                  id="name"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                  }}
+                  className="form-input w-full"
+                  type="password"
+                />
+              </div>
 
-          <TextBox
-            id="newPassword"
-            name="newPassword"
-            type="password"
-            value={validatePassword}
-            img={passwordPng}
-            htmlAttributes={required}
-            onChange={(e) => setValidatePassword(e.target.value)}
-            title="Nouveau Mot de passe"></TextBox>
+              <div className="sm:w-1/3">
+                <label className="block text-sm font-medium mb-1" htmlFor="name">
+                  Confirmer le mot de passe
+                </label>
+                <input
+                  id="name"
+                  onChange={(e) => {
+                    if (e.target.value === password) {
+                      const users = store.get("users");
+                      const temp = store.get("user");
+                      const temparray = users.filter((user) => user.userName !== temp.userName);
+                      store.set("users", [...temparray, { ...temp, password: e.target.value }]);
+                    } else {
+                      setWrongPassword(true);
+                    }
+                  }}
+                  className="form-input w-full"
+                  type="password"
+                />
+              </div>
+              {wrongPassword && <span className="m-1 text-xs text-red-400">Mot de passe inccorecte</span>}
+            </div>
+          )}
+        </section>
+        <section>
+          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Code Pin</h2>
+          <div className="mt-5">
+            <button
+              onClick={(e) => {
+                setShowPin(true);
+              }}
+              className={`btn ${showPin && "hidden"} border-slate-200 shadow-sm text-indigo-500`}>
+              Definir un nouveau Code Pin
+            </button>
+          </div>
+          {showPin && (
+            <div className="flex gap-4">
+              <div className="sm:w-1/3">
+                <label className="block text-sm font-medium mb-1" htmlFor="name">
+                  Code Pin
+                </label>
+                <TextBox
+                  id="name"
+                  onChange={(e) => {
+                    setPin(e.value);
+                  }}
+                  className="form-input w-full"
+                  min={0}
+                  htmlAttributes={{ maxlength: "6", type: "password" }}
+                  type="number"
+                  showSpinButton={false}
+                  format="N0"
+                />
+              </div>
 
-          <div className="m-4">
-            <ProgressButtonComponent cssClass="e-info" end={() => handleClick()}>
+              <div className="sm:w-1/3">
+                <label className="block text-sm font-medium mb-1" htmlFor="name">
+                  Confirmer le Code Pin
+                </label>
+                <TextBox
+                  id="name"
+                  onChange={(e) => {
+                    if (e.value === pin) {
+                      store.set("pin", e.value);
+                    } else {
+                      setWrongPin(true);
+                    }
+                  }}
+                  className="form-input w-full"
+                  min={0}
+                  htmlAttributes={{ maxlength: "6", type: "password" }}
+                  type="number"
+                  showSpinButton={false}
+                  format="N0"
+                />
+              </div>
+              {wrongPin && <span className="m-1 text-xs text-red-400">Code pin inccorecte</span>}
+            </div>
+          )}
+        </section>
+        <section>
+          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Verrouillage</h2>
+          <ul>
+            <li className="flex justify-between items-center py-3 border-b border-slate-200">
+              {/* Left */}
+              <div>
+                <div className="text-slate-800 font-semibold">Produits</div>
+                <div className="text-sm">Verrouillage des modifications quantité Produits.</div>
+              </div>
+              {/* Right */}
+              <div className="flex items-center ml-4">
+                <div className="text-sm text-slate-400 italic mr-2">{productPin ? "On" : "Off"}</div>
+                <div className="form-switch">
+                  <input
+                    type="checkbox"
+                    id="productPin"
+                    className="sr-only"
+                    checked={productPin}
+                    onChange={(e) => {
+                      setProductPin(!productPin);
+                      store?.set("productPin", e.target.checked);
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="productPin">
+                    <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    <span className="sr-only">Enable smart sync</span>
+                  </label>
+                </div>
+              </div>
+            </li>
+            <li className="flex justify-between items-center py-3 border-b border-slate-200">
+              {/* Left */}
+              <div>
+                <div className="text-slate-800 font-semibold">Ventes</div>
+                <div className="text-sm">Verrouillage des modifications des Ventes.</div>
+              </div>
+              {/* Right */}
+              <div className="flex items-center ml-4">
+                <div className="text-sm text-slate-400 italic mr-2">{vendingPin ? "On" : "Off"}</div>
+                <div className="form-switch">
+                  <input
+                    type="checkbox"
+                    id="vendingPin"
+                    className="sr-only"
+                    checked={vendingPin}
+                    onChange={(e) => {
+                      setVendingPin(!vendingPin);
+                      store?.set("vendingPin", e.target.checked);
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="vendingPin">
+                    <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    <span className="sr-only">Enable smart sync</span>
+                  </label>
+                </div>
+              </div>
+            </li>
+            <li className="flex justify-between items-center py-3 border-b border-slate-200">
+              {/* Left */}
+              <div>
+                <div className="text-slate-800 font-semibold">Achats</div>
+                <div className="text-sm">Verrouillage des modifications des Achats.</div>
+              </div>
+              {/* Right */}
+              <div className="flex items-center ml-4">
+                <div className="text-sm text-slate-400 italic mr-2">{buyingPin ? "On" : "Off"}</div>
+                <div className="form-switch">
+                  <input
+                    type="checkbox"
+                    id="buyingPin"
+                    className="sr-only"
+                    checked={buyingPin}
+                    onChange={(e) => {
+                      setBuyingPin(!buyingPin);
+                      store?.set("buyingPin", e.target.checked);
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="buyingPin">
+                    <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    <span className="sr-only">Enable smart sync</span>
+                  </label>
+                </div>
+              </div>
+            </li>
+            <li className="flex justify-between items-center py-3 border-b border-slate-200">
+              {/* Left */}
+              <div>
+                <div className="text-slate-800 font-semibold">Clients</div>
+                <div className="text-sm">Verrouillage des modifications des Crédits Clients.</div>
+              </div>
+              {/* Right */}
+              <div className="flex items-center ml-4">
+                <div className="text-sm text-slate-400 italic mr-2">{customerPin ? "On" : "Off"}</div>
+                <div className="form-switch">
+                  <input
+                    type="checkbox"
+                    id="customerPin"
+                    className="sr-only"
+                    checked={customerPin}
+                    onChange={(e) => {
+                      setCustomerPin(!customerPin);
+                      store?.set("customerPin", e.target.checked);
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="customerPin">
+                    <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    <span className="sr-only">Enable smart sync</span>
+                  </label>
+                </div>
+              </div>
+            </li>
+            <li className="flex justify-between items-center py-3 border-b border-slate-200">
+              <div>
+                <div className="text-slate-800 font-semibold">Fournisseurs</div>
+                <div className="text-sm">Verrouillage des modifications des Déttes Fournisseurs.</div>
+              </div>
+              <div className="flex items-center ml-4">
+                <div className="text-sm text-slate-400 italic mr-2">{providerPin ? "On" : "Off"}</div>
+                <div className="form-switch">
+                  <input
+                    type="checkbox"
+                    id="providerPin"
+                    className="sr-only"
+                    checked={providerPin}
+                    onChange={(e) => {
+                      setProviderPin(!providerPin);
+                      store?.set("providerPin", e.target.checked);
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="providerPin">
+                    <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    <span className="sr-only">Enable smart sync</span>
+                  </label>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
+      <footer>
+        <div className="flex flex-col px-6 py-5 border-t border-slate-200">
+          <div className="flex self-end">
+            <button
+              onClick={(e) => {
+                const user = store.get("user");
+                store.set("user", { userName: user.userName });
+                location.reload();
+              }}
+              // type="submit"
+              className="btn border-slate-200 hover:border-slate-300 text-slate-600">
+              Reset
+            </button>
+            <button
+              type="submit"
+              onClick={(e) => {
+                window.location.reload();
+              }}
+              //  type="submit"
+              className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3">
               Sauvgarder
-            </ProgressButtonComponent>
+            </button>
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

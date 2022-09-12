@@ -1,27 +1,27 @@
 import {
-    ColumnChooser,
-    ColumnDirective,
-    ColumnsDirective,
-    Edit,
-    Filter,
-    GridComponent,
-    Inject,
-    PdfExport,
-    Print,
-    Reorder,
-    Resize,
-    Search,
-    Selection,
-    Sort,
-    Toolbar
+  ColumnChooser,
+  ColumnDirective,
+  ColumnsDirective,
+  Edit,
+  Filter,
+  GridComponent,
+  Inject,
+  PdfExport,
+  Print,
+  Reorder,
+  Resize,
+  Search,
+  Selection,
+  Sort,
+  Toolbar
 } from "@syncfusion/ej2-react-grids";
+import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { loadProviders, useStore } from "../../contexts/Store";
 import AvanceProvider from "../AvanceProvider";
 import ProviderFormTemplate from "../form/ProviderForm";
 import Localization from "../Localization";
-
 import ProviderCreditList from "./../ProviderCreditList";
 import Status from "./templates/ProviderStatus";
 const { ipcRenderer } = require("electron");
@@ -46,7 +46,8 @@ export default function ProvidersTable() {
   const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: providersFormTemplate };
   let grid;
-
+  const textValidation = { required: [(args) => (args["value"] == "" ? false : true), "ce champ est obligatoire"] };
+  const store = new Store();
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const providerCredit = useStore((state) => state.providers).reduce((acc, cur) => acc + cur.credit, 0);
   const gridRef = useRef();
@@ -66,7 +67,7 @@ export default function ProvidersTable() {
         let data = target.contentWindow.document.documentElement.outerHTML;
         let blob = new Blob([data], { type: "text/html; charset=utf-8" });
         let url = URL.createObjectURL(blob);
-        ipcRenderer.send("previewComponent", url);
+        ipcRenderer.send("previewComponent2", url);
       }),
   });
 
@@ -91,11 +92,30 @@ export default function ProvidersTable() {
         break;
     }
   }
+    useEffect(() => {
+      useStore.setState((state) => ({ gridProduct: grid }));
+    }, [grid]);
   function actionComplete(args) {
     switch (true) {
       case args.requestType === "save" && args.action === "add":
         ipcRenderer.send("addProvider", args.data);
         ipcRenderer.on("refreshGridProvider:add", (e, res) => {
+          store?.set("activity", [
+            ...store?.get("activity"),
+            {
+              date: new Date(),
+              page: "Fournisseur",
+              action: "ajouter",
+              item: args?.data,
+              title: "Nouveau Fournisseur Ajouter",
+              user: store?.get("user")?.userName,
+              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+            },
+          ]);
+          useStore.setState({ toast: { show: true, title: "Fournisseur Ajouter Avec Succés", type: "success" } });
+          setTimeout(() => {
+            useStore.setState({ toast: { show: false } });
+          }, 2000);
           loadProviders();
           ipcRenderer.removeAllListeners("refreshGridProvider:add");
         });
@@ -106,6 +126,22 @@ export default function ProvidersTable() {
       case args.requestType === "save" && args.action === "edit":
         ipcRenderer.send("updateProvider", args.data);
         ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+          store?.set("activity", [
+            ...store?.get("activity"),
+            {
+              date: new Date(),
+              page: "Fournisseur",
+              action: "modifier",
+              title: "Fournisseur Modifier",
+              item: args?.data,
+              user: store?.get("user")?.userName,
+              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+            },
+          ]);
+          useStore.setState({ toast: { show: true, title: "Fournisseur Modifier Avec Succés", type: "success" } });
+          setTimeout(() => {
+            useStore.setState({ toast: { show: false } });
+          }, 2000);
           loadProviders();
           ipcRenderer.removeAllListeners("refreshGridProvider:update");
         });
@@ -116,21 +152,29 @@ export default function ProvidersTable() {
       case args.requestType === "delete":
         ipcRenderer.send("deleteProvider", args.data[0]);
         ipcRenderer.on("refreshGridProvider:delete", (e, res) => {
+          store?.set("activity", [
+            ...store?.get("activity"),
+            {
+              date: new Date(),
+              page: "Fournisseur",
+              action: "supprimer",
+              title: "Fournisseur Supprimer",
+              item: args?.data[0],
+              user: store?.get("user")?.userName,
+              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+            },
+          ]);
+          useStore.setState({ toast: { show: true, title: "Fournisseur Supprimer Du Stock", type: "error" } });
+          setTimeout(() => {
+            useStore.setState({ toast: { show: false } });
+          }, 2000);
           loadProviders();
           ipcRenderer.removeAllListeners("refreshGridProvider:delete");
         });
         break;
     }
   }
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
   function actionBegin(args) {
     if (args.requestType === "delete") {
     }
@@ -170,7 +214,7 @@ export default function ProvidersTable() {
         </div>
         <div className="flex gap-2">
           <AvanceProvider />
-          <ProviderCreditList  />
+          <ProviderCreditList />
         </div>
       </div>
 
@@ -195,7 +239,7 @@ export default function ProvidersTable() {
           allowSorting>
           <ColumnsDirective>
             <ColumnDirective field="id" headerText="ID" textAlign="center" headerTextAlign="center" width="30" template={providersIdTemplate} />
-            <ColumnDirective field="name" headerText="Nom" textAlign="center" headerTextAlign="center" width="100" />
+            <ColumnDirective field="name" validationRules={textValidation} headerText="Nom" textAlign="center" headerTextAlign="center" width="100" />
             <ColumnDirective field="phone" headerText="Téléphone" textAlign="center" headerTextAlign="center" width="35" />
             <ColumnDirective field="address" headerText="adresse" textAlign="center" headerTextAlign="center" width="30" />
             <ColumnDirective field="email" headerText="Email" textAlign="center" headerTextAlign="center" width="40" />
@@ -207,7 +251,7 @@ export default function ProvidersTable() {
           </ColumnsDirective>
           <Inject services={[Resize, Selection, Reorder, Search, Toolbar, Edit, ColumnChooser, Sort, Print, Filter, PdfExport]} />
         </GridComponent>
-        <div ref={gridRef} className={`mx-2 mb-4 ${showPrintDiv && "hidden"} h-[297mm] w-[210mm] `}>
+        <div ref={gridRef} className={` ${showPrintDiv && "hidden"} h-[297mm] w-[210mm] `}>
           <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
             <div>
               <div className="overflow-x-auto">
@@ -226,7 +270,7 @@ export default function ProvidersTable() {
                     <span className="ml-1  text-emerald-600">{toCurrency(providersData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPrice, 0))}</span>
                   </button> */}
                 </div>
-                <table className="table-auto w-full divide-y divide-slate-200 ">
+                <table className="table-auto w-full  divide-slate-200 ">
                   <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                     <tr>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">

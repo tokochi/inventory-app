@@ -10,15 +10,7 @@ const { ipcRenderer } = require("electron");
 export default function DepenseList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const depenseData = () => useStore((state) => state.depenses);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
   return (
     <>
       <button
@@ -46,7 +38,7 @@ export default function DepenseList({ header, id, svg, children, width, footer, 
           <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
             <div>
               <div className="overflow-x-auto">
-                <table className="table-auto w-full divide-y divide-slate-200">
+                <table className="table-auto w-full  divide-slate-200">
                   {/* Table header */}
                   <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                     <tr>
@@ -91,6 +83,18 @@ export default function DepenseList({ header, id, svg, children, width, footer, 
                               ipcRenderer.on("refreshGridDepense:delete", (e, res) => {
                                 loadDepenses();
                                 ipcRenderer.removeAllListeners("refreshGridDepense:delete");
+                                store?.set("activity", [
+                                  ...store?.get("activity"),
+                                  {
+                                    date: new Date(),
+                                    page: "Dépense",
+                                    action: "supprimer",
+                                    title: "Dépense Supprimer",
+                                    item: { name: "Dépense", amount: depense?.amount, description: depense?.description, type: depense?.type },
+                                    user: store?.get("user")?.userName,
+                                    role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                                  },
+                                ]);
                                 setDropdownOpen(false);
                               });
                             }}>

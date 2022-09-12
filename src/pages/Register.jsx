@@ -1,10 +1,7 @@
-import React from "react";
-import { useState, useEffect } from "react";
-import { useStore } from "../contexts/Store";
-import { NavLink, useNavigate, Link } from "react-router-dom";
-import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
 import Store from "electron-store";
-import { setSwimLaneDefaults } from "@syncfusion/ej2/diagrams";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useStore } from "../contexts/Store";
 
 const { ipcRenderer } = require("electron");
 
@@ -16,6 +13,7 @@ export default function Register() {
   const navigate = useNavigate();
   const [wrongPassword, setWrongPassword] = useState(false);
   const [wrongPin, setWrongPin] = useState(false);
+  const [checked, setChecked] = useState(true);
   const [wrongUserName, setWrongUserName] = useState(false);
   const [isSpin, setIsSpin] = useState(false);
   const schema = {
@@ -27,17 +25,18 @@ export default function Register() {
   };
   const store = new Store({ schema });
   const users = store?.get("users");
-    useEffect(() => {
-      if (isSpin) {
-        setTimeout(() => {
-          setIsSpin(false);
-          if (store?.get("user")?.userName != null) {
-            useStore.setState((state) => ({ isLoggedIn: true }));
-            navigate("/report");
-          }
-        }, 2000);
-      }
-    }, [isSpin]);
+  useEffect(() => {
+    if (isSpin) {
+      setTimeout(() => {
+        setIsSpin(false);
+        if (store?.get("user")?.userName != null) {
+          store?.set("isLoggedIn", true);
+          useStore.setState((state) => ({ isLoggedIn: true }));
+          navigate("/report");
+        }
+      }, 2000);
+    }
+  }, [isSpin]);
   return (
     <form onSubmit={(e) => e.preventDefault()}>
       <main className="bg-slate-200">
@@ -134,25 +133,42 @@ export default function Register() {
                   {wrongPin && <span className="m-1 text-xs text-red-400">Code Pin incorrecte</span>}
                 </div>
                 <div className="flex items-center justify-between mt-6">
-                  <div className="mr-1"></div>
+                  <div className="mr-1">
+                    <div className="flex items-center">
+                      <input
+                        id="default-checkbox"
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => {
+                          setChecked(e.target.checked);
+                        }}
+                        value={store?.get("reset")}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500"
+                      />
+                      <label htmlFor="default-checkbox" className="ml-2 text-sm font-medium text-gray-600">
+                        Administrateur
+                      </label>
+                    </div>
+                  </div>
                   <button
                     type="submit"
                     onClick={(e) => {
                       switch (true) {
-                        case users.find((user) => user.userName === userName)!==undefined:
+                        case users.find((user) => user.userName === userName) !== undefined:
                           setWrongUserName(true);
                           break;
                         case password != cpassword:
                           setWrongPassword(true);
                           break;
-                        case pin != 1990:
+                        case pin != store.get("pin"):
                           setWrongPin(true);
                           break;
                         default:
                           setIsSpin(true);
-                          users.push({ userName, password });
+                          users.push({ userName, password, isAdmin: checked, caisse: 1, pages: ["/products", "/provider", "/customers", "/sell", "/buy", "/caisse", "/facture", "/bonAchat"] });
                           store?.set("users", users);
-                          store?.set("user", { userName, password });
+
+                          store?.set("user", { userName, password, isAdmin: checked, pages: ["/products", "/provider", "/customers", "/sell", "/buy", "/caisse", "/facture", "/bonAchat"] });
                           break;
                       }
                     }}

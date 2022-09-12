@@ -1,27 +1,27 @@
 import {
-    ColumnChooser,
-    ColumnDirective,
-    ColumnsDirective,
-    Edit,
-    Filter,
-    GridComponent,
-    Inject,
-    PdfExport,
-    Print,
-    Reorder,
-    Resize,
-    Search,
-    Selection,
-    Sort,
-    Toolbar
+  ColumnChooser,
+  ColumnDirective,
+  ColumnsDirective,
+  Edit,
+  Filter,
+  GridComponent,
+  Inject,
+  PdfExport,
+  Print,
+  Reorder,
+  Resize,
+  Search,
+  Selection,
+  Sort,
+  Toolbar
 } from "@syncfusion/ej2-react-grids";
+import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { loadCustomers, useStore } from "../../contexts/Store";
 import AvanceCustomer from "../AvanceCustomer";
 import CustomerFormTemplate from "../form/CustomerForm";
 import Localization from "../Localization";
-
 import CustomerCreditList from "./../CustomerCreditList";
 import Status from "./templates/CustomerStatus";
 const { ipcRenderer } = require("electron");
@@ -46,11 +46,11 @@ export default function CustomersTable() {
   const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: customersFormTemplate };
   let grid;
-
+  const store = new Store();
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const totalCredit = useStore((state) => state.customers).reduce((acc, cur) => acc + cur.credit, 0);
   const gridRef = useRef();
-
+const textValidation = { required: [(args) => (args["value"] == "" ? false : true), "ce champ est obligatoire"] };
   function filterCustomer(customer) {
     if (active.all === true) {
       return customer === customer;
@@ -66,7 +66,7 @@ export default function CustomersTable() {
         let data = target.contentWindow.document.documentElement.outerHTML;
         let blob = new Blob([data], { type: "text/html; charset=utf-8" });
         let url = URL.createObjectURL(blob);
-        ipcRenderer.send("previewComponent", url);
+        ipcRenderer.send("previewComponent2", url);
       }),
   });
 
@@ -91,12 +91,30 @@ export default function CustomersTable() {
         break;
     }
   }
+    useEffect(() => {
+      useStore.setState((state) => ({ gridProduct: grid }));
+    }, [grid]);
   function actionComplete(args) {
     switch (true) {
       case args.requestType === "save" && args.action === "add":
         ipcRenderer.send("addCustomer", args.data);
         ipcRenderer.on("refreshGridCustomer:add", (e, res) => {
-
+          store?.set("activity", [
+            ...store?.get("activity"),
+            {
+              date: new Date(),
+              page: "Client",
+              action: "ajouter",
+              title: "Nouveau Client Ajouter",
+              item: args?.data,
+              user: store?.get("user")?.userName,
+              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+            },
+          ]);
+          useStore.setState({ toast: { show: true, title: "Client Ajouter Avec Succés", type: "success" } });
+          setTimeout(() => {
+            useStore.setState({ toast: { show: false } });
+          }, 2000);
           loadCustomers();
           ipcRenderer.removeAllListeners("refreshGridCustomer:add");
         });
@@ -107,7 +125,22 @@ export default function CustomersTable() {
       case args.requestType === "save" && args.action === "edit":
         ipcRenderer.send("updateCustomer", args.data);
         ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-        
+          store?.set("activity", [
+            ...store?.get("activity"),
+            {
+              date: new Date(),
+              page: "Client",
+              action: "modifier",
+              title: "Client Modifier",
+              item: args?.data,
+              user: store?.get("user")?.userName,
+              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+            },
+          ]);
+          useStore.setState({ toast: { show: true, title: "Client Modifier Avec Succés", type: "success" } });
+          setTimeout(() => {
+            useStore.setState({ toast: { show: false } });
+          }, 2000);
           loadCustomers();
           ipcRenderer.removeAllListeners("refreshGridCustomer:update");
         });
@@ -117,24 +150,30 @@ export default function CustomersTable() {
         break;
       case args.requestType === "delete":
         ipcRenderer.send("deleteCustomer", args.data[0]);
-
         ipcRenderer.on("refreshGridCustomer:delete", (e, res) => {
-
+          store?.set("activity", [
+            ...store?.get("activity"),
+            {
+              date: new Date(),
+              page: "Client",
+              action: "supprimer",
+              title: "Client Supprimer",
+              item: args?.data[0],
+              user: store?.get("user")?.userName,
+              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+            },
+          ]);
+          useStore.setState({ toast: { show: true, title: "Client Supprimer Du Stock", type: "error" } });
+          setTimeout(() => {
+            useStore.setState({ toast: { show: false } });
+          }, 2000);
           loadCustomers();
           ipcRenderer.removeAllListeners("refreshGridCustomer:delete");
         });
         break;
     }
   }
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
   function actionBegin(args) {
     if (args.requestType === "delete") {
     }
@@ -199,7 +238,7 @@ export default function CustomersTable() {
           allowSorting>
           <ColumnsDirective>
             <ColumnDirective field="id" headerText="ID" textAlign="center" headerTextAlign="center" width="30" template={customersIdTemplate} />
-            <ColumnDirective field="name" headerText="Nom" textAlign="center" headerTextAlign="center" width="100" />
+            <ColumnDirective field="name" validationRules={textValidation} headerText="Nom" textAlign="center" headerTextAlign="center" width="100" />
             <ColumnDirective field="phone" headerText="Téléphone" textAlign="center" headerTextAlign="center" width="35" />
             <ColumnDirective field="address" headerText="adresse" textAlign="center" headerTextAlign="center" width="30" />
             <ColumnDirective field="email" headerText="Email" textAlign="center" headerTextAlign="center" width="40" visible={false} />
@@ -211,7 +250,7 @@ export default function CustomersTable() {
           </ColumnsDirective>
           <Inject services={[Resize, Selection, Reorder, Search, Toolbar, Edit, ColumnChooser, Sort, Print, Filter, PdfExport]} />
         </GridComponent>
-        <div ref={gridRef} className={`mx-2 mb-4 ${showPrintDiv && "hidden"} h-[297mm] w-[210mm] `}>
+        <div ref={gridRef} className={` ${showPrintDiv && "hidden"} h-[297mm] w-[210mm] `}>
           <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
             <div>
               <div className="overflow-x-auto">
@@ -226,7 +265,7 @@ export default function CustomersTable() {
                     <span className="ml-1  text-emerald-600">{toCurrency(customersData.reduce((acc, cur) => acc + cur.credit, 0))}</span>
                   </button>
                 </div>
-                <table className="table-auto w-full divide-y divide-slate-200 ">
+                <table className="table-auto w-full  divide-slate-200 ">
                   <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                     <tr>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">

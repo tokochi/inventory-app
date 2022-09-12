@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import TextBox from "../component/button/TextBox";
-import { useStore, loadProviders } from "../contexts/Store";
-const { ipcRenderer } = require("electron");
 import { DateTimePickerComponent } from "@syncfusion/ej2-react-calendars";
-
-
+import { DialogComponent } from "@syncfusion/ej2-react-popups";
+import React, { useState } from "react";
+import TextBox from "../component/button/TextBox";
+import Store from "electron-store";
+import { loadProviders, useStore } from "../contexts/Store";
+const { ipcRenderer } = require("electron");
 
 export default function AvanceProvider({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const providersData = () => useStore((state) => state.providers);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [amount, setAmount] = useState(0);
-
-
-  const [paymentType, setPaymentType] = useState("cash");
+  const store = new Store();
+  const [requiredName, setRequiredName] = useState(false);
+  const [requiredPrice, setRequiredPrice] = useState(false);
+  const [paymentType, setPaymentType] = useState("");
   const [date, setDate] = useState(new Date());
   const [slectedProvider, setSlectedProvider] = useState("");
-
 
   return (
     <>
@@ -44,24 +43,57 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
         close={() => setDropdownOpen(false)}
         footerTemplate={() => (
           <div>
-            {" "}
             <ul className="flex items-center justify-end gap-6">
               <li>
                 <button
                   className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
                   onClick={() => {
-                    setDropdownOpen(false);
-                    amount > 0 &&
-                      ipcRenderer.send("updateProvider", {
-                        credit: slectedProvider.credit - amount,
-                        _id: slectedProvider._id,
-                        avance: [...slectedProvider.avance, { credit: slectedProvider.credit, date, amount, paymentType, name: slectedProvider.name, providerId: slectedProvider._id }],
-                      });
-                    ipcRenderer.on("refreshGridProvider:update", (e, res) => {
-                      ipcRenderer.removeAllListeners("refreshGridProvider:update");
-                      loadProviders();
-                      window.location.reload();
-                    });
+                    switch (true) {
+                      case slectedProvider === "":
+                        setRequiredName(true);
+                        break;
+                      case amount === 0:
+                        setRequiredPrice(true);
+                        break;
+                      default:
+                        amount > 0 &&
+                          ipcRenderer.send("updateProvider", {
+                            credit: parseInt(slectedProvider.credit) - parseInt(amount),
+                            _id: slectedProvider._id,
+                            avance: [...slectedProvider.avance, { credit: slectedProvider.credit, date, amount, paymentType, name: slectedProvider.name, providerId: slectedProvider._id }],
+                          });
+                        ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                          ipcRenderer.removeAllListeners("refreshGridProvider:update");
+                          setAmount(0);
+                          setSlectedProvider("");
+                          setPaymentType("");
+                          setDropdownOpen(false);
+                          store?.set("activity", [
+                            ...store?.get("activity"),
+                            {
+                              date: new Date(),
+                              page: "Avance fournisseur",
+                              action: "ajouter",
+                              item: {
+                                name: slectedProvider.name,
+                                type: "Avance",
+                                amount: parseInt(amount),
+                                credit: parseInt(slectedProvider.credit) - parseInt(amount),
+                              },
+                              user: store?.get("user")?.userName,
+                              title: "Nouvelle Avance Fournisseur Ajouter",
+                              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                            },
+                          ]);
+                          useStore.setState({ toast: { show: true, title: "Avance Ajouter Avec Succés", type: "success" } });
+                          setTimeout(() => {
+                            useStore.setState({ toast: { show: false } });
+                          }, 2000);
+                          loadProviders();
+                          // window.location.reload();
+                        });
+                        break;
+                    }
                   }}>
                   Terminer
                 </button>
@@ -70,6 +102,9 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                 <button
                   className="btn-xs bg-white border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-600"
                   onClick={(e) => {
+                    setAmount(0);
+                    setSlectedProvider("");
+                    setPaymentType("");
                     setDropdownOpen(false);
                   }}>
                   Annuler
@@ -88,12 +123,16 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                     type="dropdown"
                     id="provider"
                     width="full"
-                    onChange={(e) => e.itemData != null && setSlectedProvider(e.itemData)}
+                    onChange={(e) => {
+                      e.itemData != null && setSlectedProvider(e.itemData);
+                      setRequiredName(false);
+                    }}
                     dataSource={providersData()}
                     fields={{ value: "_id", text: "name" }}
                     popupHeight="200px"
                     title="Choisir le Fournisseur"
                   />
+                  {requiredName && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
                 </td>
               </tr>
               <tr>
@@ -157,11 +196,13 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
                     max={slectedProvider.credit}
                     onChange={(e) => {
                       e.value != null && setAmount(e.value);
+                      setRequiredPrice(false);
                     }}
                     step={100}
                     min={0}
                     title="Montant Avance"
-                  />
+                    />
+                    {requiredPrice && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
                 </td>
               </tr>
               <tr>
@@ -174,7 +215,6 @@ export default function AvanceProvider({ header, id, svg, children, width, foote
           </table>
         </div>
       </DialogComponent>
-
     </>
   );
 }

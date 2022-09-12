@@ -1,28 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import TextBox from "./button/TextBox";
-import { useStore, loadCustomers } from "../contexts/Store";
-const { ipcRenderer } = require("electron");
 import { DateTimePickerComponent } from "@syncfusion/ej2-react-calendars";
 import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
-import deletePng2 from "./../data/icons/delete2.png";
-
-
+import { DialogComponent } from "@syncfusion/ej2-react-popups";
+import React, { useEffect, useState } from "react";
+import Store from "electron-store";
+import { loadCustomers, useStore } from "../contexts/Store";
+import TextBox from "./button/TextBox";
+const { ipcRenderer } = require("electron");
 
 export default function AvanceCustomer({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const customersData = useStore((state) => state.customers);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [amount, setAmount] = useState(0);
-  const [paymentType, setPaymentType] = useState("cash");
-
+  const [paymentType, setPaymentType] = useState("");
+  const [requiredName, setRequiredName] = useState(false);
+  const [requiredPrice, setRequiredPrice] = useState(false);
   const [date, setDate] = useState(new Date());
   const [slectedCustomer, setSlectedCustomer] = useState("");
   let dropDown;
-
-
-    useEffect(() => {
-  useStore.setState((state) => ({ dropDownObj: dropDown }));
-    }, [dropDown]);
+const store = new Store();
 
   return (
     <>
@@ -50,24 +45,52 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
         close={() => setDropdownOpen(false)}
         footerTemplate={() => (
           <div>
-            {" "}
             <ul className="flex items-center justify-end gap-6">
               <li>
                 <button
                   className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
                   onClick={() => {
-                    setDropdownOpen(false);
-                    amount > 0 &&
-                      ipcRenderer.send("updateCustomer", {
-                        credit: slectedCustomer.credit - amount,
-                        _id: slectedCustomer._id,
-                        avance: [...slectedCustomer.avance, { credit: slectedCustomer.credit, date, amount, paymentType,name:slectedCustomer.name,customerId: slectedCustomer._id }],
-                      });
-                    ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                      ipcRenderer.removeAllListeners("refreshGridCustomer:update");
-                      loadCustomers();
-                      window.location.reload();
-                    });
+                    switch (true) {
+                      case slectedCustomer === "":
+                        setRequiredName(true);
+                        break;
+                      case amount === 0:
+                        setRequiredPrice(true);
+                        break;
+                      default:
+                        amount > 0 &&
+                          ipcRenderer.send("updateCustomer", {
+                            credit: parseInt(slectedCustomer.credit) - parseInt(amount),
+                            _id: slectedCustomer._id,
+                            avance: [...slectedCustomer.avance, { credit: slectedCustomer.credit, date, amount, paymentType, name: slectedCustomer.name, customerId: slectedCustomer._id }],
+                          });
+                        setAmount(0);
+                        setSlectedCustomer("");
+                        setPaymentType("");
+                        ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                          ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+                          store?.set("activity", [
+                            ...store?.get("activity"),
+                            {
+                              date: new Date(),
+                              page: "Avance Client",
+                              action: "ajouter",
+                              title: "Nouvelle Avance Client Ajouter",
+                              item: { name: slectedCustomer.name, type: "Avance", amount: parseInt(amount), credit: parseInt(slectedCustomer.credit) - parseInt(amount) },
+                              user: store?.get("user")?.userName,
+                              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                            },
+                          ]);
+                          useStore.setState({ toast: { show: true, title: "Avance Ajouter Avec Succés", type: "success" } });
+                          setTimeout(() => {
+                            useStore.setState({ toast: { show: false } });
+                          }, 2000);
+                          loadCustomers();
+                          setDropdownOpen(false);
+                          // window.location.reload();
+                        });
+                        break;
+                    }
                   }}>
                   Terminer
                 </button>
@@ -76,6 +99,9 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
                 <button
                   className="btn-xs bg-white border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-600"
                   onClick={(e) => {
+                    setAmount(0);
+                    setSlectedCustomer("");
+                    setPaymentType("");
                     setDropdownOpen(false);
                   }}>
                   Annuler
@@ -92,18 +118,22 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
                 <td className="w-[320px]">
                   <div className="border-slate-200 border w-[262px] rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm">
                     <DropDownListComponent
-                      ref={(g) => dropDown=g}
+                      //ref={(g) => (dropDown = g)}
                       type="dropdown"
                       id="customer"
                       width="full"
                       value={slectedCustomer}
-                      change={(e) => e.itemData != null && setSlectedCustomer(e.itemData)}
+                      change={(e) => {
+                        e.itemData != null && setSlectedCustomer(e.itemData);
+                        setRequiredName(false);
+                      }}
                       dataSource={customersData}
                       fields={{ value: "_id", text: "name" }}
                       popupHeight="200px"
                       placeholder="Choisir le Client"
                     />
                   </div>
+                  {requiredName && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
                 </td>
               </tr>
               <tr>
@@ -169,11 +199,13 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
                     max={slectedCustomer.credit}
                     onChange={(e) => {
                       e.value != null && setAmount(e.value);
+                      setRequiredPrice(false);
                     }}
                     step={100}
                     min={0}
                     title="Montant Avance"
                   />
+                  {requiredPrice && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
                 </td>
               </tr>
               <tr>
@@ -186,7 +218,6 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
           </table>
         </div>
       </DialogComponent>
-
     </>
   );
 }

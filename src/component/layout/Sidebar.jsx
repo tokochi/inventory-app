@@ -2,7 +2,7 @@ import logo from "../../data/icons/logo.png";
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useStore, loadSettings } from "../../contexts/Store";
-
+import Store from "electron-store";
 
 
 export default function Sidebar() {
@@ -10,7 +10,8 @@ export default function Sidebar() {
     const location = useLocation();
     const { pathname } = location;
     const trigger = useRef(null);
-    const sidebar = useRef(null);
+  const sidebar = useRef(null);
+  const store = new Store();
 const isLoggedIn = useStore((state) => state.isLoggedIn);
 
   return (
@@ -22,14 +23,10 @@ const isLoggedIn = useStore((state) => state.isLoggedIn);
       <div
         className={`  ${isLoggedIn ? "w-[132px] " : "opacity-0 w-0"} transition-all duration-300 flex-none h-screen  overflow-y-auto  bg-slate-800 "
       }`}>
-        <NavLink end to="/" className="flex justify-center mt-2 mb-5">
-          <svg width="48" height="48" viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="31" fill="#e6e6e6" />
-            <polygon fill="#353535" points="32.002,6.99 12.002,17.99 32.002,29.99 52.002,17.99" />
-            <polygon fill="#65a844" points="54.002,43.99 34.002,55.99 34.002,32.99 54.002,20.99" />
-            <polygon fill="#353535" points="10.002,43.99 30.002,55.99 30.002,32.99 10.002,20.99" />
-          </svg>
-        </NavLink>
+        <div className="flex items-center justify-center mt-2 mb-5 select-none">
+        <button >
+          <img className="w-[60px] h-[60px] rounded-full bg-contain" src={store?.get("company").logo || logo} />
+        </button></div>
         <div className={`px-5 py-6 border-t-[1px] border-slate-900 ${pathname.includes("sell") && "bg-slate-900"}`}>
           <NavLink end to="/sell" className={`block  text-slate-200 hover:text-white truncate transition duration-150 ${pathname.includes("sell") && "hover:text-slate-200"}`}>
             <div className="flex flex-col justify-center items-center ">

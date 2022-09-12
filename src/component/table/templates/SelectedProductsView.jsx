@@ -1,16 +1,11 @@
 import { TreeViewComponent } from "@syncfusion/ej2-react-navigations";
 import React from "react";
-
+import { useStore } from "./../../../contexts/Store";
 
 export default function SelectedProductsView(props) {
    const normalButton =
      "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-1  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  function toCurrency(num) {
-    let str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-    str = str.replace("DZD", "DA");
-    str = str.replace(",", " ");
-    return str;
-  }
+const toCurrency = useStore((state) => state.toCurrency);
   const treeViewTemplate = (prop) => (
     <table className="table-auto w-full">
       <tbody>

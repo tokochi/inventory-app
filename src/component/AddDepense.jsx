@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import TextBox from "./button/TextBox";
-import { useStore, loadDepenses } from "../contexts/Store";
-const { ipcRenderer } = require("electron");
 import { DateTimePickerComponent } from "@syncfusion/ej2-react-calendars";
-import { HashRouter } from 'react-router-dom';
-
+import { DialogComponent } from "@syncfusion/ej2-react-popups";
+import React, { useState } from "react";
+import { loadDepenses, useStore } from "../contexts/Store";
+import TextBox from "./button/TextBox";
+import Store from "electron-store";
+const { ipcRenderer } = require("electron");
 
 export default function AddDepense({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
-
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [amount, setAmount] = useState(0);
   const [comment, setComment] = useState("");
-
+  const [requiredName, setRequiredName] = useState(false);
+  const [requiredPrice, setRequiredPrice] = useState(false);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(new Date());
   const [slectedDepense, setSlectedDepense] = useState("");
-
+const store = new Store();
   return (
     <>
       <button
@@ -49,18 +48,43 @@ export default function AddDepense({ header, id, svg, children, width, footer, c
                 <button
                   className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
                   onClick={() => {
-                    setDropdownOpen(false);
-                    amount > 0 && ipcRenderer.send("addDepense", { amount, comment, description, date, type: slectedDepense });
-                    setAmount(0);
-                    setComment("");
-                    setDescription("");
-                    setSlectedDepense("");
-                    ipcRenderer.on("refreshDepense:add", (e, res) => {
-                      setDropdownOpen(false);
+                    switch (true) {
+                      case description === "":
+                        setRequiredName(true);
+                        break;
+                      case amount === 0:
+                        setRequiredPrice(true);
+                        break;
 
-                      loadDepenses();
-                      ipcRenderer.removeAllListeners("refreshDepense:add");
-                    });
+                      default:
+                        amount > 0 && ipcRenderer.send("addDepense", { amount, comment, description, date, type: slectedDepense });
+                        setAmount(0);
+                        setComment("");
+                        setDescription("");
+                        setSlectedDepense("");
+                        ipcRenderer.on("refreshDepense:add", (e, res) => {
+                          store?.set("activity", [
+                            ...store?.get("activity"),
+                            {
+                              date: new Date(),
+                              page: "Dépense",
+                              action: "ajouter",
+                              title: "Nouvelle Dépense Ajouter",
+                              item: { name: "Dépense", amount, description, type: slectedDepense },
+                              user: store?.get("user")?.userName,
+                              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                            },
+                          ]);
+                          setDropdownOpen(false);
+                          useStore.setState({ toast: { show: true, title: "Dépense Ajouter Avec Succés", type: "success" } });
+                          setTimeout(() => {
+                            useStore.setState({ toast: { show: false } });
+                          }, 2000);
+                          loadDepenses();
+                          ipcRenderer.removeAllListeners("refreshDepense:add");
+                        });
+                        break;
+                    }
                   }}>
                   Terminer
                 </button>
@@ -69,6 +93,10 @@ export default function AddDepense({ header, id, svg, children, width, footer, c
                 <button
                   className="btn-xs bg-white border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-600"
                   onClick={(e) => {
+                    setAmount(0);
+                    setComment("");
+                    setDescription("");
+                    setSlectedDepense("");
                     setDropdownOpen(false);
                   }}>
                   Annuler
@@ -88,7 +116,7 @@ export default function AddDepense({ header, id, svg, children, width, footer, c
                     id="provider"
                     width="full"
                     onChange={(e) => e.value != null && setSlectedDepense(e.value)}
-                    dataSource={["Facture élec/Gaz", "Salaire Employée", "Frais Location", "Maintenance", "Sérvices", "Frais Transport", "Autre Frais"]}
+                    dataSource={["Facture élec/Gaz", "Salaire Employée", "Avance de paie", "Frais Location", "Maintenance", "Sérvices", "Frais Transport", "Autre Frais"]}
                     popupHeight="200px"
                     title="Type Dépense"
                   />
@@ -112,7 +140,18 @@ export default function AddDepense({ header, id, svg, children, width, footer, c
               <tr>
                 <td className="p-4 w-[220px] text-sm font-medium">Déscription:</td>
                 <td className="w-[320px]">
-                  <TextBox type="text" id="paymentType" width="full" value={description} onChange={(e) => e.value != null && setDescription(e.value)} title="Déscription" />
+                  <TextBox
+                    type="text"
+                    id="paymentType"
+                    width="full"
+                    value={description}
+                    onChange={(e) => {
+                      e.value != null && setDescription(e.value);
+                      setRequiredName(false);
+                    }}
+                    title="Déscription"
+                  />
+                  {requiredName && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
                 </td>
               </tr>
               <tr>
@@ -127,11 +166,13 @@ export default function AddDepense({ header, id, svg, children, width, footer, c
                     value={amount}
                     onChange={(e) => {
                       e.value != null && setAmount(e.value);
+                      setRequiredPrice(false);
                     }}
                     step={100}
                     min={0}
                     title="Montant Dépense"
                   />
+                  {requiredPrice && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
                 </td>
               </tr>
               <tr>
@@ -145,7 +186,6 @@ export default function AddDepense({ header, id, svg, children, width, footer, c
           </table>
         </div>
       </DialogComponent>
-
     </>
   );
 }

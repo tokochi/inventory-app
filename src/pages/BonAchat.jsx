@@ -10,14 +10,13 @@ import styled from "styled-components";
 import TextBox from "../component/button/TextBox";
 import PrintInvoice from "../component/PrintInvoiceBonAchat";
 import { loadBuyings, loadProducts, loadProviders, useStore } from "../contexts/Store";
+import ProductFormPopUp from "./../component/form/ProductFormPopUp";
 import add from "./../data/icons/add.png";
 import deletePng from "./../data/icons/delete.png";
 import deletePng2 from "./../data/icons/delete2.png";
 import done from "./../data/icons/done.png";
 import minus from "./../data/icons/minus.png";
-import newPng from "./../data/icons/new.png";
 import print from "./../data/icons/print.png";
-import ProductFormPopUp from './../component/form/ProductFormPopUp';
 const { ipcRenderer } = require("electron");
 
 moment.locale("fr");
@@ -56,10 +55,11 @@ export default function BonAchat() {
   const setTotalBonAchat = useStore((state) => state.setTotalBonAchat);
   const providersData = useStore((state) => state.providers);
   const buyingsData = useStore((state) => state.buyings);
-const [title, setTitle] = useState(0);
+  const [title, setTitle] = useState(0);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   const [date, setDate] = useState(new Date());
+  
   let autoCompleteObj;
   let validateBtn = useRef();
   let addQtyBtn = useRef();
@@ -85,7 +85,7 @@ const [title, setTitle] = useState(0);
         let data = target.contentWindow.document.documentElement.outerHTML;
         let blob = new Blob([data], { type: "text/html; charset=utf-8" });
         let url = URL.createObjectURL(blob);
-        ipcRenderer.send("previewComponent", url);
+        ipcRenderer.send("previewComponent2", url);
       }),
   });
   useEffect(() => {
@@ -115,19 +115,11 @@ const [title, setTitle] = useState(0);
       </tbody>
     </table>
   );
- useEffect(() => {
-   useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, autoCompleteObj } }));
- }, [autoCompleteObj]);
+  useEffect(() => {
+    useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, autoCompleteObj } }));
+  }, [autoCompleteObj]);
 
-  function toCurrency(num) {
-    let str = "0.00DA";
-    if (num != null && !isNaN(num)) {
-      str = num?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "DA";
-      str = str.replace("DZD", "DA");
-      str = str.replace(",", " ");
-    }
-    return str;
-  }
+  const toCurrency = useStore((state) => state.toCurrency);
   return (
     <div className="bg-white m-2 shadow-lg rounded-sm   relative ">
       <div className="flex h-full justify-center">
@@ -262,19 +254,7 @@ const [title, setTitle] = useState(0);
               <button
                 ref={addListBtn}
                 onClick={() => {
-                  if (useStore.getState().bonAchat.selectedProduct != null) {
-                    useStore.setState((state) => ({
-                      bonAchat: {
-                        ...state.bonAchat,
-                        selectedProducts: [...state.bonAchat.selectedProducts, { ...state.bonAchat.selectedProduct, selectedQuantity: parseInt(1), index: state.bonAchat.selectedProducts.length + 1 }],
-                      },
-                    }));
-                    autoCompleteObj.clear();
-                    useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProduct: null } }));
-                  } else {
-                   // autoCompleteObj.showPopup();
-                    autoCompleteObj.focusIn();
-                  }
+                  useStore.setState(() => ({ dropdownOpen: true }));
                 }}>
                 <svg className="w-8 hover:opacity-80 " viewBox="0 0 44 40">
                   <path fill="#7db382" d="M20,38.5C9.799,38.5,1.5,30.201,1.5,20S9.799,1.5,20,1.5S38.5,9.799,38.5,20S30.201,38.5,20,38.5z" />
@@ -293,11 +273,6 @@ const [title, setTitle] = useState(0);
                 showClearButton
                 allowCustom
                 popupHeight="500"
-                customValueSpecifier={(e) => {
-                  setTitle(parseInt(e.text));
-                  bonAchat.autoCompleteObj.clear();
-                  useStore.setState(() => ({ dropdownOpen: true }));
-                }}
                 change={(e) => {
                   if (e.itemData?._id != null) {
                     if (useStore.getState().bonAchat.selectedProducts.some((selected) => selected._id === e.itemData._id) === false) {
@@ -318,10 +293,11 @@ const [title, setTitle] = useState(0);
                       }));
                     }
                     bonAchat.autoCompleteObj.clear();
-                    setTotal();
+                    setTotalBonAchat();
                   }
                 }}
                 filtering={(e) => {
+                  setTitle(e.text);
                   const barCodeProd = productsList.find((prod) => prod.barCode === e.text);
                   if (barCodeProd != undefined) {
                     if (bonAchat.selectedProducts.some((selected) => selected._id === barCodeProd._id) === false) {
@@ -350,36 +326,36 @@ const [title, setTitle] = useState(0);
                 valueTemplate={productsTemplate}
                 itemTemplate={productsTemplate}
                 dataSource={productsData}
-                fields={{ value: "barCode", text: "barCode" }}
+                fields={{ value: "name", text: "name" }}
                 placeholder="Ajouter un Produit (F5)"
               />
             </div>
           </Wrapper>
           <div id="grid" className=" bg-white border  border-slate-200 ">
             <div className="bg-white overflow-y-auto h-[530px] shadow-lg rounded-sm border border-slate-200">
-              <table className="w-full relative  divide-y divide-slate-200">
+              <table className="w-full relative   divide-slate-200">
                 <thead className="text-xs sticky top-0 z-10 uppercase  text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                   <tr className="sticky top-0 z-10 ">
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-40">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
                       <div className="font-semibold text-center">ID</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-2/4">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-2/6">
                       <div className="font-semibold text-center">Désignation</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-20">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
                       <div className="font-semibold text-center">Quantité</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-20">
-                      <div className="font-semibold text-center">Dérnier Prix Achat</div>
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                      <div className="font-semibold text-center">Ancien Prix</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/4">
-                      <div className="font-semibold text-center">Prix Achat</div>
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                      <div className="font-semibold text-center">PUHT</div>
                     </th>
 
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/4">
-                      <div className="font-semibold text-center">Montant</div>
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                      <div className="font-semibold text-center">Total</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/4">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
                       <div className="font-semibold text-center"></div>
                     </th>
                   </tr>
@@ -457,8 +433,8 @@ const [title, setTitle] = useState(0);
               Produits:<span className="text-green-600"> {bonAchat.selectedProducts.length}</span>
             </div>
           </div>
-          <div id="validation" className="flex gap-2 items-center p-2 min-w-[850px]">
-            <div className="bg-emerald-600 hover:bg-emerald-400 p-4">
+          <div id="validation" className="flex gap-2 items-center p-2 ">
+            <div className="bg-emerald-600 shrink-0 hover:bg-emerald-400 p-4">
               <button
                 ref={addQtyBtn}
                 onClick={() => {
@@ -477,7 +453,7 @@ const [title, setTitle] = useState(0);
                 <img src={add} className="w-10" />
               </button>
             </div>
-            <div className="bg-red-600 hover:bg-red-400 p-4">
+            <div className="bg-red-600 shrink-0 hover:bg-red-400 p-4">
               <button
                 ref={subQtyBtn}
                 onClick={() => {
@@ -496,21 +472,37 @@ const [title, setTitle] = useState(0);
                 <img src={minus} className="w-10" />
               </button>
             </div>
-            <div className="bg-green-500 hover:bg-green-700 p-[9px]">
+            <div className="bg-green-500 shrink-0 hover:bg-green-700 p-[9px]">
               <button
                 ref={validateBtn}
                 onClick={() => {
                   if (bonAchat.isEdit === true) {
                     // update buying List
-
                     ipcRenderer.send("updateBuying", {
-                      ...bonAchat,
+                      paymentType: bonAchat.paymentType,
                       supplier: { name: bonAchat.supplier.name, _id: bonAchat.supplier._id, credit: bonAchat.supplier.credit },
+                      mode: bonAchat.mode,
+                      tva: bonAchat.tva,
+                      rebate: bonAchat.rebate.toFixed(2),
+                      deposit: bonAchat.deposit.toFixed(2),
+                      amount: bonAchat.amount.toFixed(2),
+                      total: bonAchat.total.toFixed(2),
                       totalbuyPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
-                      totalSellPriceGros: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
                       grid: bonAchat.selectedProducts,
                     });
                     ipcRenderer.on("refreshGridBuying:update", (e, res) => {
+                      store?.set("activity", [
+                        ...store?.get("activity"),
+                        {
+                          date: new Date(),
+                          page: "Bon Achat",
+                          action: "modifier",
+                          title:"Modifier Bon Achat",
+                          item: JSON.parse(res),
+                          user: store?.get("user")?.userName,
+                          role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                        },
+                      ]);
                       bonAchat.selectedProducts.forEach((prod) => {
                         // quantity update
                         productsList.forEach((curProduct) => {
@@ -523,7 +515,10 @@ const [title, setTitle] = useState(0);
                         });
                       });
                       loadBuyings();
-
+                      useStore.setState({ toast: { show: true, title: "Achat Modifier Avec Succés", type: "success" } });
+                      setTimeout(() => {
+                        useStore.setState({ toast: { show: false } });
+                      }, 2000);
                       // clear oldSupplier credit if changed
                       if (bonAchat.oldSupplier._id != bonAchat.supplier._id) {
                         providersData.forEach((provider) => {
@@ -577,17 +572,31 @@ const [title, setTitle] = useState(0);
                         deposit: bonAchat.deposit.toFixed(2),
                         amount: bonAchat.amount.toFixed(2),
                         total: bonAchat.total.toFixed(2),
-                        totalSellPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.sellPrice * cur.selectedQuantity, 0).toFixed(2),
                         totalbuyPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
-                        totalSellPriceGros: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.sellPriceGros * cur.selectedQuantity, 0).toFixed(2),
                         grid: bonAchat.selectedProducts,
                       });
                     ipcRenderer.on("refreshGridBuying:add", (e, res) => {
+                      store?.set("activity", [
+                        ...store?.get("activity"),
+                        {
+                          date: new Date(),
+                          page: "Bon Achat",
+                          action: "ajouter",
+                          item: JSON.parse(res),
+                          title: "Bon Achat Ajouter",
+                          user: store?.get("user")?.userName,
+                          role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                        },
+                      ]);
                       bonAchat.selectedProducts.forEach((prod) => {
                         // quantity update
                         ipcRenderer.send("updateProduct", { _id: prod._id, quantity: parseInt(prod.quantity) + parseInt(prod.selectedQuantity) });
                       });
                       loadBuyings();
+                      useStore.setState({ toast: { show: true, title: "Achat Ajouter Avec Succés", type: "success" } });
+                      setTimeout(() => {
+                        useStore.setState({ toast: { show: false } });
+                      }, 2000);
                       if (bonAchat.supplier.name != "Standard" && bonAchat.amount - bonAchat.deposit > 0) {
                         providersData.forEach((provider) => {
                           if (provider._id === bonAchat.supplier._id) {
@@ -631,7 +640,7 @@ const [title, setTitle] = useState(0);
                 <img src={done} className="w-10" />
               </button>
             </div>
-            <div className="bg-lime-500 hover:bg-lime-700 p-[9px]">
+            <div className="bg-lime-500 shrink-0 hover:bg-lime-700 p-[9px]">
               <button ref={printBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
                 <div className="flex flex-col">
                   <span>Imprimer</span>
@@ -640,7 +649,7 @@ const [title, setTitle] = useState(0);
                 <img src={print} className="w-10" />
               </button>
             </div>
-            <div className="bg-rose-500 hover:bg-rose-700 p-[9px]">
+            <div className="bg-rose-500 shrink-0 hover:bg-rose-700 p-[9px]">
               <button
                 ref={deleteBtn}
                 onClick={() => {
@@ -653,15 +662,6 @@ const [title, setTitle] = useState(0);
                   <span className="text-base">(Suppr)</span>
                 </div>
                 <img src={deletePng} className="w-10" />
-              </button>
-            </div>
-            <div className="bg-blue-500 hover:bg-blue-700 p-[9px]">
-              <button ref={newTabBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <div className="flex flex-col">
-                  <span>Nouveau</span>
-                  <span className="text-base">(F6)</span>
-                </div>
-                <img src={newPng} className="w-10" />
               </button>
             </div>
           </div>

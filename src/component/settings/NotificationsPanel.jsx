@@ -1,34 +1,47 @@
-import React, { useState } from 'react';
-
+import Store from "electron-store";
+import React, { useState } from "react";
 function NotificationsPanel() {
-
-  const [comments, setComments] = useState(true);
-  const [messages, setMessages] = useState(true);
-  const [mentions, setMentions] = useState(false);
+  const schema = {
+    notifications: { default: { productAlert: true, clients: true, providers: true, revenue: true }, type: "object" },
+  };
+  const store = new Store({ schema });
+  const notify = store?.get("notifications");
+  const [productAlert, setProductAlert] = useState(notify.productAlert);
+  const [clients, setClients] = useState(notify.clients);
+  const [providers, setProviders] = useState(notify.providers);
+  const [revenue, setRevenue] = useState(notify.revenue);
 
   return (
-    <div className="grow">
-
+    <div className=" h-[500px]">
       {/* Panel body */}
       <div className="p-6 space-y-6">
-        <h2 className="text-2xl text-slate-800 font-bold mb-5">My Notifications</h2>
+        <h2 className="text-2xl text-slate-800 font-bold mb-5">Notifications</h2>
 
         {/* General */}
         <section>
-          <h3 className="text-xl leading-snug text-slate-800 font-bold mb-1">General</h3>
+          <h3 className="text-xl leading-snug text-slate-800 font-bold mb-1">Géneral</h3>
           <ul>
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Comments and replies</div>
-                <div className="text-sm">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit.</div>
+                <div className="text-slate-800 font-semibold">Rupture de Stock</div>
+                <div className="text-sm">Notification des Produit en quantité alérte ou rupture.</div>
               </div>
               {/* Right */}
               <div className="flex items-center ml-4">
-                <div className="text-sm text-slate-400 italic mr-2">{comments ? 'On' : 'Off'}</div>
+                <div className="text-sm text-slate-400 italic mr-2">{productAlert ? "On" : "Off"}</div>
                 <div className="form-switch">
-                  <input type="checkbox" id="comments" className="sr-only" checked={comments} onChange={() => setComments(!comments)} />
-                  <label className="bg-slate-400" htmlFor="comments">
+                  <input
+                    type="checkbox"
+                    id="productAlert"
+                    className="sr-only"
+                    checked={productAlert}
+                    onChange={(e) => {
+                      setProductAlert(!productAlert);
+                      store?.set("notifications", { ...store?.get("notifications"), productAlert: e.target.checked });
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="productAlert">
                     <span className="bg-white shadow-sm" aria-hidden="true"></span>
                     <span className="sr-only">Enable smart sync</span>
                   </label>
@@ -38,15 +51,24 @@ function NotificationsPanel() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Messages</div>
-                <div className="text-sm">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit.</div>
+                <div className="text-slate-800 font-semibold">Crédit Client</div>
+                <div className="text-sm">Notification des crédits clients .</div>
               </div>
               {/* Right */}
               <div className="flex items-center ml-4">
-                <div className="text-sm text-slate-400 italic mr-2">{messages ? 'On' : 'Off'}</div>
+                <div className="text-sm text-slate-400 italic mr-2">{clients ? "On" : "Off"}</div>
                 <div className="form-switch">
-                  <input type="checkbox" id="messages" className="sr-only" checked={messages} onChange={() => setMessages(!messages)} />
-                  <label className="bg-slate-400" htmlFor="messages">
+                  <input
+                    type="checkbox"
+                    id="clients"
+                    className="sr-only"
+                    checked={clients}
+                    onChange={(e) => {
+                      setClients(!clients);
+                      store?.set("notifications", { ...store?.get("notifications"), clients: e.target.checked });
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="clients">
                     <span className="bg-white shadow-sm" aria-hidden="true"></span>
                     <span className="sr-only">Enable smart sync</span>
                   </label>
@@ -56,15 +78,51 @@ function NotificationsPanel() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Mentions</div>
-                <div className="text-sm">Excepteur sint occaecat cupidatat non in culpa qui officia deserunt mollit.</div>
+                <div className="text-slate-800 font-semibold">Déttes Fournisseurs</div>
+                <div className="text-sm">Notifications des déttes des fournisseurs.</div>
               </div>
               {/* Right */}
               <div className="flex items-center ml-4">
-                <div className="text-sm text-slate-400 italic mr-2">{mentions ? 'On' : 'Off'}</div>
+                <div className="text-sm text-slate-400 italic mr-2">{providers ? "On" : "Off"}</div>
                 <div className="form-switch">
-                  <input type="checkbox" id="mentions" className="sr-only" checked={mentions} onChange={() => setMentions(!mentions)} />
-                  <label className="bg-slate-400" htmlFor="mentions">
+                  <input
+                    type="checkbox"
+                    id="providers"
+                    className="sr-only"
+                    checked={providers}
+                    onChange={(e) => {
+                      setProviders(!providers);
+                      store?.set("notifications", { ...store?.get("notifications"), providers: e.target.checked });
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="providers">
+                    <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    <span className="sr-only">Enable smart sync</span>
+                  </label>
+                </div>
+              </div>
+            </li>
+            <li className="flex justify-between items-center py-3 border-b border-slate-200">
+              {/* Left */}
+              <div>
+                <div className="text-slate-800 font-semibold">Revenue Quotidien</div>
+                <div className="text-sm">Notification des Revenues des ventes journalier.</div>
+              </div>
+              {/* Right */}
+              <div className="flex items-center ml-4">
+                <div className="text-sm text-slate-400 italic mr-2">{revenue ? "On" : "Off"}</div>
+                <div className="form-switch">
+                  <input
+                    type="checkbox"
+                    id="revenue"
+                    className="sr-only"
+                    checked={revenue}
+                    onChange={(e) => {
+                      setRevenue(!revenue);
+                      store?.set("notifications", { ...store?.get("notifications"), revenue: e.target.checked });
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="revenue">
                     <span className="bg-white shadow-sm" aria-hidden="true"></span>
                     <span className="sr-only">Enable smart sync</span>
                   </label>
@@ -75,57 +133,7 @@ function NotificationsPanel() {
         </section>
 
         {/* Shares */}
-        <section>
-          <h3 className="text-xl leading-snug text-slate-800 font-bold mb-1">Shares</h3>
-          <ul>
-            <li className="flex justify-between items-center py-3 border-b border-slate-200">
-              {/* Left */}
-              <div>
-                <div className="text-slate-800 font-semibold">Shares of my content</div>
-                <div className="text-sm">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit.</div>
-              </div>
-              {/* Right */}
-              <div className="flex items-center ml-4">
-                <button className="btn-sm border-slate-200 hover:border-slate-300 shadow-sm">Manage</button>
-              </div>
-            </li>
-            <li className="flex justify-between items-center py-3 border-b border-slate-200">
-              {/* Left */}
-              <div>
-                <div className="text-slate-800 font-semibold">Team invites</div>
-                <div className="text-sm">Excepteur sint occaecat cupidatat non in culpa qui officia deserunt mollit.</div>
-              </div>
-              {/* Right */}
-              <div className="flex items-center ml-4">
-                <button className="btn-sm border-slate-200 hover:border-slate-300 shadow-sm">Manage</button>
-              </div>
-            </li>
-            <li className="flex justify-between items-center py-3 border-b border-slate-200">
-              {/* Left */}
-              <div>
-                <div className="text-slate-800 font-semibold">Smart connection</div>
-                <div className="text-sm">Excepteur sint occaecat cupidatat non in culpa qui officia deserunt mollit.</div>
-              </div>
-              {/* Right */}
-              <div className="flex items-center ml-4">
-                <div className="text-sm text-slate-400 italic mr-2 hidden md:block">Active</div>
-                <button className="btn-sm border-slate-200 hover:border-slate-300 shadow-sm text-rose-500">Disable</button>
-              </div>
-            </li>
-          </ul>
-        </section>
       </div>
-
-      {/* Panel footer */}
-      <footer>
-        <div className="flex flex-col px-6 py-5 border-t border-slate-200">
-          <div className="flex self-end">
-            <button className="btn border-slate-200 hover:border-slate-300 text-slate-600">Cancel</button>
-            <button className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3">Save Changes</button>
-          </div>
-        </div>
-      </footer>
-
     </div>
   );
 }
