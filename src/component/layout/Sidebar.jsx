@@ -18,15 +18,16 @@ const isLoggedIn = useStore((state) => state.isLoggedIn);
     <div
       id="sidebar"
       ref={sidebar}
-      className={` sticky top-0 w-[132px]  flex-none h-screen overflow-hidden bg-slate-800 "
+      className={` sticky top-0 w-[132px]  flex-none h-screen overflow-hidden select-none bg-slate-800 "
       }`}>
       <div
         className={`  ${isLoggedIn ? "w-[132px] " : "opacity-0 w-0"} transition-all duration-300 flex-none h-screen  overflow-y-auto  bg-slate-800 "
       }`}>
         <div className="flex items-center justify-center mt-2 mb-5 select-none">
-        <button >
-          <img className="w-[60px] h-[60px] rounded-full bg-contain" src={store?.get("company").logo || logo} />
-        </button></div>
+          <button>
+            <img className="w-[60px] h-[60px] rounded-full bg-contain" src={store?.get("company")?.logo || logo} />
+          </button>
+        </div>
         <div className={`px-5 py-6 border-t-[1px] border-slate-900 ${pathname.includes("sell") && "bg-slate-900"}`}>
           <NavLink end to="/sell" className={`block  text-slate-200 hover:text-white truncate transition duration-150 ${pathname.includes("sell") && "hover:text-slate-200"}`}>
             <div className="flex flex-col justify-center items-center ">

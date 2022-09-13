@@ -19,13 +19,13 @@ import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { loadCustomers, useStore } from "../../contexts/Store";
-import AvanceCustomer from "../AvanceCustomer";
+import AvanceCustomer from "../avance/AvanceCustomer";
 import CustomerFormTemplate from "../form/CustomerForm";
 import Localization from "../Localization";
-import CustomerCreditList from "./../CustomerCreditList";
+import CustomerCreditList from "../list/CustomerCreditList";
 import Status from "./templates/CustomerStatus";
 const { ipcRenderer } = require("electron");
-
+import { ErrorBoundary } from "react-error-boundary";
 // ******** Get Customers List  ********
 
 Localization("Client");

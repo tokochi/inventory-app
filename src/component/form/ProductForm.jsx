@@ -103,7 +103,6 @@ export default function ProductForm(props) {
                 type="text"
                 id="name"
                 width="full"
-                onInput={() => gridProduct?.editModule?.editFormValidate()}
                 onChange={(e) => {
                   e.value != null && setName(e.value);
                   gridProduct?.editModule?.editFormValidate();

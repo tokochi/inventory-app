@@ -1,21 +1,22 @@
 import { DateTimePickerComponent } from "@syncfusion/ej2-react-calendars";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import React, { useState } from "react";
-import { loadDepenses, useStore } from "../contexts/Store";
-import TextBox from "./button/TextBox";
+import TextBox from "../button/TextBox";
 import Store from "electron-store";
+import { loadProviders, useStore } from "../../contexts/Store";
 const { ipcRenderer } = require("electron");
 
-export default function AddDepense({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
+export default function AvanceProvider({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
+  const providersData = () => useStore((state) => state.providers);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [amount, setAmount] = useState(0);
-  const [comment, setComment] = useState("");
+  const store = new Store();
   const [requiredName, setRequiredName] = useState(false);
   const [requiredPrice, setRequiredPrice] = useState(false);
-  const [description, setDescription] = useState("");
+  const [paymentType, setPaymentType] = useState("");
   const [date, setDate] = useState(new Date());
-  const [slectedDepense, setSlectedDepense] = useState("");
-const store = new Store();
+  const [slectedProvider, setSlectedProvider] = useState("");
+
   return (
     <>
       <button
@@ -27,13 +28,13 @@ const store = new Store();
         <svg className="w-4 h-4 fill-current opacity-50 shrink-0" viewBox="0 0 16 16">
           <path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" />
         </svg>
-        <span className="hidden xs:block ml-2">Ajouter Dépense</span>
+        <span className="hidden xs:block ml-2">Ajouter Versement</span>
       </button>
       <DialogComponent
         id={id}
         isModal
         allowDragging
-        header="Ajouter une Dépense"
+        header="Réglement Crédits"
         visible={dropdownOpen}
         showCloseIcon={true}
         closeOnEscape
@@ -42,46 +43,54 @@ const store = new Store();
         close={() => setDropdownOpen(false)}
         footerTemplate={() => (
           <div>
-            {" "}
             <ul className="flex items-center justify-end gap-6">
               <li>
                 <button
                   className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
                   onClick={() => {
                     switch (true) {
-                      case description === "":
+                      case slectedProvider === "":
                         setRequiredName(true);
                         break;
                       case amount === 0:
                         setRequiredPrice(true);
                         break;
-
                       default:
-                        amount > 0 && ipcRenderer.send("addDepense", { amount, comment, description, date, type: slectedDepense });
-                        setAmount(0);
-                        setComment("");
-                        setDescription("");
-                        setSlectedDepense("");
-                        ipcRenderer.on("refreshDepense:add", (e, res) => {
+                        amount > 0 &&
+                          ipcRenderer.send("updateProvider", {
+                            credit: parseInt(slectedProvider.credit) - parseInt(amount),
+                            _id: slectedProvider._id,
+                            avance: [...slectedProvider.avance, { credit: slectedProvider.credit, date, amount, paymentType, name: slectedProvider.name, providerId: slectedProvider._id }],
+                          });
+                        ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                          ipcRenderer.removeAllListeners("refreshGridProvider:update");
+                          setAmount(0);
+                          setSlectedProvider("");
+                          setPaymentType("");
+                          setDropdownOpen(false);
                           store?.set("activity", [
                             ...store?.get("activity"),
                             {
                               date: new Date(),
-                              page: "Dépense",
+                              page: "Avance fournisseur",
                               action: "ajouter",
-                              title: "Nouvelle Dépense Ajouter",
-                              item: { name: "Dépense", amount, description, type: slectedDepense },
+                              item: {
+                                name: slectedProvider.name,
+                                type: "Avance",
+                                amount: parseInt(amount),
+                                credit: parseInt(slectedProvider.credit) - parseInt(amount),
+                              },
                               user: store?.get("user")?.userName,
+                              title: "Nouvelle Avance Fournisseur Ajouter",
                               role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
                             },
                           ]);
-                          setDropdownOpen(false);
-                          useStore.setState({ toast: { show: true, title: "Dépense Ajouter Avec Succés", type: "success" } });
+                          useStore.setState({ toast: { show: true, title: "Avance Ajouter Avec Succés", type: "success" } });
                           setTimeout(() => {
                             useStore.setState({ toast: { show: false } });
                           }, 2000);
-                          loadDepenses();
-                          ipcRenderer.removeAllListeners("refreshDepense:add");
+                          loadProviders();
+                          // window.location.reload();
                         });
                         break;
                     }
@@ -94,9 +103,8 @@ const store = new Store();
                   className="btn-xs bg-white border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-600"
                   onClick={(e) => {
                     setAmount(0);
-                    setComment("");
-                    setDescription("");
-                    setSlectedDepense("");
+                    setSlectedProvider("");
+                    setPaymentType("");
                     setDropdownOpen(false);
                   }}>
                   Annuler
@@ -109,21 +117,26 @@ const store = new Store();
           <table>
             <tbody>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Type:</td>
+                <td className="p-4 w-[220px] text-sm font-medium">Choisir Fournisseur:</td>
                 <td className="w-[320px]">
                   <TextBox
                     type="dropdown"
                     id="provider"
                     width="full"
-                    onChange={(e) => e.value != null && setSlectedDepense(e.value)}
-                    dataSource={["Facture élec/Gaz", "Salaire Employée", "Avance de paie", "Frais Location", "Maintenance", "Sérvices", "Frais Transport", "Autre Frais"]}
+                    onChange={(e) => {
+                      e.itemData != null && setSlectedProvider(e.itemData);
+                      setRequiredName(false);
+                    }}
+                    dataSource={providersData()}
+                    fields={{ value: "_id", text: "name" }}
                     popupHeight="200px"
-                    title="Type Dépense"
+                    title="Choisir le Fournisseur"
                   />
+                  {requiredName && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
                 </td>
               </tr>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Date:</td>
+                <td className="p-4 w-[220px] text-sm font-medium">Date Réglement:</td>
 
                 <td className="w-[320px]">
                   <DateTimePickerComponent
@@ -132,26 +145,43 @@ const store = new Store();
                     width="260"
                     value={date}
                     onChange={(e) => setDate(e.value)}
-                    placeholder="Date"
+                    placeholder="Date de paiment"
                     format="dddd MMMM y - HH:mm"
                     floatLabelType="Never"></DateTimePickerComponent>
                 </td>
               </tr>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Déscription:</td>
+                <td className="p-4 w-[220px] text-sm font-medium">Mode de Paiement:</td>
                 <td className="w-[320px]">
                   <TextBox
-                    type="text"
+                    type="dropdown"
                     id="paymentType"
                     width="full"
-                    value={description}
-                    onChange={(e) => {
-                      e.value != null && setDescription(e.value);
-                      setRequiredName(false);
-                    }}
-                    title="Déscription"
+                    value={paymentType}
+                    onChange={(e) => e.value != null && setPaymentType(e.value)}
+                    dataSource={["Espéce", "Chéque", "Virement"]}
+                    popupHeight="200px"
+                    title="Mode de Paiement"
                   />
-                  {requiredName && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
+                </td>
+              </tr>
+              <tr>
+                <td className="p-4 w-[220px] text-sm font-medium">Crédits initial:</td>
+                <td className="w-[320px] text-rose-500 select-none">
+                  <TextBox
+                    type="number"
+                    // readonly
+                    // showSpinButton={false}
+                    enabled={false}
+                    format="N2"
+                    label="DA"
+                    id="credit"
+                    width="w-[200px]"
+                    value={slectedProvider.credit}
+                    step={100}
+                    min={0}
+                    title="Montant Avance"
+                  />
                 </td>
               </tr>
               <tr>
@@ -163,25 +193,24 @@ const store = new Store();
                     label="DA"
                     id="amount"
                     width="w-[200px]"
-                    value={amount}
+                    max={slectedProvider.credit}
                     onChange={(e) => {
                       e.value != null && setAmount(e.value);
                       setRequiredPrice(false);
                     }}
                     step={100}
                     min={0}
-                    title="Montant Dépense"
-                  />
-                  {requiredPrice && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
+                    title="Montant Avance"
+                    />
+                    {requiredPrice && <span className="m-1 text-xs text-red-400">ce champ est obligatoire</span>}
                 </td>
               </tr>
               <tr>
-                <td className="p-4 w-[220px] text-sm font-medium">Remarque:</td>
-                <td className="w-[320px] text-rose-500 select-none">
-                  <TextBox type="text" multiline id="comment" width="full" onChange={(e) => e.value != null && setComment(e.value)} value={comment} title="Remarque sur la Dépense" />
+                <td className={`p-4 w-[220px] text-sm font-medium`}>Crédits restant:</td>
+                <td className={`w-[320px] select-none ${slectedProvider.credit === amount ? "text-emerald-500" : "text-amber-500"}`}>
+                  <TextBox type="number" enabled={false} format="N2" label="DA" id="creditLeft" width="w-[200px]" step={100} min={0} value={slectedProvider.credit - amount} title="Crédits restant" />
                 </td>
               </tr>
-              <tr></tr>
             </tbody>
           </table>
         </div>

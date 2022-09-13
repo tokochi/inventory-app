@@ -20,7 +20,7 @@ export default function ProviderForm(props) {
           <tr>
             <td className={labelclassName}>Raison Social:</td>
             <td className="w-[320px]">
-              <TextBox type="text" id="name" width="full" onInput={() => gridProduct?.editModule?.editFormValidate()} value={props?.name || ""} title="Nom du Fournisseur" />
+              <TextBox type="text" id="name" width="full" onChange={() => gridProduct?.editModule?.editFormValidate()} value={props?.name || ""} title="Nom du Fournisseur" />
             </td>
           </tr>
           <tr>

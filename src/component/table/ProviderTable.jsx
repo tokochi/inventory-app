@@ -19,10 +19,10 @@ import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { loadProviders, useStore } from "../../contexts/Store";
-import AvanceProvider from "../AvanceProvider";
+import AvanceProvider from "../avance/AvanceProvider";
 import ProviderFormTemplate from "../form/ProviderForm";
 import Localization from "../Localization";
-import ProviderCreditList from "./../ProviderCreditList";
+import ProviderCreditList from "./../list/ProviderCreditList";
 import Status from "./templates/ProviderStatus";
 const { ipcRenderer } = require("electron");
 

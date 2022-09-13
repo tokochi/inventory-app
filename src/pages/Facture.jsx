@@ -8,7 +8,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useReactToPrint } from "react-to-print";
 import styled from "styled-components";
 import TextBox from "../component/button/TextBox";
-import PrintInvoice from "../component/PrintInvoiceFacture";
+import PrintInvoice from "../component/invoice/PrintInvoiceFacture";
 import { loadCustomers, loadProducts, loadVendings, useStore } from "../contexts/Store";
 import ProductFormPopUp from "./../component/form/ProductFormPopUp";
 import add from "./../data/icons/add.png";
@@ -546,13 +546,8 @@ export default function Facture(props) {
                   if (facture.isEdit === true) {
                     // update vending List
                     ipcRenderer.send("updateVending", {
-                      client: { name: facture.client.name, _id: facture.client._id, credit: facture.client.credit },
-                      mode: facture.mode,
-                      tva: facture.tva,
-                      rebate: facture.rebate.toFixed(2),
-                      deposit: facture.deposit.toFixed(2),
-                      amount: facture.amount.toFixed(2),
-                      total: facture.total.toFixed(2),
+                      ...facture,
+                      autoCompleteObj: {},
                       totalbuyPrice: facture.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
                       grid: facture.selectedProducts,
                     });

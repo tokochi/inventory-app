@@ -96,11 +96,9 @@ export default function Caisse() {
       setShowPrintDiv(true);
     }
   }, [showPrintDiv]);
-
   useEffect(() => {
     useCaisseStore.setState((state) => ({ caisse: { ...state.caisse, autoCompleteObj } }));
   }, [autoCompleteObj]);
-
   const productsTemplate = (props) => (
     <table className="table-auto w-full">
       <tbody>
@@ -140,10 +138,11 @@ export default function Caisse() {
       </tbody>
     </table>
   );
+
   return (
     <div className="bg-white  shadow-lg rounded-sm h-[700px]  relative ">
       <div className="flex  justify-center">
-        <div id="left" className="bg-white flex-1 min-w-[545px]">
+        <div id="left" className="bg-white w-[410px]">
           <div id="option" className="flex  items-center my-2">
             <span className="px-4  text-sm font-medium min-w-[120px] ">Mode Vente:</span>
             <TextBox
@@ -212,15 +211,15 @@ export default function Caisse() {
                         }
                       }}
                       style={{ backgroundImage: `url(${box})` }}
-                      className={` m-2 w-[162px] h-[120px] select-none flex flex-col bg-center bg-auto justify-start cursor-pointer items-center rounded-lg px-2 py-1 border border-slate-200 hover:opacity-90 shadow-sm  text-slate-500 duration-150 ease-in-out`}>
+                      className={` m-2 w-[120px] h-[100px] select-none flex flex-col bg-[length:200px] bg-center justify-start cursor-pointer items-center rounded-lg  py-1 border border-slate-200 hover:opacity-90 shadow-sm  text-slate-500 duration-150 ease-in-out`}>
                       <div className="flex gap-2 justify-center items-center ">
-                        <span className="text-slate-900 text-sm font-semibold text-center ">{product.name.slice(0, 22)}</span>
+                        <span className="text-slate-900 text-[13px] font-semibold text-center ">{product.name.slice(0, 30)}</span>
                       </div>
                       <div className="p-2 flex flex-col gap-1">
-                        <div className="inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
+                        <div className="inline-flex  items-center justify-center text-[11px] font-medium  rounded-full px-[1.5px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
                           Quantité:<span className="text-green-700 pl-1"> {product.quantity}</span>
                         </div>
-                        <div className="inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
+                        <div className="inline-flex  items-center justify-center text-[11px] font-medium  rounded-full px-[2px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
                           Prix: <span className="text-green-700 pl-1">{caisse.mode === "Détail" ? toCurrency(product.sellPrice) : toCurrency(product.sellPriceGros)}</span>
                         </div>
                       </div>
@@ -230,7 +229,7 @@ export default function Caisse() {
             </div>
           </div>
         </div>
-        <div id="right" className="w-full flex flex-col min-w-[650px] bg-slate-600 select-none">
+        <div id="right" className="w-full flex flex-col flex-1 bg-slate-600 select-none">
           <div id="black_screen" className="flex gap-5 bg-black rounded-sm ">
             <div id="info_screen" className="text-xl text-white p-2 shrink-0">
               <div id="date" className="flex items-center gap-2">
@@ -445,12 +444,12 @@ export default function Caisse() {
               </div>
             )}
             <hr className="w-10" />
-            <div id="option" className="flex items-center border p-2 text-lg border-slate-400">
-              <span className=" font-medium text-slate-700 min-w-[100px]">Total à Payer TTC:</span>
+            <div id="option" className="flex items-center gap-2 whitespace-nowrap border text-base p-1 border-slate-400">
+              <span className=" font-medium text-slate-700 ">Total à Payer TTC:</span>
               <span className="font-semibold ml-2 text-slate-600">{toCurrency(caisse.amount)}</span>
             </div>
           </div>
-          <div id="validation" className="flex gap-2 items-center p-2 ">
+          <div id="validation" className="flex gap-2 items-center p-2 min-w-max shrink-0">
             <div className="bg-emerald-600 hover:bg-emerald-400 p-4 shrink-0">
               <button
                 ref={addQtyBtn}
@@ -496,12 +495,8 @@ export default function Caisse() {
                   if (caisse.isEdit === true) {
                     // update vending List
                     ipcRenderer.send("updateVending", {
-                      client: { name: caisse.client.name, _id: caisse.client._id, credit: caisse.client.credit },
-                      mode: caisse.mode,
-                      rebate: caisse.rebate.toFixed(2),
-                      deposit: caisse.deposit.toFixed(2),
-                      amount: caisse.amount.toFixed(2),
-                      total: caisse.total.toFixed(2),
+                      ...caisse,
+                      autoCompleteObj: {},
                       totalbuyPrice: caisse.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
                       grid: caisse.selectedProducts,
                     });
@@ -575,7 +570,6 @@ export default function Caisse() {
                     });
                   } else {
                     // add new vending
-                    console.log(caisse);
                     caisse.amount != 0 &&
                       ipcRenderer.send("addVending", {
                         time: new Date(),

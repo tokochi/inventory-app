@@ -13,11 +13,13 @@ function DropdownNotifications({ align }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const trigger = useRef(null);
   const dropdown = useRef(null);
-  const schema = {
-    revenue: { type: "object", default: { time: new Date() } },
-  };
+    const schema = {
+      revenueTime: { type: "object", default: { time: new Date() } },
+      notifications: { default: { productAlert: true, clients: true, providers: true, revenue: true }, type: "object" },
+    };
   const store = new Store({ schema });
-  const notify = store?.get("notifications");
+  const lastTime = store.get("revenueTime")
+  const notify = store.get("notifications");
   const toCurrency = useStore((state) => state.toCurrency);
   const productsData = useStore((state) => state.products);
   const customersData = useStore((state) => state.customers);
@@ -30,7 +32,7 @@ function DropdownNotifications({ align }) {
   const outStock = productsData.filter((prodct) => prodct.quantity <= (prodct.qtyAlert || 0) && prodct.notification === true && Math.abs(moment(prodct?.lastTimeNotify).diff(moment(), "days")) > 3);
   const customerCredit = customersData.filter((cust) => cust.credit > 0 && Math.abs(moment(cust?.lastTimeNotify).diff(moment(), "days")) > 3);
   const providerCredit = providersData.filter((cust) => cust.credit > 0 && Math.abs(moment(cust?.lastTimeNotify).diff(moment(), "days")) > 3);
-  const revenueNotify = notify.revenue && Math.abs(moment(store?.get("revenue").time).diff(moment(), "days")) > 0;
+  const revenueNotify = notify?.revenue && Math.abs(moment(lastTime || new Date()).diff(moment(), "days")) > 0;
 
 
   // close on click outside
@@ -210,7 +212,7 @@ function DropdownNotifications({ align }) {
                   to="#0"
                   onClick={() => {
                     setDropdownOpen(!dropdownOpen);
-                    store?.set("revenue", { time: new Date() });
+                    store?.set("revenueTime", { time: new Date() });
                   }}>
                   <div className="">
                     <h2 className=" font-semibold  text-slate-800">Revenue Quotidien</h2>

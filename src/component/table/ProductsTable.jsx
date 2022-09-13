@@ -22,7 +22,7 @@ import { useReactToPrint } from "react-to-print";
 import { loadProducts, useStore } from "../../contexts/Store";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import ProductsInventory from "./../ProductsInventory";
+import ProductsInventory from "./../list/ProductsInventory";
 import Status from "./templates/ProductsStatus";
 const { ipcRenderer } = require("electron");
 

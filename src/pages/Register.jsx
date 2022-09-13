@@ -22,6 +22,18 @@ export default function Register() {
       type: "array",
       default: [],
     },
+    activity: {
+      type: "array",
+      default: [],
+    },
+    reset: {
+      default: false,
+    },
+
+    pin: {
+      type: "number",
+      default: 1990,
+    },
   };
   const store = new Store({ schema });
   const users = store?.get("users");
@@ -164,6 +176,18 @@ export default function Register() {
                           setWrongPin(true);
                           break;
                         default:
+                             store?.set("activity", [
+                               ...store?.get("activity"),
+                               {
+                                 date: new Date(),
+                                 page: "Inscription",
+                                 action: "ajouter",
+                                 item: { name: userName },
+                                 title: "Nouveau Compte Ajouter",
+                                 user: store?.get("user")?.userName,
+                                 role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                               },
+                             ]);
                           setIsSpin(true);
                           users.push({ userName, password, isAdmin: checked, caisse: 1, pages: ["/products", "/provider", "/customers", "/sell", "/buy", "/caisse", "/facture", "/bonAchat"] });
                           store?.set("users", users);

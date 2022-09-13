@@ -8,7 +8,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useReactToPrint } from "react-to-print";
 import styled from "styled-components";
 import TextBox from "../component/button/TextBox";
-import PrintInvoice from "../component/PrintInvoiceBonAchat";
+import PrintInvoice from "../component/invoice/PrintInvoiceBonAchat";
 import { loadBuyings, loadProducts, loadProviders, useStore } from "../contexts/Store";
 import ProductFormPopUp from "./../component/form/ProductFormPopUp";
 import add from "./../data/icons/add.png";
@@ -479,14 +479,8 @@ export default function BonAchat() {
                   if (bonAchat.isEdit === true) {
                     // update buying List
                     ipcRenderer.send("updateBuying", {
-                      paymentType: bonAchat.paymentType,
-                      supplier: { name: bonAchat.supplier.name, _id: bonAchat.supplier._id, credit: bonAchat.supplier.credit },
-                      mode: bonAchat.mode,
-                      tva: bonAchat.tva,
-                      rebate: bonAchat.rebate.toFixed(2),
-                      deposit: bonAchat.deposit.toFixed(2),
-                      amount: bonAchat.amount.toFixed(2),
-                      total: bonAchat.total.toFixed(2),
+                      ...bonAchat,
+                      autoCompleteObj: {},
                       totalbuyPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
                       grid: bonAchat.selectedProducts,
                     });

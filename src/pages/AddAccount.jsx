@@ -167,7 +167,7 @@ export default function AddAccount() {
                               date: new Date(),
                               page: "Inscription",
                               action: "ajouter",
-                              item: JSON.parse(res),
+                              item: { name: userName },
                               title: "Nouveau Compte Ajouter",
                               user: store?.get("user")?.userName,
                               role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",

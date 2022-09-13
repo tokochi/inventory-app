@@ -2,8 +2,8 @@ import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import moment from "moment";
 import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { loadDepenses, useStore } from "../contexts/Store";
-import deletePng2 from "./../data/icons/delete2.png";
+import { loadDepenses, useStore } from "../../contexts/Store";
+import deletePng2 from "./../../data/icons/delete2.png";
 
 const { ipcRenderer } = require("electron");
 

@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from "react";
 import facebook from "../../data/icons/facebook.png";
-import instagram from "../../data/icons/Instagram_240px.png";
 import logo from "../../data/icons/logo.png";
 import card from "../../data/icons/visit.png";
-import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
-import { loadCustomers, loadVendings, loadProducts, useStore } from "../../contexts/Store";
 import Store from "electron-store";
-
+import Animation from "../animation";
 export default function Company() {
-  const schema = { company: { type: "object" } };
+  const schema = {
+    company: {
+      type: "object",
+      default: {
+        userName: "AMIN HAMIDI",
+        address: "Hay Bensouna Nouvelle Ville",
+        email: "Email@gmail.Com",
+        phone: "05 40 22 27 82",
+        fax: "027 78 78 78",
+        site: "www.minishop-dz.com",
+        name: "MiniShop Bensouna",
+        facebook: "MiniShop Bensouna",
+      },
+    },
+  };
   const [refresh, setRefresh] = useState(false);
   const store = new Store({ schema });
 
@@ -16,6 +27,7 @@ export default function Company() {
     <div className="grow overflow-y-auto h-[600px] ">
       <div className="p-6">
         <h2 className="text-2xl text-slate-800 font-bold ">Entreprise</h2>
+          <Animation visible={true} from={{ x: 0, y: -400, opacity: 0 }} enter={{ x: 0, y: 0, opacity: 1 }} leave={{}}>
         <section className="flex  items-center justify-center">
           <div className="relative shrink-0 ">
             <img className="w-[700px] bg-transparent drop-shadow-md rounded-3xl" src={card} />
@@ -102,10 +114,10 @@ export default function Company() {
                 id="name"
                 onChange={(e) => {
                   const temp = store.get("company");
-                  e.target.value != null && store.set("company", { ...temp, name: e.target.value });
+                  e.target.value != null && store.set("company", { ...temp, facebook: e.target.value });
                   setRefresh(!refresh);
                 }}
-                value={store?.get("company")?.name}
+                value={store?.get("company")?.facebook}
                 className="p-0 w-[150px] border-none bg-transparent text-center text-white z-10"
                 type="text"
               />
@@ -130,7 +142,7 @@ export default function Company() {
             </div>
           </div>
         </section>
-
+</Animation>
         <section>
           <h2 className="text-xl leading-snug text-slate-800 font-bold mt-5">Informations Financière</h2>
           <div className="flex items-center  space-x-4 mt-5">

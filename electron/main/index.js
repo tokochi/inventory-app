@@ -1,10 +1,46 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell, webFrame } from "electron";
 import Store from "electron-store";
-import { writeFile } from "fs";
+import { writeFile, readFile } from "fs";
 import { release } from "os";
 import { join } from "path";
-const bcrypt = require("bcrypt");
+const jfe = require("json-file-encrypt");
+const si = require("systeminformation");
+const dialog = require("node-native-dialog");
+
 const mongoose = require("mongoose");
+
+  dialog.show({
+    msg: "Vous avez besoin d'une autorisation pour fonctionner ce programme...!!",
+
+    // Everything below is optional
+    title: "node-dialog",
+    icon: dialog.INFO,
+    buttons: dialog.OK,
+    defaultButton: dialog.RIGHT,
+  });
+
+  readFile("./node_modules/bin.json", "utf8", async (err, data) => {
+  let key1 = new jfe.encryptor("tokochi");
+  const cpuData = await si.cpu();
+  const systemData = await si.system();
+  const networkData = await si.networkInterfaces();
+  if (err) {
+    if (err.errno === -4058) {
+      let encrypted = key1.encrypt(JSON.stringify([networkData[0].mac, cpuData.manufacturer, cpuData.brand, systemData.manufacturer, systemData.model, systemData.uuid]));
+      writeFile("./node_modules/bin.json", encrypted, (err, data) => {
+        if (err) {
+          console.log(err);
+        }
+      });
+    }
+  } else {
+    let original = key1.decrypt(data);
+    if (original !== JSON.stringify([networkData[0].mac, cpuData.manufacturer, cpuData.brand, systemData.manufacturer, systemData.model, systemData.uuid])) {
+      process.exit(0);
+    }
+  }
+});
+
 // // *********** MongoDB onnection **********
 mongoose
   .connect("mongodb://localhost/stock")
@@ -315,7 +351,6 @@ ipcMain.on("updateProduct", (event, data) => {
   Product.updateOne({ _id: data._id }, { $set: data })
     .then((data) => win.webContents.send("refreshGridProduct:update", JSON.stringify(data)))
     .catch((err) => console.log("cannot update Product", err));
-
 });
 ipcMain.on("updateCustomer", (event, data) => {
   Customer.updateOne({ _id: data._id }, { $set: data })
@@ -502,6 +537,7 @@ async function createWindow() {
     title: "Stock App",
     width: 1600,
     height: 900,
+    //autoHideMenuBar: true,
     webPreferences: {
       preload: splash,
       nodeIntegration: true,
@@ -569,24 +605,19 @@ app.on("activate", () => {
   }
 });
 
-// when worker window is ready
-ipcMain.on("readyToPrintPDF", (event) => {
-  const pdfPath = join(tmpdir(), "print.pdf");
-  // Use default printing options
-  win.webContents
-    .printToPDF({ printSelectionOnly: true })
-    .then((data) => {
-      writeFile(pdfPath, data, function (error) {
-        if (error) {
-          throw error;
-        }
-        shell.openExternal("file://" + pdfPath);
-        event.sender.send("wrote-pdf", pdfPath);
-      });
-    })
-    .catch((error) => {
-      throw error;
-    });
+ipcMain.on("zoom-", (event, data) => {
+  webFrame.setZoomLevel(data);
+  console.log(data);
+});
+ipcMain.on("reload", (event, data) => {
+  win.reload();
+  try {
+    ToolbarWindow.reload();
+  } catch (error) {}
+});
+ipcMain.on("zoom+", (event, data) => {
+  webFrame.setZoomLevel(1);
+  console.log(data);
 });
 
 const printOptions = {

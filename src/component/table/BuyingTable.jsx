@@ -23,12 +23,11 @@ import { useReactToPrint } from "react-to-print";
 import { loadBuyings, loadProviders, useStore } from "../../contexts/Store";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import AddDepense from "./../AddDepense";
-import DepenseList from "./../DepenseList";
+import AddDepense from "../avance/AddDepense";
+import DepenseList from "./../list/DepenseList";
 import SelectedProductsView from "./templates/SelectedProductsbuy";
 import Status from "./templates/VendingsStatus";
 import TextBox from './../button/TextBox';
-
 const { ipcRenderer } = require("electron");
 
 // ******** Get Buying List  ********

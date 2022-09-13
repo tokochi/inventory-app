@@ -3,8 +3,8 @@ import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import React, { useEffect, useState } from "react";
 import Store from "electron-store";
-import { loadCustomers, useStore } from "../contexts/Store";
-import TextBox from "./button/TextBox";
+import { loadCustomers, useStore } from "../../contexts/Store";
+import TextBox from "../button/TextBox";
 const { ipcRenderer } = require("electron");
 
 export default function AvanceCustomer({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {

@@ -1,17 +1,21 @@
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import moment from "moment";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { loadCustomers, useStore } from "../contexts/Store";
-import deletePng2 from "./../data/icons/delete2.png";
+import { loadProviders, useStore } from "../../contexts/Store";
+import deletePng2 from "./../../data/icons/delete2.png";
 import Store from "electron-store";
 const { ipcRenderer } = require("electron");
 
-export default function CustomerCreditList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
+export default function ProviderCreditList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
+  const providersData = () => useStore((state) => state.providers);
+  const avanceList = () => useStore((state) => state.providers).reduce((acc, cur) => acc.concat(cur.avance), []);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const avanceList = () => useStore((state) => state.customers).reduce((acc, cur) => acc.concat(cur.avance), []);
-  const toCurrency = useStore((state) => state.toCurrency);
   const store = new Store();
+  useEffect(() => {
+    close && setDropdownOpen(false);
+  }, [close]);
+  const toCurrency = useStore((state) => state.toCurrency);
   return (
     <>
       <button
@@ -50,7 +54,7 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
                         <div className="font-semibold text-center">Date</div>
                       </th>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                        <div className="font-semibold text-center">Client</div>
+                        <div className="font-semibold text-center">Fournisseur</div>
                       </th>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                         <div className="font-semibold text-center">Ancien Credit</div>
@@ -96,40 +100,40 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
                           <td key={uuidv4()}>{avance?.paymentType}</td>
                           <td key={uuidv4()}>
                             <button
-                              id={avance?.customerId}
+                              id={avance?.providerId}
                               idd={avance?._id}
                               amount={avance?.amount}
                               name={avance?.name}
                               className=" p-1.5"
                               onClick={(e) => {
                                 setDropdownOpen(false);
-                                const custID = e.target.parentElement.attributes[0].value;
+                                const provID = e.target.parentElement.attributes[0].value;
                                 const avanceID = e.target.parentElement.attributes[1].value;
                                 const avanceAmount = parseInt(e.target.parentElement.attributes[2].value);
-                                useStore.getState().customers.forEach((customer, index) => {
-                                  if (customer._id === custID) {
-                                    ipcRenderer.send("updateCustomer", {
-                                      _id: custID,
-                                      credit: parseInt(customer.credit) + parseInt(avanceAmount),
-                                      avance: customer.avance.filter((avance) => avance._id !== avanceID),
+                                useStore.getState().providers.forEach((provider, index) => {
+                                  if (provider._id === provID) {
+                                    ipcRenderer.send("updateProvider", {
+                                      _id: provID,
+                                      credit: parseInt(provider.credit) + avanceAmount,
+                                      avance: provider.avance.filter((avance) => avance._id !== avanceID),
                                     });
                                   }
                                 });
-                                ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                                ipcRenderer.on("refreshGridProvider:update", (e, res) => {
                                   store?.set("activity", [
                                     ...store?.get("activity"),
                                     {
                                       date: new Date(),
-                                      page: "Avance Client",
+                                      page: "Avance Fournisseur",
                                       action: "supprimer",
-                                      title: "Avance Client Supprimer",
+                                      title: "Avance Fournisseur Supprimer",
                                       item: { name: e?.target?.parentElement?.attributes[3]?.value, type: "Avance", amount: parseInt(avanceAmount) },
                                       user: store?.get("user")?.userName,
                                       role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
                                     },
                                   ]);
-                                  loadCustomers();
-                                  ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+                                  loadProviders();
+                                  ipcRenderer.removeAllListeners("refreshGridProvider:update");
                                 });
                               }}>
                               <img src={deletePng2} width="25" />

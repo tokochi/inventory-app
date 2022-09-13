@@ -17,9 +17,9 @@ export default function Activity() {
   //store?.set("activity",[]);
   return (
     <div className=" bg-white shadow-lg overflow-y-auto h-[600px]  w-full rounded-sm border border-slate-200 relative">
-      <table className="table-auto  w-full divide-slate-200">
+      <table className="table-auto w-full divide-slate-200">
         {/* Table header */}
-        <thead className="text-xs sticky top-0 uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+        <thead className="text-xs sticky top-0 z-50 uppercase  text-center text-slate-500 bg-slate-50 border-t border-slate-200">
           <tr>
             <th className="px-2  first:pl-5 last:pr-5 py-3 whitespace-nowrap">
               <div className="font-semibold text-center">ID</div>
@@ -39,49 +39,52 @@ export default function Activity() {
             <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
               <div className="font-semibold text-center">Role</div>
             </th>
-            <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+            <th className="px-2 first:pl-5 last:pr-5 py-3 Z-10 whitespace-nowrap">
               <div className="font-semibold text-center">Article</div>
             </th>
           </tr>
         </thead>
         <tbody>
-          {store?.get("activity").reverse().map((db, index) => (
-            <tr key={uuidv4()} className={`${index & (1 === 1) && "bg-gray-100"}`}>
-              <td key={uuidv4()} className="text-center w-1/8">
-                #{index + 1}
-              </td>
-              <td key={uuidv4()} className="text-left capitalize w-1/8">
-                📆 {moment(db?.date).format("LLL")}
-              </td>
-              <td key={uuidv4()} className="text-center w-1/8 capitalize">
-                {db?.page}
-              </td>
-              <td key={uuidv4()} className="text-center w-1/8 capitalize">
-                {db?.action === "supprimer" && <p className="capitalize text-center rounded-3xl px-1  bg-rose-100 text-rose-500">{db?.action}</p>}
-                {db?.action === "ajouter" && <p className="capitalize text-center rounded-3xl px-1 bg-emerald-100 text-emerald-600">{db?.action}</p>}
-                {db?.action === "modifier" && <p className="capitalize text-center rounded-3xl px-1 bg-amber-100 text-sky-600">{db?.action}</p>}
-              </td>
-              <td key={uuidv4()} className="text-center w-1/8 capitalize">
-                {db?.user}
-              </td>
-              <td key={uuidv4()} className="text-center w-1/8 capitalize">
-                {db?.role}
-              </td>
-              <td key={uuidv4()} className="text-center w-1/8 capitalize">
-                <div className="flex items-center relative justify-center">
-                  <img
-                    src={view}
-                    onClick={() => {
-                      setitem(db?.item);
-                      setActivity(db);
-                      setDropdownOpen(true);
-                    }}
-                    className="w-6 h-6"
-                  />
-                </div>
-              </td>
-            </tr>
-          ))}
+          {store
+            ?.get("activity")
+            .reverse()
+            .map((db, index) => (
+              <tr key={uuidv4()} className={`${index & (1 === 1) && "bg-gray-100"}`}>
+                <td key={uuidv4()} className="text-center w-1/8">
+                  #{index + 1}
+                </td>
+                <td key={uuidv4()} className="text-left capitalize w-1/8">
+                  📆 {moment(db?.date).format("LLL")}
+                </td>
+                <td key={uuidv4()} className="text-center w-1/8 capitalize">
+                  {db?.page}
+                </td>
+                <td key={uuidv4()} className="text-center w-1/8 capitalize">
+                  {db?.action === "supprimer" && <p className="capitalize text-center rounded-3xl px-1  bg-rose-100 text-rose-500">{db?.action}</p>}
+                  {db?.action === "ajouter" && <p className="capitalize text-center rounded-3xl px-1 bg-emerald-100 text-emerald-600">{db?.action}</p>}
+                  {db?.action === "modifier" && <p className="capitalize text-center rounded-3xl px-1 bg-amber-100 text-sky-600">{db?.action}</p>}
+                </td>
+                <td key={uuidv4()} className="text-center w-1/8 capitalize">
+                  {db?.user}
+                </td>
+                <td key={uuidv4()} className="text-center w-1/8 capitalize">
+                  {db?.role}
+                </td>
+                <td key={uuidv4()} className="text-center w-1/8 capitalize">
+                  <div className="flex items-center relative justify-center">
+                    <img
+                      src={view}
+                      onClick={() => {
+                        setitem(db?.item);
+                        setActivity(db);
+                        setDropdownOpen(true);
+                      }}
+                      className="w-6 h-6 "
+                    />
+                  </div>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
       <DialogComponent
@@ -98,60 +101,82 @@ export default function Activity() {
           <tbody>
             {item?.index != null && (
               <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] px-2">
-                <div className={normalButton}>
-                  {activity?.page} N°: <span className="text-green-600 ">{item?.index}</span>
-                </div>
+                <td>
+                  <div className={normalButton}>
+                    {activity?.page} N°: <span className="text-green-600 ">{item?.index}</span>
+                  </div>
+                </td>
               </tr>
             )}
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] px-2">
-              <div className={normalButton}>
-                Titre: <span className="text-green-600 ml-4">{activity?.title}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Titre: <span className="text-green-600 ml-4">{activity?.title}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] px-2">
-              <div className={normalButton}>
-                Nom: <span className="text-green-600 ml-4">{item?.name}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Nom: <span className="text-green-600 ml-4">{item?.name}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] px-2">
-              <div className={normalButton}>
-                Déscription: <span className="text-green-600 ml-4">{item?.description}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Déscription: <span className="text-green-600 ml-4">{item?.description}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] px-2">
-              <div className={normalButton}>
-                Date: <span className="text-green-600 ml-4">{moment(item?.time).format("LLL")}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Date: <span className="text-green-600 ml-4">{moment(item?.time).format("LLL")}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] my-6">
-              <div className={normalButton}>
-                Quantité: <span className="text-green-600 ml-4">{item?.quantity}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Quantité: <span className="text-green-600 ml-4">{item?.quantity}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] my-6">
-              <div className={normalButton}>
-                Prix Vente: <span className="text-green-600 ml-4">{toCurrency(item?.sellPrice)}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Prix Vente: <span className="text-green-600 ml-4">{toCurrency(item?.sellPrice)}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] my-6">
-              <div className={normalButton}>
-                Total TTC: <span className="text-green-600 ml-4">{toCurrency(item?.amount)}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Total TTC: <span className="text-green-600 ml-4">{toCurrency(item?.amount)}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] my-6">
-              <div className={normalButton}>
-                Nombre Produits: <span className="text-green-600 ml-4">{item?.grid?.length}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Nombre Produits: <span className="text-green-600 ml-4">{item?.grid?.length}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] my-6">
-              <div className={normalButton}>
-                vérsement: <span className="text-green-600 ml-4">{toCurrency(item?.deposit)}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  vérsement: <span className="text-green-600 ml-4">{toCurrency(item?.deposit)}</span>
+                </div>
+              </td>
             </tr>
             <tr className="text-slate-600 capitalize font-medium  text-lg min-w-[100px] my-6">
-              <div className={normalButton}>
-                Crédit: <span className="text-green-600 ml-4">{toCurrency(item?.crédit)}</span>
-              </div>
+              <td>
+                <div className={normalButton}>
+                  Crédit: <span className="text-green-600 ml-4">{toCurrency(item?.crédit)}</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

@@ -13,6 +13,10 @@ export default function Login() {
   const [isSpin, setIsSpin] = useState(false);
   const schema = {
     user: { type: "object" },
+    reset: {
+      default: false,
+    },
+
     users: {
       type: "array",
       default: [],

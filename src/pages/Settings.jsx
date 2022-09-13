@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import SettingsSidebar from "../component/settings/SettingsSidebar";
 import AccountPanel from "../component/settings/AccountPanel";
 import NotificationsPanel from "../component/settings/NotificationsPanel";
-import Theme from "../component/settings/Theme";
 import BackUp from "../component/settings/BackUp";
 import Company from "../component/settings/Company";
 import { Routes, Route } from "react-router-dom";

@@ -106,10 +106,12 @@ export default function VendingTable() {
     if (args.item.id.includes("edit")) {
       if (grid?.getSelectedRecords().length === 0) {
         setDropdownOpen(true);
-      } else if (store?.get("vendingPin")) {
+      }
+      if (store?.get("vendingPin")) {
         setSelectedProd(grid?.getSelectedRecords()[0]);
         setDropdownOpen2(true);
-      } else if (grid?.getSelectedRecords()[0].type === "caisse") {
+      }
+      if (grid?.getSelectedRecords()[0].type === "caisse") {
         navigate("/caisse");
         useStore.setState((state) => ({
           caisse: {
@@ -124,7 +126,8 @@ export default function VendingTable() {
             selectedProduct: null,
           },
         }));
-      } else if (grid?.getSelectedRecords()[0].type === "facture") {
+      }
+      if (grid?.getSelectedRecords()[0].type === "facture") {
         navigate("/facture");
         useStore.setState((state) => ({
           facture: {
@@ -203,6 +206,7 @@ export default function VendingTable() {
     }
   }
   return (
+
     <div className="p-2">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">

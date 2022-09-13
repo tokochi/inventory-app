@@ -34,8 +34,9 @@ export default defineConfig({
                 "electron",
                 ...builtinModules,
                 // Here
-                "mongoose",
-                "bcrypt",
+                // "json-file-encrypt",
+                // "systeminformation",
+                // "mongoose",
               ],
             },
           },

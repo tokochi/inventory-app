@@ -19,7 +19,7 @@ export default function CustomerForm(props) {
           <tr>
             <td className={labelclassName}>Nom :</td>
             <td className="w-[320px]">
-              <TextBox type="text" id="name" width="full" onInput={() => gridProduct?.editModule?.editFormValidate()} value={props?.name || ""} title="Nom du Client" />
+              <TextBox type="text" id="name" width="full" onChange={() => gridProduct?.editModule?.editFormValidate()} value={props?.name || ""} title="Nom du Client" />
             </td>
           </tr>
           <tr>

@@ -96,7 +96,7 @@ export default function PrintInvoiceCaisse() {
         )}
         <div id="comapnyInfo" className="flex gap-2">
           <span className="">VENDEUR: </span>
-          <span className=""> {store?.get("user").name}</span>
+          <span className=""> {store?.get("user")?.name}</span>
         </div>
         <div id="comapnyInfo" className="flex gap-2">
           <span className="">CAISSE N°: </span>
@@ -105,7 +105,7 @@ export default function PrintInvoiceCaisse() {
         <div id="comapnyInfo" className="flex flex-col w-full  text-center uppercase">
           <span>merci pour votre visit</span>
           <span>bienvenue a tout moment</span>
-          <span>Tél:{store?.get("company").phone.toString()?.match(/.{2}/g)?.join(" ")}</span>
+          <span>Tél:{store?.get("company")?.phone.toString()?.match(/.{2}/g)?.join(" ")}</span>
         </div>
       </div>
     </div>
