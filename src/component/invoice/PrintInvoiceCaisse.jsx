@@ -5,7 +5,6 @@ import { ToWords } from "to-words";
 import { useStore } from "../../contexts/Store";
 
 
-
 export default function PrintInvoiceCaisse() {
   const vendingsData = useStore((state) => state.vendings);
   const caisse = useStore((state) => state.caisse);

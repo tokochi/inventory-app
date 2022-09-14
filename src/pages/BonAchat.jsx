@@ -59,7 +59,7 @@ export default function BonAchat() {
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   const [date, setDate] = useState(new Date());
-  
+
   let autoCompleteObj;
   let validateBtn = useRef();
   let addQtyBtn = useRef();
@@ -97,24 +97,28 @@ export default function BonAchat() {
   const productsTemplate = (props) => (
     <table className="table-auto w-full">
       <tbody>
-        <tr className={`${props?.quantity === 0 && "bg-red-300"}`}>
+        <tr className={`${props?.quantity === 0 && "bg-red-50"}`}>
           <td className="text-slate-600  font-medium  text-lg min-w-[400px] px-2">
             <span>📦{props?.name}</span>
           </td>
           <td className="px-2">
-            <div className={normalButton}>
-              Quantité: <span className="text-green-600 ">{props?.quantity}</span>
+            <div className={`${normalButton} ${props?.quantity === 0 && "bg-red-100"}`}>
+              Quantité: <span className={`text-green-600 ml-1 ${props?.quantity === 0 && "text-rose-600"}`}>{props?.quantity}</span>
             </div>
           </td>
           <td>
-            <div className={normalButton}>
-              Dérnier Prix Achat: <span className="text-green-600 ">{toCurrency(props?.buyPrice)}</span>
+            <div className={`${normalButton} ${props.buyPrice >= props.sellPrice && "bg-red-100"}`}>
+              Prix Vente:{" "}
+              <span className={`text-green-600 ml-1 ${props.buyPrice >= props.sellPrice && "text-rose-600"}`}>
+                {bonAchat.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}
+              </span>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
   );
+
   useEffect(() => {
     useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, autoCompleteObj } }));
   }, [autoCompleteObj]);
@@ -274,7 +278,7 @@ export default function BonAchat() {
                 allowCustom
                 popupHeight="500"
                 change={(e) => {
-                  if (e.itemData?._id != null) {
+                  if (e.itemData?._id != null && e.itemData.quantity >= 1) {
                     if (useStore.getState().bonAchat.selectedProducts.some((selected) => selected._id === e.itemData._id) === false) {
                       useStore.setState((state) => ({
                         bonAchat: {
@@ -336,26 +340,26 @@ export default function BonAchat() {
               <table className="w-full relative   divide-slate-200">
                 <thead className="text-xs sticky top-0 z-10 uppercase  text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                   <tr className="sticky top-0 z-10 ">
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-[20px]">
                       <div className="font-semibold text-center">ID</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-2/6">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap ">
                       <div className="font-semibold text-center">Désignation</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap ">
                       <div className="font-semibold text-center">Quantité</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap ">
                       <div className="font-semibold text-center">Ancien Prix</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap ">
                       <div className="font-semibold text-center">PUHT</div>
                     </th>
 
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap ">
                       <div className="font-semibold text-center">Total</div>
                     </th>
-                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-1/6">
+                    <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap ">
                       <div className="font-semibold text-center"></div>
                     </th>
                   </tr>
@@ -403,9 +407,8 @@ export default function BonAchat() {
                           step="100"
                           //max={product?.quantity}
                           value={parseInt(product?.buyPrice).toFixed(2)}
-                          className="w-[100px]  text-right border-none"
+                          className="w-[120px]  text-center border-none"
                         />
-                        DA
                       </td>
                       <td>{toCurrency(product?.buyPrice * product?.selectedQuantity)}</td>
                       <td>
@@ -491,7 +494,7 @@ export default function BonAchat() {
                           date: new Date(),
                           page: "Bon Achat",
                           action: "modifier",
-                          title:"Modifier Bon Achat",
+                          title: "Modifier Bon Achat",
                           item: JSON.parse(res),
                           user: store?.get("user")?.userName,
                           role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
@@ -584,7 +587,7 @@ export default function BonAchat() {
                       ]);
                       bonAchat.selectedProducts.forEach((prod) => {
                         // quantity update
-                        ipcRenderer.send("updateProduct", { _id: prod._id, quantity: parseInt(prod.quantity) + parseInt(prod.selectedQuantity) });
+                        ipcRenderer.send("updateProduct", { _id: prod._id, buyPrice: prod.buyPrice, quantity: parseInt(prod.quantity) + parseInt(prod.selectedQuantity) });
                       });
                       loadBuyings();
                       useStore.setState({ toast: { show: true, title: "Achat Ajouter Avec Succés", type: "success" } });

@@ -13,7 +13,7 @@ import {
   Search,
   Selection,
   Sort,
-  Toolbar
+  Toolbar,
 } from "@syncfusion/ej2-react-grids";
 import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
@@ -92,9 +92,9 @@ export default function ProvidersTable() {
         break;
     }
   }
-    useEffect(() => {
-      useStore.setState((state) => ({ gridProduct: grid }));
-    }, [grid]);
+  useEffect(() => {
+    useStore.setState((state) => ({ gridProduct: grid }));
+  }, [grid]);
   function actionComplete(args) {
     switch (true) {
       case args.requestType === "save" && args.action === "add":

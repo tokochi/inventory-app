@@ -569,6 +569,7 @@ export default function Caisse() {
                     });
                   } else {
                     // add new vending
+
                     caisse.amount != 0 &&
                       ipcRenderer.send("addVending", {
                         time: new Date(),
@@ -585,6 +586,7 @@ export default function Caisse() {
                         grid: caisse.selectedProducts,
                       });
                     ipcRenderer.on("refreshGridVending:add", (e, res) => {
+                      // Activity
                       store?.set("activity", [
                         ...store?.get("activity"),
                         {
@@ -597,44 +599,42 @@ export default function Caisse() {
                           role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
                         },
                       ]);
+                      // Toast
                       useStore.setState({ toast: { show: true, title: "Vente Ajouter Avec Succés", type: "success" } });
                       setTimeout(() => {
                         useStore.setState({ toast: { show: false } });
                       }, 2000);
                       loadVendings();
-                      caisse.selectedProducts.forEach((prod) => {
-                        // quantity update
-                        productsList.forEach((curProduct) => {
-                          if (curProduct._id === prod._id) {
-                            ipcRenderer.send("updateProduct", {
-                              _id: prod._id,
-                              quantity: parseInt(prod.quantity) - parseInt(prod.selectedQuantity),
-                              lastTime: new Date(),
-                              quantitySell: parseInt(curProduct?.quantitySell || 0) + parseInt(prod.selectedQuantity),
-                              revenue: parseInt(curProduct?.revenue || 0) + parseInt(prod.selectedQuantity * prod.sellPrice) - parseInt(prod.selectedQuantity * prod.buyPrice),
-                              total: parseInt(curProduct?.total || 0) + parseInt(prod.selectedQuantity * prod.sellPrice),
-                            });
-                          }
+                      // quantity update
+                        caisse.selectedProducts.forEach((prod) => {
+                          productsList.forEach((curProduct) => {
+                            if (curProduct._id === prod._id) {
+                              ipcRenderer.send("updateProduct", {
+                                _id: prod._id,
+                                quantity: parseInt(prod.quantity) - parseInt(prod.selectedQuantity),
+                                lastTime: new Date(),
+                                quantitySell: parseInt(curProduct?.quantitySell || 0) + parseInt(prod.selectedQuantity),
+                                revenue: parseInt(curProduct?.revenue || 0) + parseInt(prod.selectedQuantity * prod.sellPrice) - parseInt(prod.selectedQuantity * prod.buyPrice),
+                                total: parseInt(curProduct?.total || 0) + parseInt(prod.selectedQuantity * prod.sellPrice),
+                              });
+                            }
+                          });
                         });
-                      });
-
-                      if (caisse.client.name != "Standard" && caisse.amount - caisse.deposit > 0) {
-                        customersData.forEach((customer) => {
-                          if (customer._id === caisse.client._id) {
-                            // add credit
-                            ipcRenderer.send("updateCustomer", { _id: caisse.client._id, credit: (parseInt(customer.credit) + parseInt(caisse.amount - caisse.deposit)).toFixed(2) });
-                            ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                              loadCustomers();
-                              ipcRenderer.removeAllListeners("refreshGridCustomer:update");
-                            });
-                          }
-                        });
-                      }
-
+                        // client credit update
+                        if (caisse.client.name != "Standard" && caisse.amount - caisse.deposit > 0) {
+                          customersData.forEach((customer) => {
+                            if (customer._id === caisse.client._id) {
+                              ipcRenderer.send("updateCustomer", { _id: caisse.client._id, credit: (parseInt(customer.credit) + parseInt(caisse.amount - caisse.deposit)).toFixed(2) });
+                              ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                                loadCustomers();
+                                ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+                              });
+                            }
+                          });
+                        }
                       ipcRenderer.removeAllListeners("refreshGridVending:add");
                     });
                   }
-
                   ipcRenderer.on("refreshGridProduct:update", (e, res) => {
                     loadProducts();
                     ipcRenderer.removeAllListeners("refreshGridProduct:update");

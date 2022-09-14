@@ -1,10 +1,6 @@
 import create from "zustand";
 const { ipcRenderer } = require("electron");
 import Store from "electron-store";
-import { useReactToPrint } from "react-to-print";
-
-
-
 
 const store = new Store();
 export const useStore = create((set) => ({
@@ -73,14 +69,11 @@ export const useStore = create((set) => ({
   customers: [],
   vendings: [],
   buyings: [],
-  user: () => store?.get("user"),
   paymentType: "",
   settings: {
     preferance: { rooms: 4 },
     company: {},
   },
-  selectedAttendances: {},
-  notifactions: [],
   depenses: [],
   setTotal: () =>
     set((state) => ({

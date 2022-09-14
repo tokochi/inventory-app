@@ -1,7 +1,7 @@
 import logo from "../../data/icons/logo.png";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useStore, loadSettings } from "../../contexts/Store";
+import { useStore } from "../../contexts/Store";
 import Store from "electron-store";
 
 

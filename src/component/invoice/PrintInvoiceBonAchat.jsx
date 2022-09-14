@@ -3,6 +3,8 @@ import moment from "moment/min/moment-with-locales";
 import React from "react";
 import { ToWords } from "to-words";
 import { useStore } from "../../contexts/Store";
+
+
 export default function PrintInvoiceBonAchat() {
   const buyingsData = useStore((state) => state.buyings);
   const bonAchat = useStore((state) => state.bonAchat);

@@ -20,20 +20,18 @@ import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
-import { loadBuyings, loadProviders, useStore } from "../../contexts/Store";
+import { loadBuyings, loadProviders, loadProducts, useStore } from "../../contexts/Store";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
 import AddDepense from "../avance/AddDepense";
 import DepenseList from "./../list/DepenseList";
 import SelectedProductsView from "./templates/SelectedProductsbuy";
 import Status from "./templates/VendingsStatus";
-import TextBox from './../button/TextBox';
+import TextBox from "./../button/TextBox";
 const { ipcRenderer } = require("electron");
-
 // ******** Get Buying List  ********
 loadBuyings();
 Localization("produits");
-
 export default function BuyingTable() {
   // ******** Column Templates  ********
   const buyingGridStatus = (props) => <Status {...props} />;
@@ -57,10 +55,14 @@ export default function BuyingTable() {
       type: "boolean",
       default: true,
     },
+    restorCredit: {
+      type: "boolean",
+      default: true,
+    },
   };
   const store = new Store({ schema });
   const restorQty = store?.get("restorQty");
-
+  const restorCredit = store?.get("restorCredit");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownOpen2, setDropdownOpen2] = useState(false);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
@@ -70,7 +72,6 @@ export default function BuyingTable() {
     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
   const normalButton =
     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
@@ -81,7 +82,6 @@ export default function BuyingTable() {
         ipcRenderer.send("previewComponent2", url);
       }),
   });
-
   function filterBuying(buying) {
     if (active.all === true) {
       return buying === buying;
@@ -96,7 +96,6 @@ export default function BuyingTable() {
       return buying?.amount > 0 && buying?.amount > buying?.deposit;
     }
   }
-
   useEffect(() => {
     if (!showPrintDiv) {
       reactToPrint();
@@ -135,44 +134,52 @@ export default function BuyingTable() {
   function actionComplete(args) {
     if (args.requestType === "delete") {
       ipcRenderer.send("deleteBuying", args.data[0]);
-      // restore old supplier credit
-      if (restorQty) {
-        //restore old quantity
-        args.data[0].grid.forEach((slectedProd) => {
-          productsList.forEach((prod) => {
-            prod._id === slectedProd._id && ipcRenderer.send("updateProduct", { _id: slectedProd._id, quantity: parseInt(prod.quantity) - parseInt(slectedProd.selectedQuantity) });
+      ipcRenderer.on("refreshGridBuying:delete", (e, res) => {
+        // activity
+        store?.set("activity", [
+          ...store?.get("activity"),
+          {
+            date: new Date(),
+            page: "Achat",
+            action: "Supprimer",
+            title: "Achat Supprimer",
+            item: args?.data,
+            user: store?.get("user")?.userName,
+            role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+          },
+        ]);
+        // Toast
+        useStore.setState({ toast: { show: true,title: "Achat Supprimer Du Stock", type: "error" } });
+        setTimeout(() => {
+          useStore.setState({ toast: { show: false}});
+        }, 2000);
+        loadBuyings();
+        ipcRenderer.removeAllListeners("refreshGridBuying:delete");
+        if (restorQty) {
+          //restore old quantity
+          args.data[0].grid.forEach((slectedProd) => {
+            productsList.forEach((prod) => {
+              prod._id === slectedProd._id && ipcRenderer.send("updateProduct", { _id: slectedProd._id, quantity: parseInt(prod.quantity) - parseInt(slectedProd.selectedQuantity) });
+            });
+            ipcRenderer.on("refreshGridProduct:update", (e, res) => {
+              loadProducts();
+              ipcRenderer.removeAllListeners("refreshGridProduct:update");
+            });
           });
-        });
-        ipcRenderer.on("refreshGridBuying:delete", (e, res) => {
-          store?.set("activity", [
-            ...store?.get("activity"),
-            {
-              date: new Date(),
-              page: "Achat",
-              action: "Supprimer",
-              title: "Achat Supprimer",
-              item: args?.data,
-              user: store?.get("user")?.userName,
-              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
-            },
-          ]);
-          useStore.setState({ toast: { show: true, title: "Achat Supprimer Du Stock", type: "error" } });
-          setTimeout(() => {
-            useStore.setState({ toast: { show: false } });
-          }, 2000);
-          loadBuyings();
-          ipcRenderer.removeAllListeners("refreshGridBuying:delete");
-        });
-      }
-      providersData.forEach((provider) => {
-        if (provider._id === args.data[0].supplier._id && args.data[0].supplier.name != "Standard") {
-          ipcRenderer.send("updateProvider", {
-            _id: provider._id,
-            credit: parseInt(provider.credit) - parseInt(args.data[0].amount - args.data[0].deposit),
-          });
-          ipcRenderer.on("refreshGridProvider:update", (e, res) => {
-            loadProviders();
-            ipcRenderer.removeAllListeners("refreshGridProvider:update");
+        }
+        if (restorCredit) {
+          // restore old supplier credit
+          providersData.forEach((provider) => {
+            if (provider._id === args.data[0].supplier._id && args.data[0].supplier.name != "Standard") {
+              ipcRenderer.send("updateProvider", {
+                _id: provider._id,
+                credit: parseInt(provider.credit) - parseInt(args.data[0].amount - args.data[0].deposit),
+              });
+              ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                loadProviders();
+                ipcRenderer.removeAllListeners("refreshGridProvider:update");
+              });
+            }
           });
         }
       });
@@ -361,7 +368,7 @@ export default function BuyingTable() {
         visible={dropdownOpen2}
         showCloseIcon={true}
         closeOnEscape
-       width="200"
+        width="200"
         open={() => setDropdownOpen2(true)}
         close={() => setDropdownOpen2(false)}
         footerTemplate={() => (

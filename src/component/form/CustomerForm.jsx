@@ -1,6 +1,6 @@
 import TextBox from "../button/TextBox";
 import React, { useState } from "react";
-import { loadProducts, useStore } from "../../contexts/Store";
+import {  useStore } from "../../contexts/Store";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import Store from "electron-store";
 

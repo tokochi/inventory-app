@@ -1,11 +1,9 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React from "react";
+import { NavLink, useLocation } from "react-router-dom";
 
 function SettingsSidebar() {
-
   const location = useLocation();
   const { pathname } = location;
-
   return (
     <div className="flex flex-nowrap overflow-x-scroll no-scrollbar md:block md:overflow-auto px-3 py-6 border-b md:border-b-0 md:border-r border-slate-200 min-w-60 md:space-y-3">
       {/* Group 1 */}
@@ -36,22 +34,6 @@ function SettingsSidebar() {
               <span className={`text-sm font-medium ${pathname.includes("/settings/security") ? "text-indigo-500" : "hover:text-slate-700"}`}>Sécurité</span>
             </NavLink>
           </li>
-          {/* <li className="mr-0.5 md:mr-0 md:mb-0.5">
-            <NavLink end to="/settings/preferance" className={`flex items-center px-2.5 py-2 rounded whitespace-nowrap ${pathname.includes("/settings/preferance") && "bg-indigo-50"}`}>
-              <svg className={`w-4 h-4 shrink-0 fill-current text-slate-400 mr-2 ${pathname.includes("/settings/preferance") && "text-indigo-400"}`} viewBox="0 0 16 16">
-                <path d="M3.414 2L9 7.586V16H7V8.414l-5-5V6H0V1a1 1 0 011-1h5v2H3.414zM15 0a1 1 0 011 1v5h-2V3.414l-3.172 3.172-1.414-1.414L12.586 2H10V0h5z" />
-              </svg>
-              <span className={`text-sm font-medium ${pathname.includes("/settings/preferance") ? "text-indigo-500" : "hover:text-slate-700"}`}>Préférances</span>
-            </NavLink>
-          </li> */}
-          {/* <li className="mr-0.5 md:mr-0 md:mb-0.5">
-            <NavLink end to="/settings/theme" className={`flex items-center px-2.5 py-2 rounded whitespace-nowrap ${pathname.includes("/settings/theme") && "bg-indigo-50"}`}>
-              <svg className={`w-4 h-4 shrink-0 fill-current text-slate-400 mr-2 ${pathname.includes("/settings/theme") && "text-indigo-400"}`} viewBox="0 0 24 20">
-                <path d="M4 2L4 4L3 4C2.448 4 2 4.448 2 5L2 6C2 6.552 2.448 7 3 7L7 7C7.552 7 8 6.552 8 6L8 5C8 4.448 7.552 4 7 4L6 4L6 2L4 2 z M 11 2L11 15L10 15C9.448 15 9 15.448 9 16L9 17C9 17.552 9.448 18 10 18L14 18C14.552 18 15 17.552 15 17L15 16C15 15.448 14.552 15 14 15L13 15L13 2L11 2 z M 18 2L18 9L17 9C16.448 9 16 9.448 16 10L16 11C16 11.552 16.448 12 17 12L21 12C21.552 12 22 11.552 22 11L22 10C22 9.448 21.552 9 21 9L20 9L20 2L18 2 z M 4 9L4 22L6 22L6 9L4 9 z M 18 14L18 22L20 22L20 14L18 14 z M 11 20L11 22L13 22L13 20L11 20 z" />
-              </svg>
-              <span className={`text-sm font-medium ${pathname.includes("/settings/theme") ? "text-indigo-500" : "hover:text-slate-700"}`}>Theme</span>
-            </NavLink>
-          </li> */}
           <li className="mr-0.5 md:mr-0 md:mb-0.5">
             <NavLink end to="/settings/notifications" className={`flex items-center px-2.5 py-2 rounded whitespace-nowrap ${pathname.includes("/settings/notifications") && "bg-indigo-50"}`}>
               <svg className={`w-4 h-4 shrink-0 fill-current text-slate-400 mr-2 ${pathname.includes("/settings/notifications") && "text-indigo-400"}`} viewBox="0 2 20 20">
@@ -65,7 +47,7 @@ function SettingsSidebar() {
               <svg className={`w-4 h-4 shrink-0 fill-current text-slate-400 mr-2 ${pathname.includes("/settings/backup") && "text-indigo-400"}`} viewBox="2 2 20 20">
                 <path d="M12.0625 3.09375C11.011719 3.09375 10.054688 3.789063 9.4375 4.78125L7.53125 8L9.25 9L11.15625 5.84375C11.539063 5.234375 11.863281 5.09375 12.0625 5.09375C12.261719 5.09375 12.554688 5.234375 12.9375 5.84375L15.21875 9.6875L14.1875 10.3125L18 12.5L18 8L16.9375 8.65625L14.65625 4.78125C14.039063 3.789063 13.113281 3.09375 12.0625 3.09375 Z M 7.40625 10L3.6875 12.1875L4.65625 12.78125L2.53125 16.5C1.914063 17.546875 1.773438 18.699219 2.3125 19.625C2.851563 20.550781 3.914063 21 5.09375 21L10 21L10 19L5.09375 19C4.371094 19 4.117188 18.773438 4.03125 18.625C3.945313 18.476563 3.867188 18.152344 4.25 17.5L4.28125 17.5L6.375 13.84375L7.40625 14.5 Z M 19.875 13.78125L18.125 14.8125L19.75 17.5L19.75 17.53125C20.117188 18.117188 20.066406 18.421875 19.96875 18.59375C19.871094 18.765625 19.609375 19 18.90625 19L15 19L15 17.5L11 20L15 22.5L15 21L18.90625 21C20.101563 21 21.191406 20.523438 21.71875 19.59375C22.242188 18.675781 22.082031 17.503906 21.46875 16.5L21.4375 16.5L21.4375 16.46875Z" />
               </svg>
-              <span className={`text-sm font-medium ${pathname.includes("/settings/backup") ? "text-indigo-500" : "hover:text-slate-700"}`}>Réstoration</span>
+              <span className={`text-sm font-medium ${pathname.includes("/settings/backup") ? "text-indigo-500" : "hover:text-slate-700"}`}>Réstauration</span>
             </NavLink>
           </li>
           <li className="mr-0.5 md:mr-0 md:mb-0.5">

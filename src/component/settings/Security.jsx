@@ -9,8 +9,15 @@ export default function Security() {
       type: "array",
       default: [],
     },
+    restorQty: {
+      type: "boolean",
+      default: true,
+    },
+    restorCredit: {
+      type: "boolean",
+      default: true,
+    },
   };
-
   const store = new Store({ schema });
   const [showPassword, setShowPassword] = useState(false);
   const [showPin, setShowPin] = useState(false);
@@ -23,12 +30,13 @@ export default function Security() {
   const [providerPin, setProviderPin] = useState(store?.get("providerPin"));
   const [vendingPin, setVendingPin] = useState(store?.get("vendingPin"));
   const [buyingPin, setBuyingPin] = useState(store?.get("buyingPin"));
+  const [restorQty, setRestorQty] = useState(store?.get("restorQty"));
+  const [restorCredit, setRestorCredit] = useState(store?.get("restorCredit"));
 
   return (
     <div className="grow overflow-y-auto h-[600px]">
       <div className=" p-6 space-y-6 ">
         <h2 className="text-2xl text-slate-800 font-bold mb-5">Sécurité</h2>
-
         <section>
           <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Mot de passe</h2>
           <div className="mt-5">
@@ -266,6 +274,65 @@ export default function Security() {
                     }}
                   />
                   <label className="bg-slate-400" htmlFor="providerPin">
+                    <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    <span className="sr-only">Enable smart sync</span>
+                  </label>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Réstauration</h2>
+          <ul>
+            <li className="flex justify-between items-center py-3 border-b border-slate-200">
+              {/* Left */}
+              <div>
+                <div className="text-slate-800 font-semibold">Produits</div>
+                <div className="text-sm">Réstaurer la quantité des Produits Supprimer.</div>
+              </div>
+              {/* Right */}
+              <div className="flex items-center ml-4">
+                <div className="text-sm text-slate-400 italic mr-2">{restorQty ? "On" : "Off"}</div>
+                <div className="form-switch">
+                  <input
+                    type="checkbox"
+                    id="restorQty"
+                    className="sr-only"
+                    checked={restorQty}
+                    onChange={(e) => {
+                      setRestorQty(!restorQty);
+                      store?.set("restorQty", e.target.checked);
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="restorQty">
+                    <span className="bg-white shadow-sm" aria-hidden="true"></span>
+                    <span className="sr-only">Enable smart sync</span>
+                  </label>
+                </div>
+              </div>
+            </li>
+            <li className="flex justify-between items-center py-3 border-b border-slate-200">
+              {/* Left */}
+              <div>
+                <div className="text-slate-800 font-semibold">Crédits</div>
+                <div className="text-sm">Réstaurer le Crédits des Clients ou Fournisseur Supprimer.</div>
+              </div>
+              {/* Right */}
+              <div className="flex items-center ml-4">
+                <div className="text-sm text-slate-400 italic mr-2">{restorCredit ? "On" : "Off"}</div>
+                <div className="form-switch">
+                  <input
+                    type="checkbox"
+                    id="restorCredit"
+                    className="sr-only"
+                    checked={restorCredit}
+                    onChange={(e) => {
+                      setRestorCredit(!restorCredit);
+                      store?.set("restorCredit", e.target.checked);
+                    }}
+                  />
+                  <label className="bg-slate-400" htmlFor="restorCredit">
                     <span className="bg-white shadow-sm" aria-hidden="true"></span>
                     <span className="sr-only">Enable smart sync</span>
                   </label>

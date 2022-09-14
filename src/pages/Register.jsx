@@ -3,8 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../contexts/Store";
 
-const { ipcRenderer } = require("electron");
-
 export default function Register() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");

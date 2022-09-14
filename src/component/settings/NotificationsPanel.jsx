@@ -1,5 +1,6 @@
 import Store from "electron-store";
 import React, { useState } from "react";
+
 function NotificationsPanel() {
   const schema = {
     notifications: { default: { productAlert: true, clients: true, providers: true, revenue: true }, type: "object" },

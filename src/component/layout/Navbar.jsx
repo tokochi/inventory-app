@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import Store from "electron-store";
 import Notifications from "../dialog/DropdownNotifications";
 import UserMenu from "../dialog/DropdownProfile";
 import caisse from "./../../data/icons/caisse.png";

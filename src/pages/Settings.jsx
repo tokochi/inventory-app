@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import SettingsSidebar from "../component/settings/SettingsSidebar";
 import AccountPanel from "../component/settings/AccountPanel";
 import NotificationsPanel from "../component/settings/NotificationsPanel";
@@ -6,9 +6,9 @@ import BackUp from "../component/settings/BackUp";
 import Company from "../component/settings/Company";
 import { Routes, Route } from "react-router-dom";
 import Activity from "../component/settings/Activity";
-import Security from './../component/settings/Security';
-export default function Settings() {
+import Security from "./../component/settings/Security";
 
+export default function Settings() {
   return (
     <div className="flex h-screen ">
       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden ">
@@ -40,5 +40,3 @@ export default function Settings() {
     </div>
   );
 }
-
-

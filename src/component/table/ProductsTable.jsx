@@ -35,9 +35,6 @@ export default function ProductsTable() {
   const productsFormTemplate = (props) => <ProductFormTemplate {...props} />;
   const productsIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
   const productsLastTimeTemplate = (props) => <div>{props.lastTime && Math.abs(moment(props.lastTime).diff(moment(), "days")) + " jours"}</div>;
-  const productsNumericRTemplate = (props) => <div>{toCurrency(props.revenue)}</div>;
-  const productsNumericTemplate = (props) => <div>{toCurrency(props.total)}</div>;
-
   // ******** Grid Table  ********
   const [active, setActive] = useState({ all: true, stock: false, alert: false, rupture: false });
   const activeButtoon =
@@ -54,8 +51,8 @@ export default function ProductsTable() {
   const gridRef = useRef();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const productsData = useStore((state) => state.products).filter((product) => filterProduct(product));
-  const gridProduct =( )=> useStore((state) => state.gridProduct);
-  
+  const gridProduct = () => useStore((state) => state.gridProduct);
+
   function filterProduct(product) {
     if (active.all === true) {
       return product === product;
@@ -70,9 +67,9 @@ export default function ProductsTable() {
       return product?.quantity === 0;
     }
   }
- useEffect(() => {
-   useStore.setState((state) => ({ gridProduct: grid }));
- }, [grid]);
+  useEffect(() => {
+    useStore.setState((state) => ({ gridProduct: grid }));
+  }, [grid]);
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>

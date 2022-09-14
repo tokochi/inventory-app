@@ -13,7 +13,7 @@ import {
   Search,
   Selection,
   Sort,
-  Toolbar
+  Toolbar,
 } from "@syncfusion/ej2-react-grids";
 import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
@@ -25,11 +25,9 @@ import Localization from "../Localization";
 import CustomerCreditList from "../list/CustomerCreditList";
 import Status from "./templates/CustomerStatus";
 const { ipcRenderer } = require("electron");
-import { ErrorBoundary } from "react-error-boundary";
+
 // ******** Get Customers List  ********
-
 Localization("Client");
-
 export default function CustomersTable() {
   // ******** Column Templates  ********
   const [active, setActive] = useState({ all: true, debt: false });
@@ -50,7 +48,7 @@ export default function CustomersTable() {
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const totalCredit = useStore((state) => state.customers).reduce((acc, cur) => acc + cur.credit, 0);
   const gridRef = useRef();
-const textValidation = { required: [(args) => (args["value"] == "" ? false : true), "ce champ est obligatoire"] };
+  const textValidation = { required: [(args) => (args["value"] == "" ? false : true), "ce champ est obligatoire"] };
   function filterCustomer(customer) {
     if (active.all === true) {
       return customer === customer;
@@ -91,9 +89,9 @@ const textValidation = { required: [(args) => (args["value"] == "" ? false : tru
         break;
     }
   }
-    useEffect(() => {
-      useStore.setState((state) => ({ gridProduct: grid }));
-    }, [grid]);
+  useEffect(() => {
+    useStore.setState((state) => ({ gridProduct: grid }));
+  }, [grid]);
   function actionComplete(args) {
     switch (true) {
       case args.requestType === "save" && args.action === "add":

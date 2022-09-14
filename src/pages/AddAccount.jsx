@@ -2,8 +2,6 @@ import Store from "electron-store";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const { ipcRenderer } = require("electron");
-
 export default function AddAccount() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");

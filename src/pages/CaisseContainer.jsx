@@ -4,7 +4,6 @@ import Caisse from "./Caisse";
 import Caisse1 from "../component/caisse/Caisse";
 import Caisse2 from "../component/caisse/Caisse2";
 import Caisse3 from "../component/caisse/Caisse3";
-import add from "./../data/icons/Plus.png";
 import { useStore } from "../contexts/Store";
 export default function CaisseContainer() {
   function chooseCaisse(index) {
@@ -31,9 +30,15 @@ export default function CaisseContainer() {
           animation={{ previous: { effect: "None" }, next: { effect: "None" } }}
           showCloseButton
           removed={(e) => {
-          if (e.removedItem.innerText === "# N°2"){useStore.setState((state) => ({ showTabs1: false }));};
-          if (e.removedItem.innerText === "# N°3"){useStore.setState((state) => ({ showTabs2: false }));};
-          if (e.removedItem.innerText === "# N°4"){useStore.setState((state) => ({ showTabs3: false }));};
+            if (e.removedItem.innerText === "# N°2") {
+              useStore.setState((state) => ({ showTabs1: false }));
+            }
+            if (e.removedItem.innerText === "# N°3") {
+              useStore.setState((state) => ({ showTabs2: false }));
+            }
+            if (e.removedItem.innerText === "# N°4") {
+              useStore.setState((state) => ({ showTabs3: false }));
+            }
           }}
           id="defaultTab ">
           <TabItemsDirective>

@@ -46,10 +46,15 @@ export default function VendingTable() {
       type: "boolean",
       default: true,
     },
+    restorCredit: {
+      type: "boolean",
+      default: true,
+    },
   };
-  const customersData = useStore((state) => state.customers);
   const store = new Store({ schema });
   const restorQty = store?.get("restorQty");
+  const restorCredit = store?.get("restorCredit");
+  const customersData = useStore((state) => state.customers);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const productsList = useStore((state) => state.products);
   const [dropdownOpen2, setDropdownOpen2] = useState(false);
@@ -63,10 +68,10 @@ export default function VendingTable() {
   const toCurrency = useStore((state) => state.toCurrency);
   const toolbarOptions = [{ text: "Modifier", tooltipText: "Modifier", prefixIcon: "e-edit", id: "edit" }, "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: vendingFormTemplate };
-  let grid;
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   const vendingData = useStore((state) => state.vendings).filter((vending) => filterVending(vending));
+  let grid;
   function filterVending(vending) {
     if (active.all === true) {
       return vending === vending;
@@ -91,14 +96,12 @@ export default function VendingTable() {
         ipcRenderer.send("previewComponent2", url);
       }),
   });
-
   useEffect(() => {
     if (!showPrintDiv) {
       reactToPrint();
       setShowPrintDiv(true);
     }
   }, [showPrintDiv]);
-
   function toolbarClick(args) {
     if (args.item.id.includes("print")) {
       setShowPrintDiv(false);
@@ -148,52 +151,58 @@ export default function VendingTable() {
   function actionComplete(args) {
     if (args.requestType === "delete") {
       ipcRenderer.send("deleteVending", args.data[0]);
+      ipcRenderer.on("refreshGridVending:delete", (e, res) => {
+        // Activity
+        store?.set("activity", [
+          ...store?.get("activity"),
+          {
+            date: new Date(),
+            page: "Vente",
+            action: "supprimer",
+            title: "Vente Supprimer",
+            item: args?.data[0],
+            user: store?.get("user")?.userName,
+            role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+          },
+        ]);
+        // Toast
+        useStore.setState({ toast: { show: true, title: "Vente Supprimer Du Stock", type: "error" } });
+        setTimeout(() => {
+          useStore.setState({ toast: { show: false } });
+        }, 2000);
+        loadVendings();
+        ipcRenderer.removeAllListeners("refreshGridVending:delete");
 
-      // restore old client credit
-      if (restorQty) {
         //restore old quantity
-        args.data[0].grid.forEach((slectedProd) => {
-          productsList.forEach((prod) => {
-            prod._id === slectedProd._id && ipcRenderer.send("updateProduct", { _id: slectedProd._id, quantity: parseInt(prod.quantity) + parseInt(slectedProd.selectedQuantity) });
+        if (restorQty) {
+          args.data[0].grid.forEach((slectedProd) => {
+            productsList.forEach((prod) => {
+              prod._id === slectedProd._id && ipcRenderer.send("updateProduct", { _id: slectedProd._id, quantity: parseInt(prod.quantity) + parseInt(slectedProd.selectedQuantity) });
+            });
+            ipcRenderer.on("refreshGridProduct:update", (e, res) => {
+              loadProducts();
+              ipcRenderer.removeAllListeners("refreshGridProduct:update");
+            });
           });
-        });
-        ipcRenderer.on("refreshGridVending:delete", (e, res) => {
-          store?.set("activity", [
-            ...store?.get("activity"),
-            {
-              date: new Date(),
-              page: "Vente",
-              action: "supprimer",
-              title: "Vente Supprimer",
-              item: args?.data[0],
-              user: store?.get("user")?.userName,
-              role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
-            },
-          ]);
-          useStore.setState({ toast: { show: true, title: "Vente Supprimer Du Stock", type: "error" } });
-          setTimeout(() => {
-            useStore.setState({ toast: { show: false } });
-          }, 2000);
-          loadVendings();
-          loadProducts();
-          ipcRenderer.removeAllListeners("refreshGridVending:delete");
-        });
-      }
-      customersData.forEach((customer) => {
-        if (customer._id === args.data[0].client._id && args.data[0].client.name != "Standard") {
-          ipcRenderer.send("updateCustomer", {
-            _id: customer._id,
-            credit: parseInt(customer.credit) - parseInt(args.data[0].amount - args.data[0].deposit),
-          });
-          ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-            loadCustomers();
-            ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+        }
+        // restore old client credit
+        if (restorCredit) {
+          customersData.forEach((customer) => {
+            if (customer._id === args.data[0].client._id && args.data[0].client.name != "Standard") {
+              ipcRenderer.send("updateCustomer", {
+                _id: customer._id,
+                credit: parseInt(customer.credit) - parseInt(args.data[0].amount - args.data[0].deposit),
+              });
+              ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                loadCustomers();
+                ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+              });
+            }
           });
         }
       });
     }
   }
-
   function actionBegin(args) {
     if (args.requestType === "delete") {
     }
@@ -206,7 +215,6 @@ export default function VendingTable() {
     }
   }
   return (
-
     <div className="p-2">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">

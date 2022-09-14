@@ -101,7 +101,7 @@ export default function Caisse() {
   const productsTemplate = (props) => (
     <table className="table-auto w-full">
       <tbody>
-        <tr className={`${props?.quantity === 0 && "bg-red-300"}`}>
+        <tr className={`${props?.quantity === 0 && "bg-red-50"}`}>
           <td>
             <button
               onClick={(e) => {
@@ -124,13 +124,16 @@ export default function Caisse() {
             <span>📦{props?.name}</span>
           </td>
           <td className="px-2">
-            <div className={normalButton}>
-              Quantité: <span className="text-green-600 ">{props?.quantity}</span>
+            <div className={`${normalButton} ${props?.quantity === 0 && "bg-red-100"}`}>
+              Quantité: <span className={`text-green-600 ml-1 ${props?.quantity === 0 && "text-rose-600"}`}>{props?.quantity}</span>
             </div>
           </td>
           <td>
-            <div className={normalButton}>
-              Prix Vente: <span className="text-green-600 ">{caisse.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}</span>
+            <div className={`${normalButton} ${props.buyPrice >= props.sellPrice && "bg-red-100"}`}>
+              Prix Vente:{" "}
+              <span className={`text-green-600 ml-1 ${props.buyPrice >= props.sellPrice && "text-rose-600"}`}>
+                {caisse.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}
+              </span>
             </div>
           </td>
         </tr>
@@ -214,11 +217,20 @@ export default function Caisse() {
                         <span className="text-slate-900 text-[13px] font-semibold text-center ">{product.name.slice(0, 30)}</span>
                       </div>
                       <div className="p-2 flex flex-col gap-1">
-                        <div className="inline-flex  items-center justify-center text-[12px] font-medium  rounded-full px-[1.5px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
-                          Quantité:<span className="text-green-700 pl-1"> {product.quantity}</span>
+                        <div
+                          className={`inline-flex ${
+                            product?.quantity === 0 && "bg-red-100"
+                          } items-center justify-center text-[12px] font-medium  rounded-full px-[1.5px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out`}>
+                          Quantité:<span className={`text-green-600 ml-1 ${product?.quantity === 0 && "text-rose-600"}`}> {product.quantity}</span>
                         </div>
-                        <div className="inline-flex  items-center justify-center text-[12px] font-medium  rounded-full px-[2px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
-                          Prix: <span className="text-green-700 pl-1">{caisse.mode === "Détail" ? toCurrency(product.sellPrice) : toCurrency(product.sellPriceGros)}</span>
+                        <div
+                          className={`inline-flex ${
+                            product.buyPrice >= product.sellPrice && "bg-red-100"
+                          } items-center justify-center text-[12px] font-medium  rounded-full px-[2px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out`}>
+                          Prix:{" "}
+                          <span className={`text-green-600 ml-1 ${product.buyPrice >= product.sellPrice && "text-rose-600"}`}>
+                            {caisse.mode === "Détail" ? toCurrency(product.sellPrice) : toCurrency(product.sellPriceGros)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -276,7 +288,7 @@ export default function Caisse() {
                 allowCustom
                 popupHeight="500"
                 change={(e) => {
-                  if (e.itemData?._id != null) {
+                  if (e.itemData?._id != null && e.itemData.quantity >= 1) {
                     if (useStore.getState().caisse.selectedProducts.some((selected) => selected._id === e.itemData._id) === false) {
                       useStore.setState((state) => ({
                         caisse: {

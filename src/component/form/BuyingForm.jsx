@@ -1,6 +1,5 @@
 import TextBox from "../button/TextBox";
 
-
 export default function BuyingForm(props) {
   const labelclassName = "p-4 w-[170px] text-sm font-medium";
   return (

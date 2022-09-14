@@ -1,6 +1,5 @@
 import warning from "../data/icons/warning.png";
 
-
 export default function NoAuth() {
   return (
     <>

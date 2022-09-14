@@ -5,41 +5,30 @@ import { release } from "os";
 import { join } from "path";
 const jfe = require("json-file-encrypt");
 const si = require("systeminformation");
-const dialog = require("node-native-dialog");
-
 const mongoose = require("mongoose");
 
-  dialog.show({
-    msg: "Vous avez besoin d'une autorisation pour fonctionner ce programme...!!",
 
-    // Everything below is optional
-    title: "node-dialog",
-    icon: dialog.INFO,
-    buttons: dialog.OK,
-    defaultButton: dialog.RIGHT,
-  });
-
-  readFile("./node_modules/bin.json", "utf8", async (err, data) => {
-  let key1 = new jfe.encryptor("tokochi");
-  const cpuData = await si.cpu();
-  const systemData = await si.system();
-  const networkData = await si.networkInterfaces();
-  if (err) {
-    if (err.errno === -4058) {
-      let encrypted = key1.encrypt(JSON.stringify([networkData[0].mac, cpuData.manufacturer, cpuData.brand, systemData.manufacturer, systemData.model, systemData.uuid]));
-      writeFile("./node_modules/bin.json", encrypted, (err, data) => {
-        if (err) {
-          console.log(err);
-        }
-      });
-    }
-  } else {
-    let original = key1.decrypt(data);
-    if (original !== JSON.stringify([networkData[0].mac, cpuData.manufacturer, cpuData.brand, systemData.manufacturer, systemData.model, systemData.uuid])) {
-      process.exit(0);
-    }
-  }
-});
+// readFile(join(__dirname, "..", "..", "..","..", "/bin.json"), "utf8", async (err, data) => {
+//   if (err) {
+//    process.exit(0);
+//   }
+//   let key1 = new jfe.encryptor("tokochi");
+//   const cpuData = await si.cpu();
+//   const systemData = await si.system();
+//   const networkData = await si.networkInterfaces();
+//   let encrypted = key1.encrypt(JSON.stringify([networkData[0].mac, cpuData.manufacturer, cpuData.brand, systemData.manufacturer, systemData.model, systemData.uuid]));
+//   if (key1.decrypt(data) === "tokochi20101990") {
+//     writeFile(join(__dirname, "..", "..", "..", "..", "/bin.json"), encrypted, (err, data) => {
+//       if (err) {
+// process.exit(0);
+//       }
+//     });
+//   } else {
+//     if (key1.decrypt(data) !== JSON.stringify([networkData[0].mac, cpuData.manufacturer, cpuData.brand, systemData.manufacturer, systemData.model, systemData.uuid]) || data == null) {
+//       process.exit(0);
+//     }
+//   }
+// });
 
 // // *********** MongoDB onnection **********
 mongoose

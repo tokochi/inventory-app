@@ -4,10 +4,12 @@ import Store from "electron-store";
 import React, { useEffect, useState } from "react";
 import TextBox from "../button/TextBox";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
-import { loadProducts, useStore } from "../../contexts/Store";
+import {  useStore } from "../../contexts/Store";
 import PopupDialog from "../dialog/PopupDialog";
 import alarm from "./../../data/icons/alarm.png";
 import deletePng2 from "./../../data/icons/delete2.png";
+
+
 export default function ProductForm(props) {
   const labelclassName = "p-4 w-[170px] text-sm font-medium";
   const brandTemplate = (props) => (

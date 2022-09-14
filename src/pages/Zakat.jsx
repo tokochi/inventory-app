@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import TextBox from "../component/button/TextBox";
 import { useStore } from "../contexts/Store";
 import Header from "./../component/layout/Header";
+
 export default function Zakat() {
-  const vendingsData = useStore((state) => state.vendings);
   const productsData = useStore((state) => state.products);
   const customersData = useStore((state) => state.customers);
   const providersData = useStore((state) => state.providers);
   const depenseData = useStore((state) => state.depenses);
-  const depenseTotal = depenseData.reduce((acc, cur) => acc + cur.amount, 0);
   const providerCredit = providersData.reduce((acc, cur) => acc + cur.credit, 0);
   const customerCredit = customersData.reduce((acc, cur) => acc + cur.credit, 0);
   const total = productsData.reduce((acc, cur) => acc + cur.sellPrice * cur.quantity, 0);

@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 import moment from "moment/min/moment-with-locales";
 import {  useStore } from "../../contexts/Store";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
+
+
 export default function Activity() {
   const schema = { activity: { type: "array", default: [] } };
   const store = new Store({ schema });

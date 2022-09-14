@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 
-
 function Header({ children, title, value, subTitle }) {
-
 
   return (
     <main>

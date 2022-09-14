@@ -1,7 +1,6 @@
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import React, { useEffect, useState } from "react";
 import { useStore } from "../../contexts/Store";
-
 import Status from "../table/templates/ProductsStatus";
 
 export default function ProductsInventory({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {

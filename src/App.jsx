@@ -15,7 +15,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import BonAchat from "./pages/BonAchat";
 import AddAccount from "./pages/AddAccount";
-import { useStore, loadCustomers, loadBuyings, loadVendings, loadProviders, loadProducts, loadDepenses } from "./contexts/Store";
+import {loadCustomers, loadBuyings, loadVendings, loadProviders, loadProducts, loadDepenses } from "./contexts/Store";
 import Settings from "./pages/Settings";
 import PrivateRoute from "./component/PrivateRoute";
 import Zakat from "./pages/Zakat";

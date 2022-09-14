@@ -55,7 +55,6 @@ const store = new Store();
                       case amount === 0:
                         setRequiredPrice(true);
                         break;
-
                       default:
                         amount > 0 && ipcRenderer.send("addDepense", { amount, comment, description, date, type: slectedDepense });
                         setAmount(0);

@@ -9,7 +9,6 @@ const { ipcRenderer } = require("electron");
 
 export default function BackUp() {
   const schema = { backup: { type: "array", default: [] } };
-  const [refresh, setRefresh] = useState(false);
   const store = new Store({ schema });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [date, setDate] = useState(false);
@@ -19,16 +18,16 @@ export default function BackUp() {
   const [vendings, setVendings] = useState(false);
   const [buyings, setBuyings] = useState(false);
   const [isSpin, setIsSpin] = useState(false);
-    useEffect(() => {
-      if (isSpin) {
-        setTimeout(() => {
-          setIsSpin(false);
-          setDropdownOpen(false);
-          window.location.reload();
-        }, 5000);
-      }
-    }, [isSpin]);
-//store?.set("backup", []);
+  useEffect(() => {
+    if (isSpin) {
+      setTimeout(() => {
+        setIsSpin(false);
+        setDropdownOpen(false);
+        window.location.reload();
+      }, 5000);
+    }
+  }, [isSpin]);
+  //store?.set("backup", []);
   return (
     <div className="bg-white shadow-lg overflow-y-auto h-[600px]  w-full rounded-sm border border-slate-200 relative">
       <div className="w-full">

@@ -96,21 +96,25 @@ export default function Facture(props) {
         ipcRenderer.send("previewComponent2", url);
       }),
   });
+
   const productsTemplate = (props) => (
     <table className="table-auto w-full">
       <tbody>
-        <tr className={`${props?.quantity === 0 && "bg-red-300"}`}>
+        <tr className={`${props?.quantity === 0 && "bg-red-50"}`}>
           <td className="text-slate-600  font-medium  text-lg min-w-[400px] px-2">
             <span>📦{props?.name}</span>
           </td>
           <td className="px-2">
-            <div className={normalButton}>
-              Quantité: <span className="text-green-600 ">{props?.quantity}</span>
+            <div className={`${normalButton} ${props?.quantity === 0 && "bg-red-100"}`}>
+              Quantité: <span className={`text-green-600 ml-1 ${props?.quantity === 0 && "text-rose-600"}`}>{props?.quantity}</span>
             </div>
           </td>
           <td>
-            <div className={normalButton}>
-              Prix Vente: <span className="text-green-600 ">{facture.mode === "Détail" ? props?.sellPrice : props?.sellPriceGros}.00DA</span>
+            <div className={`${normalButton} ${props.buyPrice >= props.sellPrice && "bg-red-100"}`}>
+              Prix Vente:{" "}
+              <span className={`text-green-600 ml-1 ${props.buyPrice >= props.sellPrice && "text-rose-600"}`}>
+                {facture.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}
+              </span>
             </div>
           </td>
         </tr>
@@ -363,7 +367,7 @@ export default function Facture(props) {
                 allowCustom
                 popupHeight="500"
                 change={(e) => {
-                  if (e.itemData?._id != null) {
+                  if (e.itemData?._id != null && e.itemData.quantity >= 1) {
                     if (useStore.getState().facture.selectedProducts.some((selected) => selected._id === e.itemData._id) === false) {
                       useStore.setState((state) => ({
                         facture: {
@@ -558,7 +562,7 @@ export default function Facture(props) {
                           date: new Date(),
                           page: "Facture",
                           action: "modifier",
-                          title:"Facture Modifier",
+                          title: "Facture Modifier",
                           item: JSON.parse(res),
                           user: store?.get("user")?.userName,
                           role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
