@@ -71,6 +71,7 @@ export default function Security() {
                 <input
                   id="name"
                   onChange={(e) => {
+                    setWrongPassword(false);
                     if (e.target.value === password) {
                       const users = store.get("users");
                       const temp = store.get("user");
@@ -83,8 +84,8 @@ export default function Security() {
                   className="form-input w-full"
                   type="password"
                 />
-              </div>
               {wrongPassword && <span className="m-1 text-xs text-red-400">Mot de passe inccorecte</span>}
+              </div>
             </div>
           )}
         </section>
@@ -126,6 +127,7 @@ export default function Security() {
                 <TextBox
                   id="name"
                   onChange={(e) => {
+                     setWrongPin(false);
                     if (e.value === pin) {
                       store.set("pin", e.value);
                     } else {
@@ -139,8 +141,8 @@ export default function Security() {
                   showSpinButton={false}
                   format="N0"
                 />
-              </div>
               {wrongPin && <span className="m-1 text-xs text-red-400">Code pin inccorecte</span>}
+              </div>
             </div>
           )}
         </section>

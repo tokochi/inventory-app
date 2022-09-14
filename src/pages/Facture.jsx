@@ -80,6 +80,7 @@ export default function Facture(props) {
     if (!showPrintDiv) {
       reactToPrint();
       setShowPrintDiv(true);
+      validateBtn.current.click();
     }
   }, [showPrintDiv]);
   useEffect(() => {

@@ -93,6 +93,7 @@ export default function Caisse() {
     if (!showPrintDiv) {
       reactToPrint();
       setShowPrintDiv(true);
+      validateBtn.current.click();
     }
   }, [showPrintDiv]);
   useEffect(() => {
@@ -146,7 +147,7 @@ export default function Caisse() {
       <div className="flex  justify-center">
         <div id="left" className="bg-white w-[410px]">
           <div id="option" className="flex items-center my-2">
-            <span className="px-4 text-sm font-medium min-w-[120px] ">Mode Vente:</span>
+            <span className="px-4 text-sm font-medium min-w-[100px] ">Mode Vente:</span>
             <TextBox
               type="dropdown"
               id="brand"
@@ -162,7 +163,7 @@ export default function Caisse() {
             />
           </div>
           <div className="flex items-center  mb-2">
-            <span className="px-4  text-sm font-medium min-w-[120px]">Client:</span>
+            <span className="px-4  text-sm font-medium min-w-[110px]">Client:</span>
             <TextBox
               type="dropdown"
               id="brand"
@@ -175,7 +176,7 @@ export default function Caisse() {
               title="Standard"
             />
             {caisse.client.name != "Standard" && (
-              <div style={{ marginLeft: "4px" }} className={normalButton}>
+              <div className={`${normalButton} mx-2 whitespace-nowrap`}>
                 Crédit: <span className="text-rose-600 ml-1">{caisse.client.credit > 0 ? toCurrency(caisse.client.credit) : toCurrency(0)}</span>
               </div>
             )}
@@ -214,7 +215,7 @@ export default function Caisse() {
                       style={{ backgroundImage: `url(${box})` }}
                       className={` m-2 w-[120px] h-[100px] select-none flex flex-col bg-[length:200px] bg-center justify-start cursor-pointer items-center rounded-lg  py-1 border border-slate-200 hover:opacity-90 shadow-sm  text-slate-500 duration-150 ease-in-out`}>
                       <div className="flex gap-2 justify-center items-center ">
-                        <span className="text-slate-900 text-[13px] font-semibold text-center ">{product.name.slice(0, 30)}</span>
+                        <span className="text-slate-800 text-[14px] font-semibold text-center ">{product.name.slice(0, 30)}</span>
                       </div>
                       <div className="p-2 flex flex-col gap-1">
                         <div

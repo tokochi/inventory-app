@@ -141,7 +141,7 @@ export default function BuyingTable() {
           {
             date: new Date(),
             page: "Achat",
-            action: "Supprimer",
+            action: "supprimer",
             title: "Achat Supprimer",
             item: args?.data,
             user: store?.get("user")?.userName,

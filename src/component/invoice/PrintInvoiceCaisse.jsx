@@ -32,7 +32,7 @@ export default function PrintInvoiceCaisse() {
     },
   });
   return (
-    <div className={`p-1 relative font-sans h-full w-[58mm] bg-white`}>
+    <div className={`p-1 px-1 relative font-sans h-full w-[58mm] bg-white`}>
       <div id="title" className="flex items-center flex-col">
         <span className="text-[15px] w-full font-mono text-center border-b-[1.5px] border-dashed  border-gray-900  uppercase">{store?.get("company")?.name}</span>
 
@@ -78,7 +78,7 @@ export default function PrintInvoiceCaisse() {
           </tr>
         </tbody>
       </table>
-      <div className="flex flex-col text-[10px] font-mono">
+      <div className="flex flex-col text-[10px] px-1 font-mono">
         <div id="comapnyInfo" className="flex gap-2 ">
           <span className="font-mono">Le: </span>
           <span className=" "> {moment(caisse.time).format("D/M/yyyy HH:mm:ss")}</span>

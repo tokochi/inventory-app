@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useStore } from "../../contexts/Store";
 import UserAvatar from "../../data/icons/user.png";
 import Transition from "../../utils/Transition";
+
 function DropdownProfile({ align }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const trigger = useRef(null);
@@ -37,12 +38,12 @@ function DropdownProfile({ align }) {
     <div className="inline-flex">
       <button ref={trigger} className="inline-flex justify-center items-center group" aria-haspopup="true" onClick={() => setDropdownOpen(!dropdownOpen)} aria-expanded={dropdownOpen}>
         <div className="relative">
-          <img className="w-8 h-8 rounded-full" src={loggedUser()?.logo || UserAvatar} width="32" height="32" alt="User" />
+          <img className="w-8 h-8 rounded-full" src={loggedUser?.logo || UserAvatar} width="32" height="32" alt="User" />
           {isLoggedIn && <div className="absolute top-0 left-6 w-2.5 h-2.5 bg-emerald-500  rounded-full"></div>}
         </div>
 
         <div className="flex items-center truncate">
-          <span className=" truncate ml-2 text-sm font-medium group-hover:text-slate-800 capitalize">{loggedUser()?.userName}</span>
+          <span className=" truncate ml-2 text-sm font-medium group-hover:text-slate-800 capitalize">{loggedUser?.userName}</span>
           <svg className="relative w-3 h-3 shrink-0 ml-1 fill-current text-slate-400" viewBox="0 0 12 12">
             <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
           </svg>

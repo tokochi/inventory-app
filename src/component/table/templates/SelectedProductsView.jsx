@@ -16,14 +16,14 @@ const toCurrency = useStore((state) => state.toCurrency);
           <td className="px-2">
             {prop?.quantity > 0 && (
               <div className={normalButton}>
-                Quantité: <span className="text-green-600 ">{prop?.quantity}</span>
+                Quantité: <span className="text-green-600 ml-1">{prop?.quantity}</span>
               </div>
             )}
           </td>
           <td>
             {prop?.sellPrice > 0 && (
               <div className={normalButton}>
-                Prix Vente: <span className="text-green-600 ">{toCurrency(prop?.sellPrice)}</span>
+                Prix Vente: <span className="text-green-600 ml-1">{toCurrency(prop?.sellPrice)}</span>
               </div>
             )}
           </td>

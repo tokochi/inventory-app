@@ -24,7 +24,7 @@ export default function PrintInvoiceFacture() {
     },
   });
   return (
-    <div className={`p-10 relative font-sans h-[297mm] w-[210mm] bg-white`}>
+    <div className={`p-10 relative font-sans h-[297mm]  bg-white`}>
       <div className="flex justify-between">
         <div id="title" className="flex flex-col">
           <span className="text-xl font-semibold">

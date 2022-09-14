@@ -673,7 +673,7 @@ ipcMain.on("previewComponent2", (event, url) => {
 
   wino.webContents.once("did-finish-load", () => {
     wino.webContents
-      .printToPDF(printOptions)
+      .printToPDF({ ...printOptions, pageSize:"A4" })
       .then((data) => {
         let buf = Buffer.from(data);
         var data = buf.toString("base64");

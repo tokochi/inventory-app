@@ -92,6 +92,7 @@ export default function BonAchat() {
     if (!showPrintDiv) {
       reactToPrint();
       setShowPrintDiv(true);
+      validateBtn.current.click();
     }
   }, [showPrintDiv]);
   const productsTemplate = (props) => (

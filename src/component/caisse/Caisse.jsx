@@ -126,12 +126,12 @@ export default function Caisse() {
           </td>
           <td className="px-2">
             <div className={normalButton}>
-              Quantité: <span className="text-green-600 ">{props?.quantity}</span>
+              Quantité: <span className="text-green-600 ml-1">{props?.quantity}</span>
             </div>
           </td>
           <td>
             <div className={normalButton}>
-              Prix Vente: <span className="text-green-600 ">{caisse.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}</span>
+              Prix Vente: <span className="text-green-600 ml-1">{caisse.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}</span>
             </div>
           </td>
         </tr>

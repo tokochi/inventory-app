@@ -24,7 +24,7 @@ export default function Navbar() {
   } transition-all duration-300 justify-center text-sm font-medium leading-5  px-3 py-1 border-r border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`;
   return (
     <>
-      <header className={`${isLoggedIn ? "sticky top-0 h-[65px] " : "opacity-0 h-0"} transition-all duration-300 shadow-sm select-none bg-white border-b border-slate-200 z-30`}>
+      <header className={`${isLoggedIn ? "sticky top-0 h-[65px] " : "opacity-0 h-0"} transition-all duration-500 shadow-sm select-none bg-white border-b border-slate-200 z-30`}>
         <div className="px-8">
           <div className="flex items-center justify-between  ">
             {/* Header: Left side */}

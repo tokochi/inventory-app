@@ -21,7 +21,7 @@ const isLoggedIn = useStore((state) => state.isLoggedIn);
       className={` sticky top-0 w-[132px]  flex-none h-screen overflow-hidden select-none bg-slate-800 "
       }`}>
       <div
-        className={`  ${isLoggedIn ? "w-[132px] " : "opacity-0 w-0"} transition-all duration-300 flex-none h-screen  overflow-y-auto  bg-slate-800 "
+        className={`  ${isLoggedIn ? "w-[132px] " : "opacity-0 w-0"} transition-all duration-500 flex-none h-screen  overflow-y-auto  bg-slate-800 "
       }`}>
         <div className="flex items-center justify-center mt-2 mb-5 select-none">
           <button>
