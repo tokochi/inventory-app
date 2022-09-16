@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, shell, webFrame } from "electron";
 import Store from "electron-store";
 import { writeFile, readFile } from "fs";
-import { release } from "os";
+import { release, tmpdir } from "os";
 import { join } from "path";
 const jfe = require("json-file-encrypt");
 const si = require("systeminformation");
@@ -612,18 +612,38 @@ ipcMain.on("zoom+", (event, data) => {
 const printOptions = {
   silent: false,
   pageSize: { height: 301000, width: 58100 },
-  printBackground: true,
-  color: true,
-  margin: {
-    marginType: "printableArea",
-  },
-  landscape: false,
-  pagesPerSheet: 1,
-  collate: false,
-  copies: 1,
-  header: "Page header",
-  footer: "Page footer",
+  // printBackground: true,
+  // color: true,
+  // margin: {
+  //   marginType: "printableArea",
+  // },
+  // landscape: false,
+  // pagesPerSheet: 1,
+  // collate: false,
+  // copies: 1,
+  // header: "Page header",
+  // footer: "Page footer",
 };
+
+// when worker window is ready
+// ipcMain.on("readyToPrintPDF", (event) => {
+//   const pdfPath = join(tmpdir(), "print.pdf");
+//   // Use default printing options
+//   win.webContents
+//     .printToPDF({ printSelectionOnly: true, pageSize: { height: 301000, width: 58100 } })
+//     .then((data) => {
+//       writeFile(pdfPath, data, function (error) {
+//         if (error) {
+//           throw error;
+//         }
+//         shell.openExternal("file://" + pdfPath);
+//         event.sender.send("wrote-pdf", pdfPath);
+//       });
+//     })
+//     .catch((error) => {
+//       throw error;
+//     });
+// });
 
 ipcMain.on("printComponent", (event, url) => {
   console.log("Print Initiated in Main...");

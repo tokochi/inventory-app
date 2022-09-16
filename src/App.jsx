@@ -19,6 +19,7 @@ import {loadCustomers, loadBuyings, loadVendings, loadProviders, loadProducts, l
 import Settings from "./pages/Settings";
 import PrivateRoute from "./component/PrivateRoute";
 import Zakat from "./pages/Zakat";
+
 loadCustomers();
 loadVendings();
 loadProducts();

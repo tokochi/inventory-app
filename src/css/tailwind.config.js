@@ -32,7 +32,7 @@ module.exports = {
       },
       fontFamily: {
         inter: ["Inter", "sans-serif"],
-        mono: ["F25 Bank Printer", "sans-serif"],
+       // mono: ["F25 Bank Printer", "sans-serif"],
       },
       fontSize: {
         xs: ["0.75rem", { lineHeight: "1.5" }],

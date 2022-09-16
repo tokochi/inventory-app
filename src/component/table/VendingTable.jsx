@@ -215,8 +215,8 @@ export default function VendingTable() {
     }
   }
   return (
-    <div className="p-2">
-      <div className="mb-4 mx-4 flex justify-between">
+    <div className="p-2 ">
+      <div className="mb-4  mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
             <button
@@ -260,7 +260,7 @@ export default function VendingTable() {
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
-          dataSource={vendingData}
+          dataSource={vendingData?.reverse()}
           enableHover={false}
           height="450"
           allowPdfExport

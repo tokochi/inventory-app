@@ -246,7 +246,7 @@ export default function BuyingTable() {
       <div className="mx-2 mb-4">
         <GridComponent
           ref={(g) => (grid = g)}
-          dataSource={buyingData}
+          dataSource={buyingData?.reverse()}
           enableHover={false}
           height="450"
           allowPdfExport
