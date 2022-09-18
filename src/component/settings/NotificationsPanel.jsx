@@ -1,11 +1,13 @@
 import Store from "electron-store";
 import React, { useState } from "react";
+import { useStore } from "../../contexts/Store";
 
 function NotificationsPanel() {
   const schema = {
     notifications: { default: { productAlert: true, clients: true, providers: true, revenue: true }, type: "object" },
   };
   const store = new Store({ schema });
+  const theme = useStore((state) => state.theme);
   const notify = store?.get("notifications");
   const [productAlert, setProductAlert] = useState(notify.productAlert);
   const [clients, setClients] = useState(notify.clients);
@@ -13,19 +15,19 @@ function NotificationsPanel() {
   const [revenue, setRevenue] = useState(notify.revenue);
 
   return (
-    <div className=" h-[500px]">
+    <div className={`grow overflow-y-auto h-[calc(100vh_-_150px)] ${theme.back} ${theme.textXl}`}>
       {/* Panel body */}
       <div className="p-6 space-y-6">
-        <h2 className="text-2xl text-slate-800 font-bold mb-5">Notifications</h2>
+        <h2 className="text-2xl  font-bold mb-5">Notifications</h2>
 
         {/* General */}
         <section>
-          <h3 className="text-xl leading-snug text-slate-800 font-bold mb-1">Géneral</h3>
+          <h3 className="text-xl leading-snug  font-bold mb-1">Géneral</h3>
           <ul>
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Rupture de Stock</div>
+                <div className=" font-semibold">Rupture de Stock</div>
                 <div className="text-sm">Notification des Produit en quantité alérte ou rupture.</div>
               </div>
               {/* Right */}
@@ -52,7 +54,7 @@ function NotificationsPanel() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Crédit Client</div>
+                <div className=" font-semibold">Crédit Client</div>
                 <div className="text-sm">Notification des crédits clients .</div>
               </div>
               {/* Right */}
@@ -79,7 +81,7 @@ function NotificationsPanel() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Déttes Fournisseurs</div>
+                <div className=" font-semibold">Déttes Fournisseurs</div>
                 <div className="text-sm">Notifications des déttes des fournisseurs.</div>
               </div>
               {/* Right */}
@@ -106,7 +108,7 @@ function NotificationsPanel() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Revenue Quotidien</div>
+                <div className=" font-semibold">Revenue Quotidien</div>
                 <div className="text-sm">Notification des Revenues des ventes journalier.</div>
               </div>
               {/* Right */}

@@ -3,8 +3,8 @@ import React from "react";
 import { useStore } from "./../../../contexts/Store";
 
 export default function SelectedProductsView(props) {
-   const normalButton =
-     "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-1  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
+  const theme = useStore((state) => state.theme);
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
 const toCurrency = useStore((state) => state.toCurrency);
   const treeViewTemplate = (prop) => (
     <table className="table-auto w-full">

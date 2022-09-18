@@ -5,11 +5,10 @@ import React, { useState } from "react";
 import { useStore } from "../contexts/Store";
 
 export default function Report() {
+  const theme = useStore((state) => state.theme);
   const [active, setActive] = useState({ all: true, today: false, week: false, month: false });
-  const activeButtoon =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
-  const normalButton =
-    "inline-flex items-center  justify-between text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
+  const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
   const [date, setDate] = useState([]);
   const vendingsData = useStore((state) => state.vendings).filter((vente) => (date?.length > 0 ? new Date(date[0]) < new Date(vente.time) && new Date(vente.time) < new Date(date[1]) : vente));
   const productsData = useStore((state) => state.products);
@@ -127,12 +126,13 @@ export default function Report() {
           />
         </div>
       </div>
+
       <div id="cards" className="grid grid-cols-1 gap-5 ">
         <div className="grid grid-cols-4 gap-6">
-          <div id="card1" className="flex min-w-[300px]  bg-white shadow-lg rounded-sm border border-slate-200">
+          <div id="card1" className={`${theme.back} flex min-w-[300px]  shadow-lg rounded-sm border border-slate-200`}>
             <div className="pl-5 py-2 flex ">
               <div className="">
-                <h2 className="text-lg text-center font-semibold  text-slate-800">Clients</h2>
+                <h2 className={`text-lg text-center font-semibold  ${theme.textXl}`}>Clients</h2>
                 <hr className="w-full mb-4" />
                 <div className="flex gap-2 flex-col mb-4 justify-center">
                   <div className={normalButton}>
@@ -142,9 +142,9 @@ export default function Report() {
                     Moyenne Achat Client:<span className="text-green-600 ml-2 text-right">{toCurrency(average)}</span>
                   </div>
                 </div>
-                <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Total Crédit Client</div>
+                <div className={`text-xs font-semibold ${theme.text} uppercase mb-1`}>Total Crédit Client</div>
                 <div className="flex items-start">
-                  <div className="text-3xl font-bold text-slate-800 pl-2 mr-2">{totalCredit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}DA</div>
+                  <div className={`text-3xl font-bold ${theme.textXl} pl-2 mr-2`}>{totalCredit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}DA</div>
                   <div className={`text-sm font-[500] text-center text-white px-1.5 ${marginCredit === 1 ? "bg-emerald-500" : "bg-rose-500"}  rounded-full`}>
                     {(marginCredit * 100 - 100).toFixed(2)}%
                   </div>
@@ -152,10 +152,10 @@ export default function Report() {
               </div>
             </div>
           </div>
-          <div id="card2" className="flex min-w-[300px] bg-white shadow-lg rounded-sm border border-slate-200">
+          <div id="card2" className={`${theme.back} flex min-w-[300px]  shadow-lg rounded-sm border border-slate-200`}>
             <div className="pl-5 py-2 flex ">
               <div className="">
-                <h2 className="text-lg text-center font-semibold  text-slate-800">Remises</h2>
+                <h2 className={`text-lg text-center font-semibold  ${theme.textXl}`}>Remises</h2>
                 <hr className="w-full mb-4" />
                 <div className="flex gap-2 flex-col mb-4 justify-center">
                   <div className={normalButton}>
@@ -165,9 +165,9 @@ export default function Report() {
                     Moyenne Remise Client:<span className="text-green-600 ml-2 text-right">{toCurrency(totalRemise / NumRemise || 0)}</span>
                   </div>
                 </div>
-                <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Total Remise</div>
+                <div className={`text-xs font-semibold ${theme.text} uppercase mb-1`}>Total Remise</div>
                 <div className="flex items-start">
-                  <div className="text-3xl font-bold text-slate-800 pl-2 mr-2">{toCurrency(totalRemise)}</div>
+                  <div className={`text-3xl font-bold ${theme.textXl} pl-2 mr-2`}>{toCurrency(totalRemise)}</div>
                   <div className={`text-sm font-[500] text-center text-white px-1.5 ${marginRemise === 1 ? "bg-emerald-500" : "bg-rose-500"} rounded-full`}>
                     {(marginRemise * 100 - 100).toFixed(2)}%
                   </div>
@@ -175,10 +175,10 @@ export default function Report() {
               </div>
             </div>
           </div>
-          <div id="card3" className="flex min-w-[300px] bg-white shadow-lg rounded-sm border border-slate-200">
+          <div id="card3" className={`${theme.back} flex min-w-[300px]  shadow-lg rounded-sm border border-slate-200`}>
             <div className="pl-5 py-2 flex ">
               <div className="">
-                <h2 className="text-lg text-center font-semibold  text-slate-800">Fournisseurs</h2>
+                <h2 className={`text-lg text-center font-semibold  ${theme.textXl}`}>Fournisseurs</h2>
                 <hr className="w-full mb-4" />
                 <div className="flex gap-2 flex-col mb-4 justify-center">
                   <div className={normalButton}>
@@ -188,18 +188,18 @@ export default function Report() {
                     Nombre Produits Achter:<span className="text-green-600 ml-2 text-right">{buyingQuantity}</span>
                   </div>
                 </div>
-                <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Total Déttes Fournisseurs</div>
+                <div className={`text-xs font-semibold ${theme.text} uppercase mb-1`}>Total Déttes Fournisseurs</div>
                 <div className="flex items-start">
-                  <div className="text-3xl font-bold text-slate-800 pl-2 mr-2">{toCurrency(providerCredit)}</div>
+                  <div className={`text-3xl font-bold ${theme.textXl} pl-2 mr-2`}>{toCurrency(providerCredit)}</div>
                   <div className={`text-sm font-[500] text-center text-white px-1.5  bg-rose-500 rounded-full`}>{(marginCreditSupplier * 100 - 100).toFixed(2)}%</div>
                 </div>
               </div>
             </div>
           </div>
-          <div id="card4" className="flex min-w-[300px] bg-white shadow-lg rounded-sm border border-slate-200">
+          <div id="card4" className={`${theme.back} flex min-w-[300px]  shadow-lg rounded-sm border border-slate-200`}>
             <div className="pl-5 py-2 flex ">
               <div className="">
-                <h2 className="text-lg text-center font-semibold  text-slate-800">Achats</h2>
+                <h2 className={`text-lg text-center font-semibold  ${theme.textXl}`}>Achats</h2>
                 <hr className="w-full mb-4" />
                 <div className="flex gap-2 flex-col mb-4 justify-center">
                   <div className={normalButton}>
@@ -209,19 +209,19 @@ export default function Report() {
                     Moyenne Achat :<span className="text-green-600 ml-2 text-right">{toCurrency(averageBuy)}</span>
                   </div>
                 </div>
-                <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Total Achats</div>
+                <div className={`text-xs font-semibold ${theme.text} uppercase mb-1`}>Total Achats</div>
                 <div className="flex items-start">
-                  <div className="text-3xl font-bold text-slate-800 pl-2 mr-2">{buyingTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}DA</div>
+                  <div className={`text-3xl font-bold ${theme.textXl} pl-2 mr-2`}>{buyingTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}DA</div>
                   {/* <div className={`text-sm font-[500] text-center text-white px-1.5  bg-rose-500 rounded-full`}>{(marginCredit * 100 - 100).toFixed(2)}%</div> */}
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div id="longCard1" className="flex  bg-white shadow-lg rounded-sm border border-slate-200">
+        <div id="longCard1" className={`flex  ${theme.back} shadow-lg rounded-sm border border-slate-200`}>
           <div className="pl-5 py-2 flex w-[330px]">
             <div className="">
-              <h2 className="text-lg text-center font-semibold  text-slate-800">Revenues</h2>
+              <h2 className={`text-lg text-center font-semibold  ${theme.textXl}`}>Revenues</h2>
               <hr className="w-full mb-4" />
               <div className="flex gap-2 flex-col mb-4 justify-center">
                 <div className={normalButton}>
@@ -245,9 +245,9 @@ export default function Report() {
                   <span className="text-green-600 ml-2 text-right">{toCurrency(total - totalBuyPrice)}</span>
                 </div>
               </div>
-              <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Bénéfice net</div>
+              <div className={`text-xs font-semibold ${theme.text} uppercase mb-1`}>Bénéfice net</div>
               <div className="flex items-start">
-                <div className="text-3xl font-bold text-slate-800 pl-2 mr-2">{toCurrency(total - totalBuyPrice - depenseTotal)}</div>
+                <div className={`text-3xl font-bold ${theme.textXl} pl-2 mr-2`}>{toCurrency(total - totalBuyPrice - depenseTotal)}</div>
                 {!isNaN(margin) && (
                   <div className={`text-sm font-[500] text-center text-white px-1.5 ${Math.sign(margin) === 1 ? "bg-emerald-500" : "bg-amber-500"}   rounded-full`}>
                     {Math.sign(margin) === 1 ? "+" + parseInt(margin * 100) : parseInt(margin * 100)}%
@@ -256,7 +256,7 @@ export default function Report() {
               </div>
             </div>
           </div>
-          <div id="chart1" className="p-2 flex-1 overflow-x-auto">
+          <div id="chart1" className={`p-2 flex-1 overflow-x-auto ${theme.name === "dark" && "bg-[#e7e7e7]"}`}>
             <ChartComponent
               height="300"
               title="Analyse des Ventes"
@@ -287,10 +287,10 @@ export default function Report() {
             </ChartComponent>
           </div>
         </div>
-        <div id="longCard2" className="flex mb-20 bg-white shadow-lg rounded-sm border border-slate-200">
+        <div id="longCard2" className={`flex mb-20 ${theme.back} shadow-lg rounded-sm border border-slate-200`}>
           <div className="pl-5 py-2 flex w-[330px]">
             <div className="">
-              <h2 className="text-lg text-center font-semibold  text-slate-800">Stock</h2>
+              <h2 className={`text-lg text-center font-semibold  ${theme.textXl}`}>Stock</h2>
               <hr className="w-full mb-4" />
               <div className="flex gap-2 flex-col mb-4 justify-center">
                 <div className={normalButton}>
@@ -314,9 +314,9 @@ export default function Report() {
                   Moyenne Achat Produit:<span className="text-green-600 ml-2 text-right">{toCurrency(averageProducts)}</span>
                 </div>
               </div>
-              <div className="text-xs font-semibold text-slate-400 uppercase mb-1">Bénéfice Stock</div>
+              <div className={`text-xs font-semibold ${theme.text} uppercase mb-1`}>Bénéfice Stock</div>
               <div className="flex items-start">
-                <div className="text-3xl font-bold text-slate-800 pl-2 mr-2">{toCurrency(prodTotalSellPrice - prodTotalBuyPrice)}</div>
+                <div className={`text-3xl font-bold ${theme.textXl} pl-2 mr-2`}>{toCurrency(prodTotalSellPrice - prodTotalBuyPrice)}</div>
                 {!isNaN(marginProducts) && (
                   <div className={`text-sm font-[500] text-center text-white px-1.5 ${Math.sign(marginProducts) === 1 ? "bg-emerald-500" : "bg-amber-500"}   rounded-full`}>
                     {Math.sign(marginProducts) === 1 ? "+" + parseInt(marginProducts * 100) : parseInt(marginProducts * 100)}%
@@ -325,7 +325,7 @@ export default function Report() {
               </div>
             </div>
           </div>
-          <div id="chart2" className=" p-2 flex-1 overflow-x-auto">
+          <div id="chart2" className={` p-2 flex-1 overflow-x-auto ${theme.name === "dark" && "bg-[#e7e7e7]"}`}>
             <ChartComponent
               height="300"
               title="Top 5 Produits Vendu"

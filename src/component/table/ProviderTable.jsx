@@ -25,24 +25,19 @@ import Localization from "../Localization";
 import ProviderCreditList from "./../list/ProviderCreditList";
 import Status from "./templates/ProviderStatus";
 const { ipcRenderer } = require("electron");
-
 // ******** Get Providers List  ********
-
 Localization("Fournisseur");
-
 export default function ProvidersTable() {
   // ******** Column Templates  ********
+  const theme = useStore((state) => state.theme);
   const [active, setActive] = useState({ all: true, debt: false });
   const providersData = useStore((state) => state.providers).filter((provider) => filterProvider(provider));
   const providersGridStatus = (props) => <Status {...props} />;
   const providersFormTemplate = (props) => <ProviderFormTemplate {...props} />;
   const providersIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
-
   // ******** Grid Table  ********
-  const activeButtoon =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
-  const normalButton =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
+  const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
   const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: providersFormTemplate };
   let grid;
@@ -187,7 +182,7 @@ export default function ProvidersTable() {
     }
   }
   return (
-    <div className="p-2 ">
+    <div className="p-2 h-screen">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
@@ -201,7 +196,7 @@ export default function ProvidersTable() {
           </li>
           <li className="m-1">
             <button
-              className={active.stock ? activeButtoon : normalButton}
+              className={active.debt ? activeButtoon : normalButton}
               onClick={() => {
                 setActive((state) => ({ all: false, debt: true }));
               }}>
@@ -218,13 +213,13 @@ export default function ProvidersTable() {
         </div>
       </div>
 
-      <div className="mx-2 mb-4">
+      <div className="mx-2 h-[calc(100vh_-_200px)]">
         <GridComponent
           ref={(g) => (grid = g)}
           dataSource={providersData}
           enableHover={false}
           allowPdfExport
-          height="450"
+          height="100%"
           allowPrint
           allowResizing
           showColumnChooser

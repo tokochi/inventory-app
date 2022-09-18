@@ -4,25 +4,17 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useStore } from "../../contexts/Store";
 import Store from "electron-store";
 
-
 export default function Sidebar() {
-  const company = useStore((state) => state.settings.company);
-    const location = useLocation();
-    const { pathname } = location;
-    const trigger = useRef(null);
+  const theme = useStore((state) => state.theme);
+  const location = useLocation();
+  const { pathname } = location;
   const sidebar = useRef(null);
   const store = new Store();
-const isLoggedIn = useStore((state) => state.isLoggedIn);
+  const isLoggedIn = useStore((state) => state.isLoggedIn);
 
   return (
-    <div
-      id="sidebar"
-      ref={sidebar}
-      className={` sticky top-0 w-[132px]  flex-none h-screen overflow-hidden select-none bg-slate-800 "
-      }`}>
-      <div
-        className={`  ${isLoggedIn ? "w-[132px] " : "opacity-0 w-0"} transition-all duration-500 flex-none h-screen  overflow-y-auto  bg-slate-800 "
-      }`}>
+    <div id="sidebar" ref={sidebar} className={` sticky top-0 w-[132px]  flex-none h-screen overflow-hidden select-none ${theme.side} "}`}>
+      <div className={`  ${isLoggedIn ? "w-[132px] " : "opacity-0 w-0"} transition-all duration-500 flex-none h-screen  overflow-y-auto  ${theme.side}`}>
         <div className="flex items-center justify-center mt-2 mb-5 select-none">
           <button>
             <img className="w-[60px] h-[60px] rounded-full bg-contain" src={store?.get("company")?.logo || logo} />

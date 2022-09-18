@@ -13,7 +13,7 @@ import {
   Search,
   Selection,
   Sort,
-  Toolbar,
+  Toolbar
 } from "@syncfusion/ej2-react-grids";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import Store from "electron-store";
@@ -23,14 +23,12 @@ import { useReactToPrint } from "react-to-print";
 import { loadCustomers, loadProducts, loadVendings, useStore } from "../../contexts/Store";
 import VendingFormTemplate from "../../pages/Facture";
 import Localization from "../Localization";
+import TextBox from "./../button/TextBox";
 import SelectedProductsView from "./templates/SelectedProductsView";
 import Status from "./templates/VendingsStatus";
-import TextBox from "./../button/TextBox";
 const { ipcRenderer } = require("electron");
 // ******** Get Vending List  ********
-
 Localization("produits");
-
 export default function VendingTable() {
   // ******** Column Templates  ********
   const [active, setActive] = useState({ all: true, paid: false, unpaid: false, deposit: false });
@@ -52,6 +50,7 @@ export default function VendingTable() {
     },
   };
   const store = new Store({ schema });
+  const theme = useStore((state) => state.theme);
   const restorQty = store?.get("restorQty");
   const restorCredit = store?.get("restorCredit");
   const customersData = useStore((state) => state.customers);
@@ -61,11 +60,9 @@ export default function VendingTable() {
   const [pin, setPin] = useState(false);
   const [selectedProd, setSelectedProd] = useState();
   const [wrongPin, setWrongPin] = useState(false);
-  const activeButtoon =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
-  const normalButton =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  const toCurrency = useStore((state) => state.toCurrency);
+  const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+ const toCurrency = useStore((state) => state.toCurrency);
   const toolbarOptions = [{ text: "Modifier", tooltipText: "Modifier", prefixIcon: "e-edit", id: "edit" }, "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: vendingFormTemplate };
   const [showPrintDiv, setShowPrintDiv] = useState(true);
@@ -215,7 +212,7 @@ export default function VendingTable() {
     }
   }
   return (
-    <div className="p-2 ">
+    <div className="p-2  h-screen">
       <div className="mb-4  mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
@@ -256,13 +253,12 @@ export default function VendingTable() {
           </li>
         </ul>
       </div>
-
-      <div className="mx-2 mb-4">
+      <div className="mx-2  h-[calc(100vh_-_200px)]">
         <GridComponent
           ref={(g) => (grid = g)}
           dataSource={vendingData?.reverse()}
           enableHover={false}
-          height="450"
+          height="100%"
           allowPdfExport
           allowPrint
           allowResizing

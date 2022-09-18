@@ -60,10 +60,10 @@ export default function Caisse() {
   const vendingsData = useStore((state) => state.vendings);
   const toCurrency = useStore((state) => state.toCurrency);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
+  const theme = useStore((state) => state.theme);
   const gridRef = useRef();
   let autoCompleteObj;
-  const normalButton =
-    "inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
   //************Keyboard shortcuts*********************
   let validateBtn = useRef();
   let addQtyBtn = useRef();
@@ -80,7 +80,6 @@ export default function Caisse() {
   useHotkeys("f5", () => addListBtn.current.click());
   useHotkeys("f6", () => newTabBtn.current.click());
   //************UseEffects*********************
-
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
@@ -127,25 +126,24 @@ export default function Caisse() {
           </td>
           <td className="px-2">
             <div className={normalButton}>
-              Quantité: <span className="text-green-600 ">{props?.quantity}</span>
+              Quantité: <span className="text-green-600 ml-1">{props?.quantity}</span>
             </div>
           </td>
           <td>
             <div className={normalButton}>
-              Prix Vente: <span className="text-green-600 ">{caisse.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}</span>
+              Prix Vente: <span className="text-green-600 ml-1">{caisse.mode === "Détail" ? toCurrency(props?.sellPrice) : toCurrency(props?.sellPriceGros)}</span>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
   );
-
   return (
-    <div className="bg-white  shadow-lg rounded-sm h-[700px]  relative ">
-      <div className="flex  justify-center">
-        <div id="left" className="bg-white w-[410px]">
+    <div className={`${theme.nav} ${theme.text}   shadow-lg rounded-sm h-[700px]  relative`}>
+      <div className="flex justify-center">
+        <div id="left" className={`${theme.back} transition-colors  duration-300 w-[410px]`}>
           <div id="option" className="flex  items-center my-2">
-            <span className="px-4  text-sm font-medium min-w-[120px] ">Mode Vente:</span>
+            <span className="px-4 text-sm font-medium min-w-[120px] ">Mode Vente:</span>
             <TextBox
               type="dropdown"
               id="brand"
@@ -180,9 +178,9 @@ export default function Caisse() {
             )}
           </div>
 
-          <div id="favori" className="bg-slate-800 h-[619px] overflow-auto w-full">
-            <div className="text-white text-center w-full my-2 p-2">
-              <div className="flex items-center justify-center">
+          <div id="favori" className={`bg-slate-800 h-[619px] overflow-auto w-full`}>
+            <div className="text-white text-center w-full my-1 ">
+              <div className="flex items-center text-base justify-center">
                 <img src={fav} width="25" className="pr-1 pb-1" />
                 Produits Favoris
               </div>
@@ -212,15 +210,15 @@ export default function Caisse() {
                         }
                       }}
                       style={{ backgroundImage: `url(${box})` }}
-                      className={` m-2 w-[120px] h-[100px] select-none flex flex-col bg-[length:200px] bg-center justify-start cursor-pointer items-center rounded-lg  py-1 border border-slate-200 hover:opacity-90 shadow-sm  text-slate-500 duration-150 ease-in-out`}>
+                      className={` m-2 w-[120px] h-[110px] select-none flex flex-col bg-[length:200px_230px] bg-center justify-start cursor-pointer items-center rounded-lg  py-1 border border-slate-600 hover:opacity-90 shadow-sm  text-slate-500 duration-150 ease-in-out`}>
                       <div className="flex gap-2 justify-center items-center ">
-                        <span className="text-slate-900 text-[13px] font-semibold text-center ">{product.name.slice(0, 30)}</span>
+                        <span className="text-slate-900 text-[14px] font-semibold text-center ">{product.name.slice(0, 30)}</span>
                       </div>
                       <div className="p-2 flex flex-col gap-1">
-                        <div className="inline-flex  items-center justify-center text-[11px] font-medium  rounded-full px-[1.5px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
+                        <div className="inline-flex  items-center justify-center text-[12px] font-medium  rounded-full px-[1.5px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
                           Quantité:<span className="text-green-700 pl-1"> {product.quantity}</span>
                         </div>
-                        <div className="inline-flex  items-center justify-center text-[11px] font-medium  rounded-full px-[2px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
+                        <div className="inline-flex  items-center justify-center text-[12px] font-medium  rounded-full px-[2px]  border border-slate-400  shadow-sm bg-[#fdd8a6] text-slate-600 duration-150 ease-in-out">
                           Prix: <span className="text-green-700 pl-1">{caisse.mode === "Détail" ? toCurrency(product.sellPrice) : toCurrency(product.sellPriceGros)}</span>
                         </div>
                       </div>
@@ -230,7 +228,7 @@ export default function Caisse() {
             </div>
           </div>
         </div>
-        <div id="right" className="w-full flex flex-col flex-1 bg-slate-600 select-none">
+        <div id="right" className="w-full flex flex-col flex-1 bg-[#1e293b] border-l border-slate-600 select-none">
           <div id="black_screen" className="flex gap-5 bg-black rounded-sm ">
             <div id="info_screen" className="text-xl text-white p-2 shrink-0">
               <div id="date" className="flex items-center gap-2">
@@ -337,10 +335,10 @@ export default function Caisse() {
               />
             </div>
           </Wrapper>
-          <div id="grid" className=" bg-white border  border-slate-200 ">
-            <div className="bg-white overflow-y-auto h-[410px] shadow-lg rounded-sm border border-slate-200">
+          <div id="grid" className={` ${theme.back} transition-colors  duration-300  border border-slate-600`}>
+            <div className=" overflow-y-auto h-[410px] shadow-lg rounded-sm  ">
               <table className="w-full relative   divide-slate-200">
-                <thead className="text-xs sticky top-0 z-10 uppercase  text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                <thead className={`text-[12px] sticky top-0 z-10 uppercase border-b border-slate-600 text-center ${theme.text} ${theme.main} bg-slate-20`}>
                   <tr className="sticky top-0 z-10 ">
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-40">
                       <div className="font-semibold text-center">ID</div>
@@ -410,7 +408,7 @@ export default function Caisse() {
               </table>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-4 px-2 py-1 bg-white">
+          <div className={`flex items-center ${theme.back} justify-between gap-4 px-2 py-1`}>
             <div id="option" className="flex items-center ">
               <span className="px-4  text-sm font-medium ">Remise:</span>
               <TextBox
@@ -444,13 +442,13 @@ export default function Caisse() {
                 />
               </div>
             )}
-            <hr className="w-10" />
-            <div id="option" className="flex items-center gap-2 whitespace-nowrap border text-base p-1 border-slate-400">
-              <span className=" font-medium  text-slate-700 ">Total à Payer TTC:</span>
-              <span className="font-semibold ml-2 text-slate-600">{toCurrency(caisse.amount)}</span>
+            <hr className="w-5" />
+            <div id="option" className="flex items-center gap-2 whitespace-nowrap border text-base p-1 border-slate-600">
+              <span className={`font-medium ${theme.textXl}`}>Total à Payer TTC:</span>
+              <span className={`font-medium ml-2  ${theme.textXl}`}>{toCurrency(caisse.amount)}</span>
             </div>
           </div>
-          <div id="validation" className="flex gap-2 items-center p-2 min-w-max shrink-0 ">
+          <div id="validation" className="flex gap-2 items-center p-2 min-w-max shrink-0">
             <div className="bg-emerald-600 hover:bg-emerald-400 p-4 shrink-0">
               <button
                 ref={addQtyBtn}
@@ -571,6 +569,7 @@ export default function Caisse() {
                     });
                   } else {
                     // add new vending
+
                     caisse.amount != 0 &&
                       ipcRenderer.send("addVending", {
                         time: new Date(),
@@ -587,6 +586,7 @@ export default function Caisse() {
                         grid: caisse.selectedProducts,
                       });
                     ipcRenderer.on("refreshGridVending:add", (e, res) => {
+                      // Activity
                       store?.set("activity", [
                         ...store?.get("activity"),
                         {
@@ -599,13 +599,14 @@ export default function Caisse() {
                           role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
                         },
                       ]);
+                      // Toast
                       useStore.setState({ toast: { show: true, title: "Vente Ajouter Avec Succés", type: "success" } });
                       setTimeout(() => {
                         useStore.setState({ toast: { show: false } });
                       }, 2000);
                       loadVendings();
+                      // quantity update
                       caisse.selectedProducts.forEach((prod) => {
-                        // quantity update
                         productsList.forEach((curProduct) => {
                           if (curProduct._id === prod._id) {
                             ipcRenderer.send("updateProduct", {
@@ -619,11 +620,10 @@ export default function Caisse() {
                           }
                         });
                       });
-
+                      // client credit update
                       if (caisse.client.name != "Standard" && caisse.amount - caisse.deposit > 0) {
                         customersData.forEach((customer) => {
                           if (customer._id === caisse.client._id) {
-                            // add credit
                             ipcRenderer.send("updateCustomer", { _id: caisse.client._id, credit: (parseInt(customer.credit) + parseInt(caisse.amount - caisse.deposit)).toFixed(2) });
                             ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
                               loadCustomers();
@@ -632,11 +632,9 @@ export default function Caisse() {
                           }
                         });
                       }
-
                       ipcRenderer.removeAllListeners("refreshGridVending:add");
                     });
                   }
-
                   ipcRenderer.on("refreshGridProduct:update", (e, res) => {
                     loadProducts();
                     ipcRenderer.removeAllListeners("refreshGridProduct:update");
@@ -681,7 +679,7 @@ export default function Caisse() {
               <button
                 ref={newTabBtn}
                 onClick={() => {
-                  useStore.setState((state) => ({ showTabs3: true }));
+                  useStore.setState((state) => ({ showTabs2: true }));
                 }}
                 className="text-xl  text-white gap-2 rounded-sm items-center flex">
                 <div className="flex flex-col">

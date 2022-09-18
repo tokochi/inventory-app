@@ -13,7 +13,7 @@ import {
   Search,
   Selection,
   Sort,
-  Toolbar,
+  Toolbar
 } from "@syncfusion/ej2-react-grids";
 import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
@@ -21,15 +21,15 @@ import { useReactToPrint } from "react-to-print";
 import { loadCustomers, useStore } from "../../contexts/Store";
 import AvanceCustomer from "../avance/AvanceCustomer";
 import CustomerFormTemplate from "../form/CustomerForm";
-import Localization from "../Localization";
 import CustomerCreditList from "../list/CustomerCreditList";
+import Localization from "../Localization";
 import Status from "./templates/CustomerStatus";
 const { ipcRenderer } = require("electron");
-
 // ******** Get Customers List  ********
 Localization("Client");
 export default function CustomersTable() {
   // ******** Column Templates  ********
+  const theme = useStore((state) => state.theme);
   const [active, setActive] = useState({ all: true, debt: false });
   const customersData = useStore((state) => state.customers).filter((customer) => filterCustomer(customer));
   const customersGridStatus = (props) => <Status {...props} />;
@@ -37,11 +37,9 @@ export default function CustomersTable() {
   const customersIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
 
   // ******** Grid Table  ********
-  const activeButtoon =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
-  const normalButton =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
+  const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
+   const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+ const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: customersFormTemplate };
   let grid;
   const store = new Store();
@@ -184,7 +182,7 @@ export default function CustomersTable() {
     }
   }
   return (
-    <div className="p-2 ">
+    <div className="p-2 h-screen">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
@@ -198,7 +196,7 @@ export default function CustomersTable() {
           </li>
           <li className="m-1">
             <button
-              className={active.stock ? activeButtoon : normalButton}
+              className={active.debt ? activeButtoon : normalButton}
               onClick={() => {
                 setActive((state) => ({ all: false, debt: true }));
               }}>
@@ -215,12 +213,12 @@ export default function CustomersTable() {
         </div>
       </div>
 
-      <div className="mx-2 mb-4">
+      <div className="mx-2 h-[calc(100vh_-_200px)]">
         <GridComponent
           ref={(g) => (grid = g)}
           dataSource={customersData}
           enableHover={false}
-          height="450"
+          height="100%"
           allowPdfExport
           allowPrint
           allowResizing

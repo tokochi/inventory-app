@@ -13,7 +13,7 @@ import {
   Search,
   Selection,
   Sort,
-  Toolbar,
+  Toolbar
 } from "@syncfusion/ej2-react-grids";
 import Store from "electron-store";
 import moment from "moment";
@@ -24,11 +24,12 @@ import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
 import ProductsInventory from "./../list/ProductsInventory";
 import Status from "./templates/ProductsStatus";
+
 const { ipcRenderer } = require("electron");
-
 // ******** Get Products List  ********
-
 Localization("produits");
+
+
 export default function ProductsTable() {
   // ******** Column Templates  ********
   const productsGridStatus = (props) => <Status {...props} />;
@@ -36,12 +37,11 @@ export default function ProductsTable() {
   const productsIdTemplate = (props) => <div>{"#" + props._id?.slice(-6)}</div>;
   const productsLastTimeTemplate = (props) => <div>{props.lastTime && Math.abs(moment(props.lastTime).diff(moment(), "days")) + " jours"}</div>;
   // ******** Grid Table  ********
+  const theme = useStore((state) => state.theme);
   const [active, setActive] = useState({ all: true, stock: false, alert: false, rupture: false });
-  const activeButtoon =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
-  const normalButton =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
+  const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+ const toolbarOptions = ["Add", "Edit", "Delete", "Search", "Print", "ColumnChooser"];
   const editing = { allowDeleting: true, allowEditing: true, allowAdding: true, mode: "Dialog", showDeleteConfirmDialog: true, template: productsFormTemplate };
   let grid;
   const textValidation = { required: [(args) => (args["value"] == "" ? false : true), "ce champ est obligatoire"] };
@@ -49,7 +49,6 @@ export default function ProductsTable() {
   const toCurrency = useStore((state) => state.toCurrency);
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const productsData = useStore((state) => state.products).filter((product) => filterProduct(product));
   const gridProduct = () => useStore((state) => state.gridProduct);
 
@@ -201,7 +200,7 @@ export default function ProductsTable() {
   }, [grid]);
 
   return (
-    <div className="p-2">
+    <div className="p-2 h-screen">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
@@ -244,7 +243,7 @@ export default function ProductsTable() {
         <ProductsInventory />
       </div>
 
-      <div className="mx-2 mb-4">
+      <div className="mx-2 h-[calc(100vh_-_200px)]">
         <GridComponent
           ref={(g) => (grid = g)}
           dataSource={productsData}
@@ -252,7 +251,7 @@ export default function ProductsTable() {
           allowPdfExport
           allowPrint
           allowResizing
-          height="450"
+          height="100%"
           showColumnChooser
           locale="fr-BE"
           // enablePersistence

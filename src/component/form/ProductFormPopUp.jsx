@@ -99,7 +99,7 @@ export default function ProductFormPopUp({ title }) {
       header="Ajouter un Nouveau Produit"
       allowDragging
       width="550"
-      height="720"
+      height="770"
       open={() => useStore.setState(() => ({ dropdownOpen: true }))}
       cloose={() => useStore.setState(() => ({ dropdownOpen: false }))}
       visible={dropdownOpen()}

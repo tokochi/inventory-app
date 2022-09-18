@@ -5,6 +5,7 @@ import Header from "./../component/layout/Header";
 
 export default function Zakat() {
   const productsData = useStore((state) => state.products);
+  const theme = useStore((state) => state.theme);
   const customersData = useStore((state) => state.customers);
   const providersData = useStore((state) => state.providers);
   const depenseData = useStore((state) => state.depenses);

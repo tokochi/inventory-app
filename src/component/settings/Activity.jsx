@@ -1,27 +1,27 @@
-import Store from "electron-store";
-import React, { useState } from "react";
-import view from "./../../data/icons/view.png";
-import { v4 as uuidv4 } from "uuid";
-import moment from "moment/min/moment-with-locales";
-import {  useStore } from "../../contexts/Store";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
+import Store from "electron-store";
+import moment from "moment/min/moment-with-locales";
+import React, { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { useStore } from "../../contexts/Store";
+import view from "./../../data/icons/view.png";
 
 
 export default function Activity() {
+  const theme = useStore((state) => state.theme);
   const schema = { activity: { type: "array", default: [] } };
   const store = new Store({ schema });
   const [item, setitem] = useState();
   const [activity, setActivity] = useState();
   const toCurrency = useStore((state) => state.toCurrency);
-  const normalButton =
-    "inline-flex  items-center justify-between w-full  font-medium leading-5 rounded-full px-2 py-2 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+ const [dropdownOpen, setDropdownOpen] = useState(false);
   //store?.set("activity",[]);
   return (
-    <div className=" bg-white shadow-lg overflow-y-auto h-[600px]  w-full rounded-sm border border-slate-200 relative">
+    <div className={`grow overflow-y-auto shadow-lg h-[calc(100vh_-_150px)] w-full rounded-sm  relative ${theme.back} ${theme.textXl}`}>
       <table className="table-auto w-full divide-slate-200">
         {/* Table header */}
-        <thead className="text-xs sticky top-0 z-50 uppercase  text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+        <thead className={`text-xs sticky top-0 z-50 uppercase  text-center ${theme.nav} ${theme.textXl} `}>
           <tr>
             <th className="px-2  first:pl-5 last:pr-5 py-3 whitespace-nowrap">
               <div className="font-semibold text-center">ID</div>
@@ -51,7 +51,7 @@ export default function Activity() {
             ?.get("activity")
             .reverse()
             .map((db, index) => (
-              <tr key={uuidv4()} className={`${index & (1 === 1) && "bg-gray-100"}`}>
+              <tr key={uuidv4()} className={`${index & (1 === 1) && theme.main}`}>
                 <td key={uuidv4()} className="text-center w-1/8">
                   #{index + 1}
                 </td>

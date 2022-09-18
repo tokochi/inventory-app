@@ -17,7 +17,7 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
   const [date, setDate] = useState(new Date());
   const [slectedCustomer, setSlectedCustomer] = useState("");
   const store = new Store();
-
+ const theme = useStore((state) => state.theme);
   return (
     <>
       <button
@@ -25,7 +25,7 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
           e.preventDefault();
           setDropdownOpen(!dropdownOpen);
         }}
-        className="btn bg-indigo-500 hover:bg-indigo-600 text-white">
+        className={`btn ${theme.button} hover:opacity-80 text-white`}>
         <svg className="w-4 h-4 fill-current opacity-50 shrink-0" viewBox="0 0 16 16">
           <path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" />
         </svg>
@@ -47,7 +47,7 @@ export default function AvanceCustomer({ header, id, svg, children, width, foote
             <ul className="flex items-center justify-end gap-6">
               <li>
                 <button
-                  className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
+                  className={`btn ${theme.button} hover:opacity-80 text-white`}
                   onClick={() => {
                     switch (true) {
                       case slectedCustomer === "":

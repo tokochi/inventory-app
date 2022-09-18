@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import Store from "electron-store";
+import React, { useState } from "react";
+import { useStore } from "../../contexts/Store";
 import facebook from "../../data/icons/facebook.png";
 import logo from "../../data/icons/logo.png";
 import card from "../../data/icons/visit.png";
-import Store from "electron-store";
 import Animation from "../animation";
 
-
 export default function Company() {
+  const theme = useStore((state) => state.theme);
   const schema = {
     company: {
       type: "object",
@@ -25,13 +26,13 @@ export default function Company() {
   const [refresh, setRefresh] = useState(false);
   const store = new Store({ schema });
   return (
-    <div className="grow overflow-y-auto h-[600px] ">
+    <div className={`grow overflow-y-auto h-[calc(100vh_-_150px)] ${theme.back} ${theme.textXl}`}>
       <div className="p-6">
-        <h2 className="text-2xl text-slate-800 font-bold ">Entreprise</h2>
+        <h2 className="text-2xl mb-2 font-bold ">Entreprise</h2>
         <Animation visible={true} from={{ x: 0, y: -400, opacity: 0 }} enter={{ x: 0, y: 0, opacity: 1 }} leave={{}}>
           <section className="flex  items-center justify-center">
             <div className="relative shrink-0 ">
-              <img className="w-[700px] bg-transparent drop-shadow-md rounded-3xl" src={card} />
+              <img className="w-[600px] bg-transparent drop-shadow-md rounded-3xl" src={card} />
               <input
                 id="name"
                 onChange={(e) => {
@@ -40,7 +41,7 @@ export default function Company() {
                   setRefresh(!refresh);
                 }}
                 value={store?.get("company")?.userName}
-                className="p-0 w-[300px] border-none  absolute font-semibold bg-transparent  text-2xl top-[40px] capitalize left-[70px] z-10"
+                className={`p-0 w-[300px] border-none  absolute font-semibold text-slate-800 bg-transparent  text-2xl top-[30px] capitalize left-[70px] z-10`}
                 type="text"
               />
               <textarea
@@ -51,7 +52,7 @@ export default function Company() {
                   setRefresh(!refresh);
                 }}
                 value={store?.get("company")?.address}
-                className="p-0 w-[250px] border-none absolute bg-transparent  text-lg top-[100px] capitalize left-[120px] z-10"
+                className="p-0 w-[250px] border-none absolute bg-transparent overflow-hidden text-slate-800 text-lg top-[80px] capitalize left-[90px] z-10"
                 type="text"
               />
               <input
@@ -62,7 +63,7 @@ export default function Company() {
                   setRefresh(!refresh);
                 }}
                 value={store?.get("company")?.email}
-                className="p-0 w-[250px] border-none absolute bg-transparent  text-lg top-[180px] capitalize left-[120px] z-10"
+                className="p-0 w-[250px] border-none absolute bg-transparent text-slate-800 text-lg top-[150px] capitalize left-[90px] z-10"
                 type="text"
               />
               <input
@@ -73,7 +74,7 @@ export default function Company() {
                   setRefresh(!refresh);
                 }}
                 value={store?.get("company")?.phone}
-                className="p-0 w-[250px] border-none absolute bg-transparent text-lg top-[240px] capitalize left-[120px] z-10"
+                className="p-0 w-[250px] border-none absolute bg-transparent text-slate-800 text-lg top-[200px] capitalize left-[90px] z-10"
                 type="text"
               />
               <input
@@ -84,7 +85,7 @@ export default function Company() {
                   setRefresh(!refresh);
                 }}
                 value={store?.get("company")?.fax}
-                className="p-0 w-[250px] border-none absolute bg-transparent text-lg top-[260px] capitalize left-[120px] z-10"
+                className="p-0 w-[250px] border-none absolute bg-transparent text-slate-800 text-lg top-[225px] capitalize left-[90px] z-10"
                 type="text"
               />
               <input
@@ -95,7 +96,7 @@ export default function Company() {
                   setRefresh(!refresh);
                 }}
                 value={store?.get("company")?.site}
-                className="p-0 w-[250px] border-none absolute bg-transparent text-lg top-[320px]  left-[120px] z-10"
+                className="p-0 w-[250px] border-none absolute bg-transparent text-slate-800 text-lg top-[270px]  left-[90px] z-10"
                 type="text"
               />
               <input
@@ -106,10 +107,10 @@ export default function Company() {
                   setRefresh(!refresh);
                 }}
                 value={store?.get("company")?.name}
-                className="p-0 w-[250px] border-none absolute bg-transparent text-center text-2xl font-semibold text-white top-[150px]  left-[420px] z-10"
+                className="p-0 w-[250px] border-none absolute bg-transparent text-center text-2xl font-semibold text-white top-[120px]  left-[350px] z-10"
                 type="text"
               />
-              <div className="flex gap-2 top-[350px] absolute left-[470px]">
+              <div className="flex gap-2 top-[300px] absolute left-[380px]">
                 <img className="w-[30px] h-[30px]" src={facebook} />
                 <input
                   id="name"
@@ -119,11 +120,11 @@ export default function Company() {
                     setRefresh(!refresh);
                   }}
                   value={store?.get("company")?.facebook}
-                  className="p-0 w-[150px] border-none bg-transparent text-center text-white z-10"
+                  className="p-0 w-[170px] border-none bg-transparent text-center text-white z-10"
                   type="text"
                 />
               </div>
-              <div className="absolute bg-transparent top-[50px]  left-[480px] ">
+              <div className="absolute bg-transparent top-[20px]  left-[410px] ">
                 <label htmlFor="dropzone-file" className="flex flex-col justify-center items-center h-20 p-4 bg-transparent rounded-lg  border-gray-300 border-dashed cursor-pointer  hover:bg-gray-10">
                   <div className="flex flex-col justify-center items-center pt-5 pb-4">
                     <img htmlFor="dropzone-file" className="w-[100px] h-[100px] rounded-full bg-contain" src={store?.get("company")?.logo || logo} width="80" height="80" alt="User upload" />
@@ -145,7 +146,7 @@ export default function Company() {
           </section>
         </Animation>
         <section>
-          <h2 className="text-xl leading-snug text-slate-800 font-bold mt-5">Informations Financière</h2>
+          <h2 className="text-xl leading-snug  font-bold mt-5">Informations Financière</h2>
           <div className="flex items-center  space-x-4 mt-5">
             <div className="w-1/3">
               <label className="block text-sm font-medium mb-1" htmlFor="location">
@@ -227,7 +228,7 @@ export default function Company() {
                 location.reload();
               }}
               // type="submit"
-              className="btn border-slate-200 hover:border-slate-300 text-slate-600">
+              className={`btn ${theme.nav} ${theme.text} border-slate-200 hover:border-slate-300 text-slate-600`}>
               Reset
             </button>
             <button
@@ -235,7 +236,7 @@ export default function Company() {
                 window.location.reload();
               }}
               //  type="submit"
-              className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3">
+              className={`btn ${theme.button} hover:opacity-80 text-white ml-3`}>
               Sauvgarder
             </button>
           </div>

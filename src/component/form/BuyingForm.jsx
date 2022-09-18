@@ -1,9 +1,10 @@
 import TextBox from "../button/TextBox";
-
+import { useStore } from "../../contexts/Store";
 export default function BuyingForm(props) {
   const labelclassName = "p-4 w-[170px] text-sm font-medium";
+  const theme = useStore((state) => state.theme);
   return (
-    <div>
+    <div >
       <table>
         <tbody>
           <tr>

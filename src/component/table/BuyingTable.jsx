@@ -13,25 +13,27 @@ import {
   Search,
   Selection,
   Sort,
-  Toolbar,
+  Toolbar
 } from "@syncfusion/ej2-react-grids";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import Store from "electron-store";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
-import { loadBuyings, loadProviders, loadProducts, useStore } from "../../contexts/Store";
+import { loadBuyings, loadProducts, loadProviders, useStore } from "../../contexts/Store";
+import AddDepense from "../avance/AddDepense";
 import ProductFormTemplate from "../form/ProductForm";
 import Localization from "../Localization";
-import AddDepense from "../avance/AddDepense";
+import TextBox from "./../button/TextBox";
 import DepenseList from "./../list/DepenseList";
 import SelectedProductsView from "./templates/SelectedProductsbuy";
 import Status from "./templates/VendingsStatus";
-import TextBox from "./../button/TextBox";
+
 const { ipcRenderer } = require("electron");
 // ******** Get Buying List  ********
 loadBuyings();
 Localization("produits");
+
 export default function BuyingTable() {
   // ******** Column Templates  ********
   const buyingGridStatus = (props) => <Status {...props} />;
@@ -61,6 +63,7 @@ export default function BuyingTable() {
     },
   };
   const store = new Store({ schema });
+  const theme = useStore((state) => state.theme);
   const restorQty = store?.get("restorQty");
   const restorCredit = store?.get("restorCredit");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -68,11 +71,9 @@ export default function BuyingTable() {
   const [showPrintDiv, setShowPrintDiv] = useState(true);
   const gridRef = useRef();
   const buyingData = useStore((state) => state.buyings).filter((buying) => filterBuying(buying));
-  const activeButtoon =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm bg-indigo-500 text-white duration-150 ease-in-out";
-  const normalButton =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  const reactToPrint = useReactToPrint({
+  const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
+   const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+ const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
       new Promise(() => {
@@ -197,7 +198,7 @@ export default function BuyingTable() {
     }
   }
   return (
-    <div className="p-2">
+    <div className="p-2 h-screen">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
@@ -242,13 +243,12 @@ export default function BuyingTable() {
           <DepenseList />
         </div>
       </div>
-
-      <div className="mx-2 mb-4">
+      <div className="mx-2 h-[calc(100vh_-_200px)]">
         <GridComponent
           ref={(g) => (grid = g)}
           dataSource={buyingData?.reverse()}
           enableHover={false}
-          height="450"
+          height="100%"
           allowPdfExport
           allowPrint
           allowResizing

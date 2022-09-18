@@ -17,14 +17,16 @@ const { webFrame } = require("electron");
 export default function Navbar() {
   const isLoggedIn = useStore((state) => state.isLoggedIn);
   const toast = useStore((state) => state.toast);
+  const theme = useStore((state) => state.theme);
   const [state, setstate] = useState(0);
-  const activeButtoon = "inline-flex items-center justify-center text-sm font-medium leading-5  px-3 py-1 border-r border-transparent shadow-sm bg-indigo-400 text-white duration-150 ease-in-out";
+  const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5  px-3 py-1 border-r border-transparent shadow-sm ${theme.button} transition-colors  duration-300 text-white `;
   const normalButton = `inline-flex items-center ${
     isLoggedIn ? "sticky h-[65px] " : "opacity-0 h-0"
-  } transition-all duration-300 justify-center text-sm font-medium leading-5  px-3 py-1 border-r border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`;
-  return (
+  } justify-center text-sm font-medium leading-5  px-3 py-1 border-r border-slate-200 hover:border-slate-300 shadow-sm transition-colors  duration-300 ${theme.nav} ${theme.text} `;
+  
+return (
     <>
-      <header className={`${isLoggedIn ? "sticky top-0 h-[65px] " : "opacity-0 h-0"} transition-all duration-500 shadow-sm select-none bg-white border-b border-slate-200 z-30`}>
+      <header className={`${isLoggedIn ? "sticky top-0 h-[65px] " : "opacity-0 h-0"}  shadow-sm select-none ${theme.nav} transition-colors  duration-300  z-30`}>
         <div className="px-8">
           <div className="flex items-center justify-between  ">
             {/* Header: Left side */}
@@ -54,7 +56,7 @@ export default function Navbar() {
             <div className="flex items-center space-x-2">
               <div className="select-none">
                 <button
-                  className={`w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 transition duration-150 rounded-full `}
+                  className={`w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200  rounded-full `}
                   onClick={(e) => {
                     e.stopPropagation();
                     setstate(state + 0.1);
@@ -65,7 +67,7 @@ export default function Navbar() {
               </div>
               <div className="select-none">
                 <button
-                  className={`w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 transition duration-150 rounded-full `}
+                  className={`w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200  rounded-full `}
                   onClick={(e) => {
                     e.stopPropagation();
                     webFrame.setZoomLevel(0);
@@ -76,7 +78,7 @@ export default function Navbar() {
               </div>
               <div className="select-none">
                 <button
-                  className={`w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 transition duration-150 rounded-full mr-3`}
+                  className={`w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200  rounded-full mr-3`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setstate(state - 0.1);

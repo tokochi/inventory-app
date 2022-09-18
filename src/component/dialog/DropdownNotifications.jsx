@@ -8,9 +8,9 @@ import Transition from "../../utils/Transition";
 const { ipcRenderer } = require("electron");
 
 function DropdownNotifications({ align }) {
-  const normalButton =
-    "inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const theme = useStore((state) => state.theme);
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-2 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+ const [dropdownOpen, setDropdownOpen] = useState(false);
   const trigger = useRef(null);
   const dropdown = useRef(null);
     const schema = {
@@ -33,6 +33,7 @@ function DropdownNotifications({ align }) {
   const customerCredit = customersData.filter((cust) => cust.credit > 0 && Math.abs(moment(cust?.lastTimeNotify).diff(moment(), "days")) > 3);
   const providerCredit = providersData.filter((cust) => cust.credit > 0 && Math.abs(moment(cust?.lastTimeNotify).diff(moment(), "days")) > 3);
   const revenueNotify = notify?.revenue && Math.abs(moment(lastTime || new Date()).diff(moment(), "days")) > 0;
+
 
 
   // close on click outside
@@ -78,7 +79,7 @@ function DropdownNotifications({ align }) {
       </button>
 
       <Transition
-        className={`origin-top-right z-10 absolute top-full -mr-48 sm:mr-0 min-w-80 bg-white border border-slate-200 py-1.5 rounded shadow-lg overflow-hidden mt-1 ${
+        className={`origin-top-right z-10 absolute top-full -mr-48 sm:mr-0 min-w-80  ${theme.back} border border-slate-200 py-1.5 rounded shadow-lg overflow-hidden mt-1 ${
           align === "right" ? "right-0" : "left-0"
         }`}
         show={dropdownOpen}
@@ -89,13 +90,13 @@ function DropdownNotifications({ align }) {
         leaveStart="opacity-100"
         leaveEnd="opacity-0">
         <div ref={dropdown} onFocus={() => setDropdownOpen(true)} onBlur={() => setDropdownOpen(false)}>
-          <div className="text-xs font-semibold text-slate-400 uppercase pt-1.5 pb-2 px-4">Notifications</div>
+          <div className={`text-xs font-semibold  ${theme.text} uppercase pt-1.5 pb-2 px-4`}>Notifications</div>
           <ul>
             {notify.productAlert &&
               outStock.map((product) => (
                 <li key={uuidv4()} className="border-b border-slate-200 last:border-0">
                   <Link
-                    className="block py-2 px-4 hover:bg-slate-50"
+                    className="block py-2 px-4 hover:opacity-90"
                     to="#0"
                     onClick={() => {
                       setDropdownOpen(!dropdownOpen);
@@ -113,19 +114,20 @@ function DropdownNotifications({ align }) {
                       });
                     }}>
                     <div className="block text-sm  mb-2">
-                      <p className="font-semibold text-slate-600"> Produit En Rupture de Stock:</p>
+                      <h2 className={`font-semibold  ${theme.textXl}`}> Produits En Rupture de Stock:</h2>
+                      <hr className="w-full mb-4" />
                       <div className="flex items-center justify-between">
-                        <div className="text-slate-600  font-medium  text-base  px-2">
+                        <div className={`${theme.text} whitespace-nowrap font-medium  text-base  px-2`}>
                           <span>📦{product.name}</span>
                         </div>
                         <div className="px-2">
                           <div className={normalButton}>
-                            Quantité: <span className="text-red-600 ml-2"> {product.quantity}</span>
+                            Quantité: <span className="text-red-600 ml-2 whitespace-nowrap"> {product.quantity}</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <span className="block text-xs font-medium text-slate-400">{moment().format("LLLL")}</span>
+                    <span className={`block text-xs font-medium  ${theme.text}`}>{moment().format("LLLL")}</span>
                   </Link>
                 </li>
               ))}
@@ -133,7 +135,7 @@ function DropdownNotifications({ align }) {
               customerCredit.map((customer) => (
                 <li key={uuidv4()} className="border-b border-slate-200 last:border-0">
                   <Link
-                    className="block py-2 px-4 hover:bg-slate-50"
+                    className="block py-2 px-4 hover:opacity-90"
                     to="#0"
                     onClick={() => {
                       setDropdownOpen(!dropdownOpen);
@@ -151,19 +153,20 @@ function DropdownNotifications({ align }) {
                       });
                     }}>
                     <div className="block text-sm  mb-2">
-                      <p className="font-semibold text-slate-600"> Crédit Client No Payé:</p>
+                      <h2 className={`font-semibold  ${theme.textXl}`}> Crédits Clients No Payé:</h2>
+                      <hr className="w-full mb-4" />
                       <div className="flex items-center justify-between">
-                        <div className="text-slate-600  font-medium  text-base  px-2">
+                        <div className={`${theme.text}  font-medium  text-base whitespace-nowrap px-2`}>
                           <span>{customer.name}</span>
                         </div>
                         <div className="px-2">
                           <div className={normalButton}>
-                            Crédit: <span className="text-red-600 ml-2">{toCurrency(customer.credit)}</span>
+                            Crédit: <span className="text-red-600 ml-2 whitespace-nowrap">{toCurrency(customer.credit)}</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <span className="block text-xs font-medium text-slate-400">{moment().format("LLLL")}</span>
+                    <span className={`block text-xs font-medium  ${theme.text}`}>{moment().format("LLLL")}</span>
                   </Link>
                 </li>
               ))}
@@ -171,7 +174,7 @@ function DropdownNotifications({ align }) {
               providerCredit.map((provider) => (
                 <li key={uuidv4()} className="border-b border-slate-200 last:border-0">
                   <Link
-                    className="block py-2 px-4 hover:bg-slate-50"
+                    className="block py-2 px-4 hover:opacity-90"
                     to="#0"
                     onClick={() => {
                       setDropdownOpen(!dropdownOpen);
@@ -189,33 +192,34 @@ function DropdownNotifications({ align }) {
                       });
                     }}>
                     <div className="block text-sm  mb-2">
-                      <p className="font-semibold text-slate-600"> Détte Fournisseur No Payé:</p>
+                      <h2 className={`font-semibold  ${theme.textXl}`}> Déttes Fournisseurs No Payé:</h2>
+                      <hr className="w-full mb-4" />
                       <div className="flex items-center justify-between">
-                        <div className="text-slate-600  font-medium  text-base  px-2">
+                        <div className={`${theme.text}  font-medium  text-base whitespace-nowrap px-2`}>
                           <span>{provider?.name}</span>
                         </div>
                         <div className="px-2">
                           <div className={normalButton}>
-                            Détte: <span className="text-red-600 ml-2">{toCurrency(provider.credit)}</span>
+                            Détte: <span className="text-red-600 ml-2 whitespace-nowrap">{toCurrency(provider.credit)}</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <span className="block text-xs font-medium text-slate-400">{moment().format("LLLL")}</span>
+                    <span className={`block text-xs font-medium  ${theme.text}`}>{moment().format("LLLL")}</span>
                   </Link>
                 </li>
               ))}
             {revenueNotify && (
               <li key={uuidv4()} className="border-b border-slate-200 last:border-0">
                 <Link
-                  className="block py-2 px-4 hover:bg-slate-50"
+                  className="block py-2 px-4 hover:opacity-90"
                   to="#0"
                   onClick={() => {
-                    setDropdownOpen(!dropdownOpen);
                     store?.set("revenueTime", { time: new Date() });
+                    setDropdownOpen(!dropdownOpen);
                   }}>
                   <div className="">
-                    <h2 className=" font-semibold  text-slate-800">Revenue Quotidien</h2>
+                    <h2 className={`font-semibold  ${theme.textXl}`}>Revenue Quotidien:</h2>
                     <hr className="w-full mb-4" />
                     <div className="flex gap-2 flex-col mb-4 justify-center">
                       <div className={normalButton}>
@@ -231,7 +235,7 @@ function DropdownNotifications({ align }) {
                       </div>
                     </div>
                   </div>
-                  <span className="block text-xs font-medium text-slate-400">{moment().format("LLLL")}</span>
+                  <span className={`block text-xs font-medium  ${theme.text}`}>{moment().format("LLLL")}</span>
                 </Link>
               </li>
             )}

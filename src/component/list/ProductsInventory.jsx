@@ -6,10 +6,9 @@ import Status from "../table/templates/ProductsStatus";
 export default function ProductsInventory({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const productsData = () => useStore((state) => state.products);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const normalButton =
-    "inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
-
-  useEffect(() => {
+  const theme = useStore((state) => state.theme);
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+ useEffect(() => {
     close && setDropdownOpen(false);
   }, [close]);
   const toCurrency = useStore((state) => state.toCurrency);
@@ -20,7 +19,7 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
           e.preventDefault();
           setDropdownOpen(!dropdownOpen);
         }}
-        className="btn bg-indigo-500 hover:bg-indigo-600 text-white">
+        className={`btn ${theme.button} hover:opacity-80 text-white`}>
         <svg className="w-4 h-4 fill-current opacity-50 shrink-0" viewBox="0 0 24 24">
           <path d="M21,3h-6.184C14.403,1.837,13.304,1,12,1S9.597,1.837,9.184,3H3v18h18V3z M12,3c0.552,0,1,0.448,1,1c0,0.552-0.448,1-1,1 s-1-0.448-1-1C11,3.448,11.448,3,12,3z M11,16.414l-4.185-4.185l1.414-1.414L11,13.586l5.792-5.792l1.414,1.414L11,16.414z" />
         </svg>

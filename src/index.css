@@ -22,7 +22,7 @@ body {
   height: 7px
 }
 ::-webkit-scrollbar-thumb {
-  background-color: rgb(83, 85, 153);
+  background-color: rgb(111, 112, 164);
   border-radius: 30px;
 }
 ::-webkit-scrollbar-track {

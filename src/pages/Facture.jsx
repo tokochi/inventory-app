@@ -42,6 +42,7 @@ const Wrapper = styled.div`
 export default function Facture(props) {
   //************State**************************
   const schema = { company: { type: "object" } };
+  const theme = useStore((state) => state.theme);
   const store = new Store({ schema });
   const company = store?.get("company");
   const [activeRow, setActiveRow] = useState(false);
@@ -57,8 +58,7 @@ export default function Facture(props) {
   const [title, setTitle] = useState(0);
   const [date, setDate] = useState(new Date());
   let autoCompleteObj;
-  const normalButton =
-    "inline-flex  items-center justify-center text-sm font-medium leading-5 rounded-full px-2  border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out";
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
   //************Keyboard shortcuts*********************
   let validateBtn = useRef();
   let addQtyBtn = useRef();
@@ -101,8 +101,8 @@ export default function Facture(props) {
   const productsTemplate = (props) => (
     <table className="table-auto w-full">
       <tbody>
-        <tr className={`${props?.quantity === 0 && "bg-red-50"}`}>
-          <td className="text-slate-600  font-medium  text-lg min-w-[400px] px-2">
+        <tr>
+          <td className={` ${theme.text} font-medium  text-lg min-w-[400px] px-2`}>
             <span>📦{props?.name}</span>
           </td>
           <td className="px-2">
@@ -124,12 +124,12 @@ export default function Facture(props) {
   );
 
   return (
-    <div className="bg-white m-2 shadow-lg rounded-sm   relative ">
+    <div className={`${theme.nav} ${theme.text} m-2 shadow-lg rounded-sm h-[700px]  relative`}>
       <div className="flex h-full  justify-center">
-        <div id="left" className="bg-white   flex-1 min-w-[480px]">
+        <div id="left" className={`${theme.back}   flex-1 min-w-[480px]`}>
           <div className="flex  items-center justify-center my-2">
             <hr className="w-[150px]" />
-            <span className="mx-1">Info Commercial</span>
+            <span className={`mx-1 ${theme.textXl}`}>Info Commercial</span>
             <hr className="w-[150px]" />
           </div>
           <div id="companyInfo" className="flex  items-center my-2">
@@ -204,7 +204,7 @@ export default function Facture(props) {
           </div>
           <div className="flex  items-center justify-center my-2">
             <hr className="w-[150px]" />
-            <span className="mx-1">Info Facture</span>
+            <span className={`mx-1 ${theme.textXl}`}>Info Facture</span>
             <hr className="w-[150px]" />
           </div>
           <div id="mode" className="flex  items-center my-2">
@@ -271,7 +271,7 @@ export default function Facture(props) {
           </div>
           <div className="flex  items-center justify-center my-2">
             <hr className="w-[150px]" />
-            <span className="mx-1">Montant</span>
+            <span className={`mx-1 ${theme.textXl}`}>Montant</span>
             <hr className="w-[150px]" />
           </div>
           <div id="date" className="flex select-none items-center my-2">
@@ -338,13 +338,13 @@ export default function Facture(props) {
           </div>
           <hr className="m-2 w-[100px] ml-[100px]" />
           <div id="option" className="flex items-center ml-10 w-[300px] border p-2 border-slate-400">
-            <span className=" font-medium text-slate-700 min-w-[100px]">Total à Payer TTC:</span>
-            <span className="font-semibold ml-2 text-slate-600">{toCurrency(facture.amount)}</span>
+            <span className={`font-medium ${theme.textXl} min-w-[100px]`}>Total à Payer TTC:</span>
+            <span className={`font-semibold ml-2 ${theme.textXl}`}>{toCurrency(facture.amount)}</span>
           </div>
         </div>
-        <div id="right" className="w-full flex flex-col  select-none">
+        <div id="right" className="w-full flex flex-col bg-[#1e293b] border-l border-slate-600 select-none">
           <Wrapper>
-            <div id="selectProduct" className="p-2 flex bg-slate-500 text-white">
+            <div id="selectProduct" className="p-2 flex  text-white">
               <button
                 ref={addListBtn}
                 onClick={() => {
@@ -425,10 +425,10 @@ export default function Facture(props) {
               />
             </div>
           </Wrapper>
-          <div id="grid" className=" bg-white border shrink-0 border-slate-200 ">
-            <div className="bg-white overflow-y-auto h-[530px] shadow-lg rounded-sm border border-slate-200">
+          <div id="grid" className={`${theme.back}  shrink-0 border border-slate-600 `}>
+            <div className=" overflow-y-auto h-[530px] shadow-lg rounded-sm ">
               <table className="w-full relative   divide-slate-200">
-                <thead className="text-xs sticky top-0 z-10 uppercase  text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                <thead className={`text-xs sticky top-0 z-10 uppercase border-b border-slate-600 text-center ${theme.text} ${theme.main}`}>
                   <tr className="sticky top-0 z-10 ">
                     <th className="px-2 sticky top-0 z-10 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-40">
                       <div className="font-semibold text-center">ID</div>
@@ -497,7 +497,7 @@ export default function Facture(props) {
               </table>
             </div>
           </div>
-          <div className="flex items-center justify-around gap-4 px-2 py-1 bg-white">
+          <div className={`flex items-center justify-around gap-4 px-2 py-1 ${theme.back}`}>
             <div>
               Facture N°:<span className="text-green-600"> {vendingsData.length + 1} </span>
             </div>

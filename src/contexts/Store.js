@@ -1,13 +1,20 @@
+import Store from "electron-store";
 import create from "zustand";
 const { ipcRenderer } = require("electron");
-import Store from "electron-store";
 
-const store = new Store();
+const schema = {
+  theme: {
+    default: { name: "classic", main: "bg-[#cbd5e1]", side: "bg-slate-800", nav: "bg-white", back: "bg-white", button: "bg-indigo-500", text: "text-slate-500", textXl: "text-slate-800" },
+    type: "object",
+  },
+};
+const store = new Store({ schema });
 export const useStore = create((set) => ({
   isLoggedIn: store?.get("isLoggedIn") ? true : false,
   dropdownOpen: false,
   dropDownObj: {},
   gridProduct: {},
+  theme: store?.get("theme"),
   tabObj: {},
   tabs: 1,
   showTabs1: false,

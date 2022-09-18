@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useStore } from "../contexts/Store";
 
 export default function Login() {
+  const theme = useStore((state) => state.theme);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function Login() {
   }, [isSpin]);
 
   return (
-    <main className="bg-slate-300">
+    <main className={`${theme.main} ${theme.text}`}>
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="relative md:flex pt-32 items-center justify-center">
           {/* Content */}
@@ -46,7 +47,7 @@ export default function Login() {
             <div className="min-h-screen h-full flex flex-col after:flex-1">
               {/* Header */}
               <div className="max-w-sm mx-auto px-4 py-8">
-                <h1 className="text-3xl text-slate-800 font-bold mb-6">Connectez-Vous ✨</h1>
+                <h1 className={`text-3xl ${theme.textXl} font-bold mb-6`}>Connectez-Vous ✨</h1>
                 {/* Form */}
 
                 <div className="space-y-4">
@@ -111,7 +112,7 @@ export default function Login() {
                         value={store?.get("reset")}
                         className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500"
                       />
-                      <label htmlFor="default-checkbox" className="ml-2 text-sm font-medium text-gray-600">
+                      <label htmlFor="default-checkbox" className={`ml-2 text-sm font-medium  ${theme.text}`}>
                         Rester Connecter
                       </label>
                     </div>
@@ -125,7 +126,7 @@ export default function Login() {
                         store?.set("user", LoggedUser);
                       } else setWrongPassword(true);
                     }}
-                    className="btn bg-indigo-500  hover:bg-indigo-600 text-white ml-3">
+                    className={`btn ${theme.button} hover:opacity-80 text-white ml-3`}>
                     {isSpin && (
                       <svg aria-hidden="true" className="mr-2 w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path

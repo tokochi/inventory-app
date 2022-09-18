@@ -15,11 +15,13 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import BonAchat from "./pages/BonAchat";
 import AddAccount from "./pages/AddAccount";
-import {loadCustomers, loadBuyings, loadVendings, loadProviders, loadProducts, loadDepenses } from "./contexts/Store";
+import { loadCustomers, loadBuyings, loadVendings, loadProviders, loadProducts, loadDepenses } from "./contexts/Store";
 import Settings from "./pages/Settings";
 import PrivateRoute from "./component/PrivateRoute";
 import Zakat from "./pages/Zakat";
-
+import styled from "styled-components";
+import GlobalFonts from "./css/styled"
+import { useStore } from "./contexts/Store";
 loadCustomers();
 loadVendings();
 loadProducts();
@@ -28,12 +30,15 @@ loadBuyings();
 loadDepenses();
 
 const App = () => {
+  const theme = useStore((state) => state.theme);
   return (
-    <div className="flex">
+    <div className={`flex ${theme.main} ${theme.text} transition-colors  duration-300`}>
       <HashRouter>
+        <GlobalFonts />
         <Sidebar />
         <div className="flex-1">
           <Navbar />
+
           <Routes>
             <Route element={<PrivateRoute />}>
               <Route path="/zakat" element={<Zakat />} />

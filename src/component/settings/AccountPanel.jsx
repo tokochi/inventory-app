@@ -3,13 +3,13 @@ import Store from "electron-store";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { useStore } from "../../contexts/Store";
 import facebook from "../../data/icons/facebook.png";
 import Image from "../../data/icons/user.png";
 import card from "../../data/icons/userCard.png";
+import Animation from "../animation";
 import PopupDialog from "../dialog/PopupDialog";
 import deletePng from "./../../data/icons/delete.png";
-import Animation from "../animation";
-
 export default function AccountPanel() {
   const schema = {
     user: { default: { name: "John Wick", facebook: "John-Wick", email: "Email@gmail.com", phone: "05 40 22 27 82", pages: [] }, type: "object" },
@@ -18,22 +18,23 @@ export default function AccountPanel() {
       default: [],
     },
   };
+  const theme = useStore((state) => state.theme);
   const navigate = useNavigate();
   const store = new Store({ schema });
   const [refresh, setRefresh] = useState(false);
   const users = store?.get("users");
   //store?.set("users", [{ userName:"admin", password:"admin", isAdmin: true,caisse:1, pages: ["/products", "/provider", "/customers", "/sell", "/buy", "/caisse", "/facture", "/bonAchat"] }]);
   return (
-    <div className="grow overflow-y-auto h-[600px]">
+    <div className={`grow overflow-y-auto  h-[calc(100vh_-_150px)] ${theme.back} ${theme.textXl} transition-colors  duration-300`}>
       <div className=" p-6 space-y-6 ">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl text-slate-800 font-bold mb-5">Mon Compte</h2>
+          <h2 className="text-2xl  font-bold mb-5">Mon Compte</h2>
           <button
             onClick={(e) => {
               e.preventDefault();
               navigate("/add");
             }}
-            className="btn bg-indigo-500 hover:bg-indigo-600 text-white">
+            className={`btn ${theme.button} hover:opacity-80 text-white`}>
             <svg className="w-4 h-4 fill-current opacity-50 shrink-0" viewBox="0 0 16 16">
               <path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" />
             </svg>
@@ -170,13 +171,13 @@ export default function AccountPanel() {
             </div>
           </Animation>
           <section className="max-w-[600px] relative h-[480px] overflow-x-hidden overflow-y-auto">
-            <h2 className="text-xl text-slate-800 font-bold mb-5"> Liste Utilisateurs</h2>
+            <h2 className="text-xl  font-bold mb-5"> Liste Utilisateurs</h2>
             <div className="flex">
               <div className=" ">
                 <div className="flex relative flex-wrap  gap-5 items-center justify-between p-2">
                   <Animation visible={true} from={{ x: 400, y: 0, opacity: 0 }} enter={{ x: 0, y: 0, opacity: 1 }} leave={{}}>
                     {store?.get("users").map((user) => (
-                      <div key={uuidv4()} className="flex flex-col justify-between border h-[135px] border-indigo-300 bg-[#1d252f]  drop-shadow-md rounded-xl p-2">
+                      <div key={uuidv4()} className="flex m-2 flex-col justify-between border h-[135px] border-indigo-300 bg-[#1d252f]  drop-shadow-md rounded-xl p-2">
                         <div className="flex items-center justify-between">
                           <div key={uuidv4()} className="w-20 relative ">
                             <img className="w-[80px] h-[80px] border border-indigo-50 rounded-full bg-contain" src={user?.logo || Image} width="80" height="80" />
@@ -493,7 +494,7 @@ export default function AccountPanel() {
                 location.reload();
               }}
               // type="submit"
-              className="btn border-slate-200 hover:border-slate-300 text-slate-600">
+              className={`btn ${theme.nav} ${theme.text} border-slate-200 hover:border-slate-300 text-slate-600`}>
               Reset
             </button>
             <button
@@ -502,7 +503,7 @@ export default function AccountPanel() {
                 window.location.reload();
               }}
               //  type="submit"
-              className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3">
+              className={`btn ${theme.button} hover:opacity-80 text-white ml-3`}>
               Sauvgarder
             </button>
           </div>

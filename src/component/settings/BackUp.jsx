@@ -1,13 +1,15 @@
-import Store from "electron-store";
-import React, { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
-import backup from "../../data/icons/backup.png";
-import moment from "moment/min/moment-with-locales";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
+import Store from "electron-store";
+import moment from "moment/min/moment-with-locales";
+import React, { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { useStore } from "../../contexts/Store";
+import backup from "../../data/icons/backup.png";
 import Animation from "../animation";
 const { ipcRenderer } = require("electron");
 
 export default function BackUp() {
+  const theme = useStore((state) => state.theme);
   const schema = { backup: { type: "array", default: [] } };
   const store = new Store({ schema });
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -29,11 +31,11 @@ export default function BackUp() {
   }, [isSpin]);
   //store?.set("backup", []);
   return (
-    <div className="bg-white shadow-lg overflow-y-auto h-[600px]  w-full rounded-sm border border-slate-200 relative">
+    <div className={`grow overflow-y-auto shadow-lg h-[calc(100vh_-_150px)] w-full rounded-sm  relative ${theme.back} ${theme.textXl}`}>
       <div className="w-full">
         <table className="table-auto  w-full divide-slate-200">
           {/* Table header */}
-          <thead className="text-xs sticky top-0 z-50 uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+          <thead className={`text-xs sticky top-0 z-50 uppercase  text-center ${theme.nav} ${theme.textXl} `}>
             <tr>
               <th className="px-2  first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                 <div className="font-semibold text-center">ID</div>
@@ -66,7 +68,7 @@ export default function BackUp() {
               ?.get("backup")
               .reverse()
               .map((db, index) => (
-                <tr key={uuidv4()} className={`${index & (1 === 1) && "bg-gray-100"}`}>
+                <tr key={uuidv4()} className={`${index & (1 === 1) && theme.main}`}>
                   <td key={uuidv4()} className="text-center w-1/8">
                     #{index + 1}
                   </td>

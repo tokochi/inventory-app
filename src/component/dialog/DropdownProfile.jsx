@@ -7,6 +7,7 @@ import Transition from "../../utils/Transition";
 
 function DropdownProfile({ align }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const theme = useStore((state) => state.theme);
   const trigger = useRef(null);
   const dropdown = useRef(null);
   const schema = { user: { type: "object" } };
@@ -38,7 +39,7 @@ function DropdownProfile({ align }) {
     <div className="inline-flex">
       <button ref={trigger} className="inline-flex justify-center items-center group" aria-haspopup="true" onClick={() => setDropdownOpen(!dropdownOpen)} aria-expanded={dropdownOpen}>
         <div className="relative">
-          <img className="w-8 h-8 rounded-full" src={loggedUser?.logo || UserAvatar} width="32" height="32" alt="User" />
+          <img className="w-8 h-8 rounded-full" src={store?.get("user")?.logo || UserAvatar} width="32" height="32" alt="User" />
           {isLoggedIn && <div className="absolute top-0 left-6 w-2.5 h-2.5 bg-emerald-500  rounded-full"></div>}
         </div>
 
@@ -51,7 +52,7 @@ function DropdownProfile({ align }) {
       </button>
 
       <Transition
-        className={`origin-top-right z-10 absolute top-full min-w-44 bg-white border border-slate-200 py-1.5 rounded shadow-lg overflow-hidden mt-1 ${align === "right" ? "right-0" : "left-0"}`}
+        className={`origin-top-right z-10 absolute top-full min-w-44 ${theme.back} border border-slate-200 py-1.5 rounded shadow-lg overflow-hidden mt-1 ${align === "right" ? "right-0" : "left-0"}`}
         show={dropdownOpen}
         enter="transition ease-out duration-200 transform"
         enterStart="opacity-0 -translate-y-2"
@@ -62,7 +63,7 @@ function DropdownProfile({ align }) {
         <div ref={dropdown} onFocus={() => setDropdownOpen(true)} onBlur={() => setDropdownOpen(false)}>
           <div className="pt-0.5 pb-2 px-3 mb-1 border-b border-slate-200">
             {/* <div className="font-medium text-slate-800">Tokochi SARL.</div> */}
-            <div className="text-xs text-slate-500 italic">Administrateur</div>
+            <div className={`text-xs ${theme.text} italic`}>Administrateur</div>
           </div>
           <ul>
             <li>

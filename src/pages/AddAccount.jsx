@@ -1,8 +1,9 @@
 import Store from "electron-store";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useStore } from "../contexts/Store";
 export default function AddAccount() {
+  const theme = useStore((state) => state.theme);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [cpassword, setCPassword] = useState("");

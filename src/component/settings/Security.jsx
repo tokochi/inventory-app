@@ -1,5 +1,6 @@
 import Store from "electron-store";
 import React, { useState } from "react";
+import { useStore } from "../../contexts/Store";
 import TextBox from "../button/TextBox";
 
 export default function Security() {
@@ -19,6 +20,7 @@ export default function Security() {
     },
   };
   const store = new Store({ schema });
+  const theme = useStore((state) => state.theme);
   const [showPassword, setShowPassword] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [password, setPassword] = useState("");
@@ -34,17 +36,17 @@ export default function Security() {
   const [restorCredit, setRestorCredit] = useState(store?.get("restorCredit"));
 
   return (
-    <div className="grow overflow-y-auto h-[600px]">
+    <div className={`grow overflow-y-auto h-[calc(100vh_-_150px)] ${theme.back} ${theme.textXl}`}>
       <div className=" p-6 space-y-6 ">
-        <h2 className="text-2xl text-slate-800 font-bold mb-5">Sécurité</h2>
+        <h2 className="text-2xl  font-bold mb-5">Sécurité</h2>
         <section>
-          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Mot de passe</h2>
+          <h2 className="text-xl leading-snug  font-bold mb-1">Mot de passe</h2>
           <div className="mt-5">
             <button
               onClick={(e) => {
                 setShowPassword(true);
               }}
-              className={`btn ${showPassword && "hidden"} border-slate-200 shadow-sm text-indigo-500`}>
+              className={`btn ${showPassword && "hidden"}  border-slate-200 shadow-sm text-indigo-500`}>
               Definir un nouveau mot de passe
             </button>
           </div>
@@ -84,13 +86,13 @@ export default function Security() {
                   className="form-input w-full"
                   type="password"
                 />
-              {wrongPassword && <span className="m-1 text-xs text-red-400">Mot de passe inccorecte</span>}
+                {wrongPassword && <span className="m-1 text-xs text-red-400">Mot de passe inccorecte</span>}
               </div>
             </div>
           )}
         </section>
         <section>
-          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Code Pin</h2>
+          <h2 className="text-xl leading-snug  font-bold mb-1">Code Pin</h2>
           <div className="mt-5">
             <button
               onClick={(e) => {
@@ -127,7 +129,7 @@ export default function Security() {
                 <TextBox
                   id="name"
                   onChange={(e) => {
-                     setWrongPin(false);
+                    setWrongPin(false);
                     if (e.value === pin) {
                       store.set("pin", e.value);
                     } else {
@@ -141,18 +143,18 @@ export default function Security() {
                   showSpinButton={false}
                   format="N0"
                 />
-              {wrongPin && <span className="m-1 text-xs text-red-400">Code pin inccorecte</span>}
+                {wrongPin && <span className="m-1 text-xs text-red-400">Code pin inccorecte</span>}
               </div>
             </div>
           )}
         </section>
         <section>
-          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Verrouillage</h2>
+          <h2 className="text-xl leading-snug  font-bold mb-1">Verrouillage</h2>
           <ul>
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Produits</div>
+                <div className=" font-semibold">Produits</div>
                 <div className="text-sm">Verrouillage des modifications quantité Produits.</div>
               </div>
               {/* Right */}
@@ -179,7 +181,7 @@ export default function Security() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Ventes</div>
+                <div className=" font-semibold">Ventes</div>
                 <div className="text-sm">Verrouillage des modifications des Ventes.</div>
               </div>
               {/* Right */}
@@ -206,7 +208,7 @@ export default function Security() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Achats</div>
+                <div className=" font-semibold">Achats</div>
                 <div className="text-sm">Verrouillage des modifications des Achats.</div>
               </div>
               {/* Right */}
@@ -233,7 +235,7 @@ export default function Security() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Clients</div>
+                <div className=" font-semibold">Clients</div>
                 <div className="text-sm">Verrouillage des modifications des Crédits Clients.</div>
               </div>
               {/* Right */}
@@ -259,7 +261,7 @@ export default function Security() {
             </li>
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               <div>
-                <div className="text-slate-800 font-semibold">Fournisseurs</div>
+                <div className=" font-semibold">Fournisseurs</div>
                 <div className="text-sm">Verrouillage des modifications des Déttes Fournisseurs.</div>
               </div>
               <div className="flex items-center ml-4">
@@ -285,12 +287,12 @@ export default function Security() {
           </ul>
         </section>
         <section>
-          <h2 className="text-xl leading-snug text-slate-800 font-bold mb-1">Réstauration</h2>
+          <h2 className="text-xl leading-snug  font-bold mb-1">Réstauration</h2>
           <ul>
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Produits</div>
+                <div className=" font-semibold">Produits</div>
                 <div className="text-sm">Réstaurer la quantité des Produits Supprimer.</div>
               </div>
               {/* Right */}
@@ -317,7 +319,7 @@ export default function Security() {
             <li className="flex justify-between items-center py-3 border-b border-slate-200">
               {/* Left */}
               <div>
-                <div className="text-slate-800 font-semibold">Crédits</div>
+                <div className=" font-semibold">Crédits</div>
                 <div className="text-sm">Réstaurer le Crédits des Clients ou Fournisseur Supprimer.</div>
               </div>
               {/* Right */}
@@ -354,7 +356,7 @@ export default function Security() {
                 location.reload();
               }}
               // type="submit"
-              className="btn border-slate-200 hover:border-slate-300 text-slate-600">
+              className={`btn ${theme.nav} ${theme.text} border-slate-200 hover:border-slate-300 text-slate-600`}>
               Reset
             </button>
             <button
@@ -363,7 +365,7 @@ export default function Security() {
                 window.location.reload();
               }}
               //  type="submit"
-              className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3">
+              className={`btn ${theme.button} hover:opacity-80 text-white ml-3`}>
               Sauvgarder
             </button>
           </div>
