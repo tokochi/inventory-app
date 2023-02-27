@@ -7,6 +7,7 @@ function NotificationsPanel() {
     notifications: { default: { productAlert: true, clients: true, providers: true, revenue: true }, type: "object" },
   };
   const store = new Store({ schema });
+  
   const theme = useStore((state) => state.theme);
   const notify = store?.get("notifications");
   const [productAlert, setProductAlert] = useState(notify.productAlert);
@@ -15,7 +16,7 @@ function NotificationsPanel() {
   const [revenue, setRevenue] = useState(notify.revenue);
 
   return (
-    <div className={`grow overflow-y-auto h-[calc(100vh_-_150px)] ${theme.back} ${theme.textXl}`}>
+    <div className={`grow overflow-y-auto h-[calc(100vh_-_190px) z-60] ${theme.back} ${theme.textXl}`}>
       {/* Panel body */}
       <div className="p-6 space-y-6">
         <h2 className="text-2xl  font-bold mb-5">Notifications</h2>

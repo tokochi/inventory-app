@@ -127,7 +127,7 @@ export default function VendingTable() {
           },
         }));
       }
-      if (grid?.getSelectedRecords()[0].type === "facture") {
+      if (grid?.getSelectedRecords()[0]?.type === "facture") {
         navigate("/facture");
         useStore.setState((state) => ({
           facture: {
@@ -212,8 +212,8 @@ export default function VendingTable() {
     }
   }
   return (
-    <div className="p-2  h-screen">
-      <div className="mb-4  mx-4 flex justify-between">
+    <div className="p-2  h-[calc(100vh_-_200px)]">
+      <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
             <button
@@ -288,21 +288,24 @@ export default function VendingTable() {
           </ColumnsDirective>
           <Inject services={[Resize, Selection, Reorder, Search, Toolbar, Edit, ColumnChooser, Sort, Print, Filter, PdfExport]} />
         </GridComponent>
-        <div ref={gridRef} className={`${showPrintDiv && "hidden"} h-[297mm] w-[210mm] `}>
+        <div ref={gridRef} id="pdf" className={`${showPrintDiv && "hidden"}  w-[210mm] text-slate-800`}>
           <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
             <div>
               <div className="overflow-x-auto">
                 <div className="flex gap-2 p-2">
                   <span className="text-lg mr-2">Liste Ventes:</span>
-                  <button className={normalButton}>
+                  <button
+                    className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Nombre Ventes:
                     <span className="ml-1  text-emerald-600">{vendingData?.length}</span>
                   </button>
-                  <button className={normalButton}>
+                  <button
+                    className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Articles Vendu:
                     <span className="ml-1  text-emerald-600">{vendingData?.reduce((acc, buying) => acc + buying.grid.reduce((accu, product) => accu + parseInt(product.selectedQuantity), 0), 0)}</span>
                   </button>
-                  <button className={normalButton}>
+                  <button
+                    className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Chiffre D'affaires:
                     <span className="ml-1  text-emerald-600">{toCurrency(vendingData.reduce((acc, cur) => acc + cur.amount, 0))}</span>
                   </button>
@@ -311,7 +314,7 @@ export default function VendingTable() {
                     <span className="ml-1  text-emerald-600">{toCurrency(vendingData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.sellPrice, 0))}</span>
                   </button> */}
                 </div>
-                <table className="table-auto w-full  divide-slate-200 ">
+                <table className="table-auto w-full   divide-slate-200 ">
                   <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
                     <tr>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
@@ -335,9 +338,9 @@ export default function VendingTable() {
                     </tr>
                   </thead>
                   <tbody>
-                    {vendingData.map((vending) => (
+                    {vendingData.map((vending, index) => (
                       <tr className="text-center " key={vending._id}>
-                        <td className=" p-2">{"#" + vending?._id.slice(-6)}</td>
+                        <td className=" p-2">{"#" + parseInt(index + 1)}</td>
                         <td>{vending?.client.name}</td>
                         <td>{toCurrency(vending?.total)}</td>
                         <td>{toCurrency(vending?.rebate)}</td>

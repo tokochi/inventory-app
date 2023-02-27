@@ -9,6 +9,7 @@ const { ipcRenderer } = require("electron");
 
 export default function DepenseList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
   const depenseData = () => useStore((state) => state.depenses);
+  const theme = useStore((state) => state.theme);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toCurrency = useStore((state) => state.toCurrency);
   return (
@@ -35,12 +36,12 @@ export default function DepenseList({ header, id, svg, children, width, footer, 
         open={() => setDropdownOpen(true)}
         close={() => setDropdownOpen(false)}
         content={() => (
-          <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+          <div className={`${theme.nav} shadow-lg rounded-sm border border-slate-600 relative`}>
             <div>
               <div className="overflow-x-auto">
                 <table className="table-auto w-full  divide-slate-200">
                   {/* Table header */}
-                  <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                  <thead className={`text-xs uppercase text-center ${theme.text} ${theme.main}  border-t border-slate-600`}>
                     <tr>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                         <div className="font-semibold text-center">ID</div>

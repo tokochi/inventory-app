@@ -2,8 +2,8 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  appId: "TokoDevID",
-  productName: "TokoDev",
+  appId: "85IGzt",
+  productName: "stock-app",
   copyright: "Copyright © 2022 ${author}",
   asar: true,
   directories: {

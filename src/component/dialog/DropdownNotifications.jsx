@@ -26,9 +26,7 @@ function DropdownNotifications({ align }) {
   const providersData = useStore((state) => state.providers);
   const vendingsData = useStore((state) => state.vendings).filter((vente) => Math.abs(moment(vente.time).diff(moment(), "days"))<1);
   const total = vendingsData.reduce((acc, cur) => acc + cur.amount, 0);
-  const totalQty = vendingsData.reduce((acc, cur) => acc + cur.grid.length, 0);
-  const totalArtQty = vendingsData.reduce((acc, cur) => acc + cur.grid.reduce((accS, curS) => accS + curS.selectedQuantity, 0), 0);
-  const totalBuyPrice = vendingsData.reduce((acc, cur) => acc + cur.totalbuyPrice, 0);
+ const totalBuyPrice = vendingsData.reduce((acc, cur) => acc + cur.totalbuyPrice, 0);
   const outStock = productsData.filter((prodct) => prodct.quantity <= (prodct.qtyAlert || 0) && prodct.notification === true && Math.abs(moment(prodct?.lastTimeNotify).diff(moment(), "days")) > 3);
   const customerCredit = customersData.filter((cust) => cust.credit > 0 && Math.abs(moment(cust?.lastTimeNotify).diff(moment(), "days")) > 3);
   const providerCredit = providersData.filter((cust) => cust.credit > 0 && Math.abs(moment(cust?.lastTimeNotify).diff(moment(), "days")) > 3);
@@ -58,7 +56,7 @@ function DropdownNotifications({ align }) {
   });
 
   return (
-    <div className="relative inline-flex">
+    <div className="relative inline-flex  ">
       <button
         ref={trigger}
         className={`w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 transition duration-150 rounded-full ${dropdownOpen && "bg-slate-200"}`}
@@ -94,9 +92,9 @@ function DropdownNotifications({ align }) {
           <ul>
             {notify.productAlert &&
               outStock.map((product) => (
-                <li key={uuidv4()} className="border-b border-slate-200 last:border-0">
+                <li key={uuidv4()} className={`${theme.name === "classic" ? "border-b border-slate-200 hover:bg-gray-300" : "border-b border-slate-600 hover:bg-gray-600"}    last:border-0`}>
                   <Link
-                    className="block py-2 px-4 hover:opacity-90"
+                    className="block py-2 px-4 "
                     to="#0"
                     onClick={() => {
                       setDropdownOpen(!dropdownOpen);
@@ -114,18 +112,20 @@ function DropdownNotifications({ align }) {
                       });
                     }}>
                     <div className="block text-sm  mb-2">
-                      <h2 className={`font-semibold  ${theme.textXl}`}> Produits En Rupture de Stock:</h2>
+                      <h2 className={`font-semibold  ${theme.textXl}`}>Produits En Rupture de Stock ‼️</h2>
                       <hr className="w-full mb-4" />
+
                       <div className="flex items-center justify-between">
                         <div className={`${theme.text} whitespace-nowrap font-medium  text-base  px-2`}>
                           <span>📦{product.name}</span>
                         </div>
                         <div className="px-2">
-                          <div className={normalButton}>
+                          <div className={`${normalButton} bg-red-100 `}>
                             Quantité: <span className="text-red-600 ml-2 whitespace-nowrap"> {product.quantity}</span>
                           </div>
                         </div>
                       </div>
+
                     </div>
                     <span className={`block text-xs font-medium  ${theme.text}`}>{moment().format("LLLL")}</span>
                   </Link>
@@ -133,7 +133,7 @@ function DropdownNotifications({ align }) {
               ))}
             {notify.clients &&
               customerCredit.map((customer) => (
-                <li key={uuidv4()} className="border-b border-slate-200 last:border-0">
+                <li key={uuidv4()} className={`${theme.name === "classic" ? "border-b border-slate-200 hover:bg-gray-300" : "border-b border-slate-600 hover:bg-gray-600"}    last:border-0`}>
                   <Link
                     className="block py-2 px-4 hover:opacity-90"
                     to="#0"
@@ -153,7 +153,7 @@ function DropdownNotifications({ align }) {
                       });
                     }}>
                     <div className="block text-sm  mb-2">
-                      <h2 className={`font-semibold  ${theme.textXl}`}> Crédits Clients No Payé:</h2>
+                      <h2 className={`font-semibold  ${theme.textXl}`}> Crédits Clients No Payé ‼️</h2>
                       <hr className="w-full mb-4" />
                       <div className="flex items-center justify-between">
                         <div className={`${theme.text}  font-medium  text-base whitespace-nowrap px-2`}>
@@ -172,7 +172,7 @@ function DropdownNotifications({ align }) {
               ))}
             {notify.providers &&
               providerCredit.map((provider) => (
-                <li key={uuidv4()} className="border-b border-slate-200 last:border-0">
+                <li key={uuidv4()} className={`${theme.name === "classic" ? "border-b border-slate-200 hover:bg-gray-300" : "border-b border-slate-600 hover:bg-gray-600"}    last:border-0`}>
                   <Link
                     className="block py-2 px-4 hover:opacity-90"
                     to="#0"
@@ -192,7 +192,7 @@ function DropdownNotifications({ align }) {
                       });
                     }}>
                     <div className="block text-sm  mb-2">
-                      <h2 className={`font-semibold  ${theme.textXl}`}> Déttes Fournisseurs No Payé:</h2>
+                      <h2 className={`font-semibold  ${theme.textXl}`}> Déttes Fournisseurs No Payé ‼️</h2>
                       <hr className="w-full mb-4" />
                       <div className="flex items-center justify-between">
                         <div className={`${theme.text}  font-medium  text-base whitespace-nowrap px-2`}>
@@ -210,7 +210,7 @@ function DropdownNotifications({ align }) {
                 </li>
               ))}
             {revenueNotify && (
-              <li key={uuidv4()} className="border-b border-slate-200 last:border-0">
+              <li key={uuidv4()} className={`${theme.name === "classic" ? "border-b border-slate-200 hover:bg-gray-300" : "border-b border-slate-600 hover:bg-gray-600"}    last:border-0`}>
                 <Link
                   className="block py-2 px-4 hover:opacity-90"
                   to="#0"
@@ -219,7 +219,7 @@ function DropdownNotifications({ align }) {
                     setDropdownOpen(!dropdownOpen);
                   }}>
                   <div className="">
-                    <h2 className={`font-semibold  ${theme.textXl}`}>Revenue Quotidien:</h2>
+                    <h2 className={`font-semibold  ${theme.textXl}`}>Revenue Quotidien ‼️</h2>
                     <hr className="w-full mb-4" />
                     <div className="flex gap-2 flex-col mb-4 justify-center">
                       <div className={normalButton}>

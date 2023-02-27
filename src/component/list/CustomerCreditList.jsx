@@ -12,6 +12,7 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
   const avanceList = () => useStore((state) => state.customers).reduce((acc, cur) => acc.concat(cur.avance), []);
   const toCurrency = useStore((state) => state.toCurrency);
   const store = new Store();
+  const theme = useStore((state) => state.theme);
   return (
     <>
       <button
@@ -36,12 +37,12 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
         open={() => setDropdownOpen(true)}
         close={() => setDropdownOpen(false)}
         content={() => (
-          <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+          <div className={`${theme.nav} shadow-lg rounded-sm border border-slate-600 relative`}>
             <div>
               <div className="overflow-x-auto">
                 <table className="table-auto w-full  divide-slate-200">
                   {/* Table header */}
-                  <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                  <thead className={`text-xs uppercase text-center ${theme.text} ${theme.main}  border-t border-slate-600`}>
                     <tr>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                         <div className="font-semibold text-center">ID</div>
@@ -110,7 +111,7 @@ export default function CustomerCreditList({ header, id, svg, children, width, f
                                   if (customer._id === custID) {
                                     ipcRenderer.send("updateCustomer", {
                                       _id: custID,
-                                      credit: parseInt(customer.credit) + parseInt(avanceAmount),
+                                      credit: store?.get("restorCredit") && parseInt(customer.credit) + parseInt(avanceAmount),
                                       avance: customer.avance.filter((avance) => avance._id !== avanceID),
                                     });
                                   }

@@ -99,7 +99,7 @@ export default function ProductFormPopUp({ title }) {
       header="Ajouter un Nouveau Produit"
       allowDragging
       width="550"
-      height="770"
+      height="600"
       open={() => useStore.setState(() => ({ dropdownOpen: true }))}
       cloose={() => useStore.setState(() => ({ dropdownOpen: false }))}
       visible={dropdownOpen()}
@@ -132,13 +132,17 @@ export default function ProductFormPopUp({ title }) {
                             date: new Date(),
                             page: "Caisse",
                             action: "ajouter",
-                            title:"Nouveau Produit Ajouter",
+                            title: "Nouveau Produit Ajouter",
                             item: JSON.parse(res),
                             user: store?.get("user")?.userName,
                             role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
                           },
                         ]);
                         ipcRenderer.removeAllListeners("refreshGridProduct:add");
+                        useStore.setState({ toast: { show: true, title: "Produit Ajouter Au Stock Avec Succés", type: "success" } });
+                        setTimeout(() => {
+                          useStore.setState({ toast: { show: false } });
+                        }, 2000);
                         loadProducts();
                         setName("");
                         setBarCode();
@@ -221,7 +225,7 @@ export default function ProductFormPopUp({ title }) {
                 />
               </td>
             </tr>
-            <tr>
+            {/* <tr>
               <td className={labelclassName}>Marque:</td>
               <td>
                 <div className="flex gap-2">
@@ -454,7 +458,7 @@ export default function ProductFormPopUp({ title }) {
                   </label>
                 </div>
               </td>
-            </tr>
+            </tr> */}
             <tr>
               <td className={labelclassName}>Quantité:</td>
               <td>

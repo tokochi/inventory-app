@@ -12,19 +12,19 @@ import Theme from "./../component/settings/Theme";
 export default function Settings() {
   const theme = useStore((state) => state.theme);
   return (
-    <div className="flex  h-screen">
+    <div className="flex  h-[calc(100vh_-_70px)]">
       <div className="relative flex flex-col flex-1 ">
         <main>
           <div className="px-8 py-4 w-full max-w-9xl mx-auto">
             {/* Page header */}
             <div className="mb-4">
               {/* Title */}
-              <h1 className={`text-2xl md:text-3xl ${theme.textXl} font-bold`}>Paramètres 🛠</h1>
+              <h1 className={`text-3xl ${theme.textXl} font-bold`}>Paramètres 🛠</h1>
             </div>
 
             {/* Content */}
-            <div className="bg-white shadow-lg rounded-sm mb-8">
-              <div className="flex flex-col md:flex-row md:-mr-px">
+            <div className=" ">
+              <div className="flex  ">
                 <SettingsSidebar />
                 <Routes>
                   <Route path="account" element={<AccountPanel />} />

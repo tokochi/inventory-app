@@ -13,7 +13,7 @@ export default function Theme() {
   const store = new Store({ schema });
   const theme = useStore((state) => state.theme);
   return (
-    <div className={`grow overflow-y-auto shadow-lg h-[calc(100vh_-_150px)] w-full rounded-sm  ${theme.back} transition-colors  duration-300 relative  ${theme.textXl}`}>
+    <div className={`grow overflow-y-auto shadow-lg h-[calc(100vh_-_190px)] w-full rounded-sm  ${theme.back} transition-colors  duration-300 relative  ${theme.textXl}`}>
       {/* Panel body */}
       <div className="p-6 space-y-6 ">
         <h2 className={`text-2xl ${theme.textXl} font-bold mb-5`}>Apparence</h2>

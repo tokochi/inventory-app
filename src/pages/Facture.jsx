@@ -17,10 +17,9 @@ import deletePng2 from "./../data/icons/delete2.png";
 import done from "./../data/icons/done.png";
 import minus from "./../data/icons/minus.png";
 import print from "./../data/icons/print.png";
+import Animation from "../component/animation";
 const { ipcRenderer } = require("electron");
-
 moment.locale("fr");
-
 const Wrapper = styled.div`
   & .e-ddl.e-input-group.e-control-wrapper .e-input {
     padding-left: 0.5rem;
@@ -86,7 +85,6 @@ export default function Facture(props) {
   useEffect(() => {
     useStore.setState((state) => ({ facture: { ...state.facture, autoCompleteObj } }));
   }, [autoCompleteObj]);
-
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
@@ -97,7 +95,6 @@ export default function Facture(props) {
         ipcRenderer.send("previewComponent2", url);
       }),
   });
-
   const productsTemplate = (props) => (
     <table className="table-auto w-full">
       <tbody>
@@ -122,9 +119,8 @@ export default function Facture(props) {
       </tbody>
     </table>
   );
-
   return (
-    <div className={`${theme.nav} ${theme.text} m-2 shadow-lg rounded-sm h-[700px]  relative`}>
+    <div className={`${theme.nav} ${theme.text} m-2 shadow-lg rounded-sm h-[700px] overflow-x-hidden relative`}>
       <div className="flex h-full  justify-center">
         <div id="left" className={`${theme.back}   flex-1 min-w-[480px]`}>
           <div className="flex  items-center justify-center my-2">
@@ -244,7 +240,7 @@ export default function Facture(props) {
           </div>
           <div id="date" className="flex select-none items-center my-2">
             <span className="px-4  text-sm font-medium min-w-[120px] ">Date:</span>
-            <div className="border-slate-200 w-[200px]  border rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm">
+            <div className={` ${theme.name === "classic" && "border-slate-200 border"} w-[200px]   rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm`}>
               <DatePickerComponent
                 id="expired"
                 name="expired"
@@ -505,228 +501,230 @@ export default function Facture(props) {
               Produits:<span className="text-green-600"> {facture.selectedProducts.length}</span>
             </div>
           </div>
-          <div id="validation" className="flex gap-2 items-center p-2 ">
-            <div className="bg-emerald-600 shrink-0 hover:bg-emerald-400 p-4">
-              <button
-                ref={addQtyBtn}
-                onClick={() => {
-                  const UpdatedProducts = useStore
-                    .getState()
-                    .facture.selectedProducts.map((product) =>
-                      product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity >= 1
-                        ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) + 1 }
-                        : product
-                    );
-                  useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: UpdatedProducts } }));
-                  setTotalFacture();
-                }}
-                className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <span>Qté</span>
-                <img src={add} className="w-10" />
-              </button>
-            </div>
-            <div className="bg-red-600 shrink-0 hover:bg-red-400 p-4">
-              <button
-                ref={subQtyBtn}
-                onClick={() => {
-                  const UpdatedProducts = useStore
-                    .getState()
-                    .facture.selectedProducts.map((product) =>
-                      product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity > 1
-                        ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) - 1 }
-                        : product
-                    );
-                  useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: UpdatedProducts } }));
-                  setTotalFacture();
-                }}
-                className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <span>Qté</span>
-                <img src={minus} className="w-10" />
-              </button>
-            </div>
-            <div className="bg-green-500 shrink-0 hover:bg-green-700 p-[9px]">
-              <button
-                ref={validateBtn}
-                onClick={() => {
-                  if (facture.isEdit === true) {
-                    // update vending List
-                    ipcRenderer.send("updateVending", {
-                      ...facture,
-                      autoCompleteObj: {},
-                      totalbuyPrice: facture.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
-                      grid: facture.selectedProducts,
-                    });
-                    ipcRenderer.on("refreshGridVending:update", (e, res) => {
-                      store?.set("activity", [
-                        ...store?.get("activity"),
-                        {
-                          date: new Date(),
-                          page: "Facture",
-                          action: "modifier",
-                          title: "Facture Modifier",
-                          item: JSON.parse(res),
-                          user: store?.get("user")?.userName,
-                          role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
-                        },
-                      ]);
-                      loadVendings();
-                      useStore.setState({ toast: { show: true, title: "Vente Modifier Avec Succés", type: "success" } });
-                      setTimeout(() => {
-                        useStore.setState({ toast: { show: false } });
-                      }, 2000);
-                      facture.selectedProducts.forEach((prod) => {
-                        // quantity update
-                        productsList.forEach((curProduct) => {
-                          if (curProduct._id === prod._id) {
-                            ipcRenderer.send("updateProduct", {
-                              _id: prod._id,
-                              quantity: parseInt(curProduct.quantity) + (parseInt(prod?.oldSelectedQty || 0) - parseInt(prod.selectedQuantity)),
-                            });
-                          }
-                        });
-                      });
-                      // clear oldClient credit if changed
-                      if (facture.oldClient._id != facture.client._id) {
-                        customersData.forEach((customer) => {
-                          if (customer._id === facture.oldClient._id) {
-                            ipcRenderer.send("updateCustomer", { _id: facture.oldClient._id, credit: (parseInt(customer.credit) - parseInt(facture.oldAmount - facture.oldDeposit)).toFixed(2) });
-                          }
-                          // add credit to new Client
-                          if (customer._id === facture.client._id && facture.client.name != "Standard") {
-                            ipcRenderer.send("updateCustomer", {
-                              _id: facture.client._id,
-                              credit: (parseInt(customer.credit) + parseInt(facture.amount - facture.deposit)).toFixed(2),
-                            });
-                          }
-                        });
-                        ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                          loadCustomers();
-                          ipcRenderer.removeAllListeners("refreshGridCustomer:update");
-                        });
-                      }
-                      // client didnt change
-                      if (facture.client.name != "Standard" && facture.oldClient._id === facture.client._id) {
-                        customersData.forEach((customer) => {
-                          if (customer._id === facture.client._id) {
-                            ipcRenderer.send("updateCustomer", {
-                              _id: facture.client._id,
-                              credit: parseInt(customer.credit) - parseInt(facture.oldAmount - facture.oldDeposit) + parseInt(facture.amount - facture.deposit),
-                            });
-                            ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                              loadCustomers();
-                              ipcRenderer.removeAllListeners("refreshGridCustomer:update");
-                            });
-                          }
-                        });
-                      }
-
-                      ipcRenderer.removeAllListeners("refreshGridVending:update");
-                    });
-                  } else {
-                    // add new vending
-                    facture.amount != 0 &&
-                      ipcRenderer.send("addVending", {
-                        time: new Date(),
-                        index: vendingsData.length + 1,
-                        paymentType: facture.paymentType,
-                        client: { name: facture.client.name, _id: facture.client._id, credit: facture.client.credit },
-                        type: "facture",
-                        mode: facture.mode,
-                        tva: facture.tva,
-                        rebate: facture.rebate.toFixed(2),
-                        deposit: facture.deposit.toFixed(2),
-                        amount: facture.amount.toFixed(2),
-                        total: facture.total.toFixed(2),
+          <Animation visible={true} from={{ x: 400, y: 0, opacity: 0 }} enter={{ x: 0, y: 0, opacity: 1 }} leave={{}}>
+            <div id="validation" className="flex gap-2 items-center p-2 ">
+              <div className="bg-emerald-600 shrink-0 hover:bg-emerald-400 p-4">
+                <button
+                  ref={addQtyBtn}
+                  onClick={() => {
+                    const UpdatedProducts = useStore
+                      .getState()
+                      .facture.selectedProducts.map((product) =>
+                        product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity >= 1
+                          ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) + 1 }
+                          : product
+                      );
+                    useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: UpdatedProducts } }));
+                    setTotalFacture();
+                  }}
+                  className="text-xl  text-white gap-2 rounded-sm items-center flex">
+                  <span>Qté</span>
+                  <img src={add} className="w-10" />
+                </button>
+              </div>
+              <div className="bg-red-600 shrink-0 hover:bg-red-400 p-4">
+                <button
+                  ref={subQtyBtn}
+                  onClick={() => {
+                    const UpdatedProducts = useStore
+                      .getState()
+                      .facture.selectedProducts.map((product) =>
+                        product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity > 1
+                          ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) - 1 }
+                          : product
+                      );
+                    useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: UpdatedProducts } }));
+                    setTotalFacture();
+                  }}
+                  className="text-xl  text-white gap-2 rounded-sm items-center flex">
+                  <span>Qté</span>
+                  <img src={minus} className="w-10" />
+                </button>
+              </div>
+              <div className="bg-green-500 shrink-0 hover:bg-green-700 p-[9px]">
+                <button
+                  ref={validateBtn}
+                  onClick={() => {
+                    if (facture.isEdit === true) {
+                      // update vending List
+                      ipcRenderer.send("updateVending", {
+                        ...facture,
+                        autoCompleteObj: {},
                         totalbuyPrice: facture.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
                         grid: facture.selectedProducts,
                       });
-                    ipcRenderer.on("refreshGridVending:add", (e, res) => {
-                      store?.set("activity", [
-                        ...store?.get("activity"),
-                        {
-                          date: new Date(),
-                          page: "Facture",
-                          action: "ajouter",
-                          item: JSON.parse(res),
-                          title: "Nouvelle Facture Ajouter",
-                          user: store?.get("user")?.userName,
-                          role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
-                        },
-                      ]);
-                      useStore.setState({ toast: { show: true, title: "Vente Ajouter Avec Succés", type: "success" } });
-                      setTimeout(() => {
-                        useStore.setState({ toast: { show: false } });
-                      }, 2000);
-                      loadVendings();
-                      facture.selectedProducts.forEach((prod) => {
-                        // quantity update
-                        productsList.forEach((curProduct) => {
-                          if (curProduct._id === prod._id) {
-                            ipcRenderer.send("updateProduct", {
-                              _id: prod._id,
-                              quantity: parseInt(prod.quantity) - parseInt(prod.selectedQuantity),
-                            });
-                          }
+                      ipcRenderer.on("refreshGridVending:update", (e, res) => {
+                        store?.set("activity", [
+                          ...store?.get("activity"),
+                          {
+                            date: new Date(),
+                            page: "Facture",
+                            action: "modifier",
+                            title: "Facture Modifier",
+                            item: JSON.parse(res),
+                            user: store?.get("user")?.userName,
+                            role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                          },
+                        ]);
+                        loadVendings();
+                        useStore.setState({ toast: { show: true, title: "Vente Modifier Avec Succés", type: "success" } });
+                        setTimeout(() => {
+                          useStore.setState({ toast: { show: false } });
+                        }, 2000);
+                        facture.selectedProducts.forEach((prod) => {
+                          // quantity update
+                          productsList.forEach((curProduct) => {
+                            if (curProduct._id === prod._id) {
+                              ipcRenderer.send("updateProduct", {
+                                _id: prod._id,
+                                quantity: parseInt(curProduct.quantity) + (parseInt(prod?.oldSelectedQty || 0) - parseInt(prod.selectedQuantity)),
+                              });
+                            }
+                          });
                         });
+                        // clear oldClient credit if changed
+                        if (facture.oldClient._id != facture.client._id) {
+                          customersData.forEach((customer) => {
+                            if (customer._id === facture.oldClient._id) {
+                              ipcRenderer.send("updateCustomer", { _id: facture.oldClient._id, credit: (parseInt(customer.credit) - parseInt(facture.oldAmount - facture.oldDeposit)).toFixed(2) });
+                            }
+                            // add credit to new Client
+                            if (customer._id === facture.client._id && facture.client.name != "Standard") {
+                              ipcRenderer.send("updateCustomer", {
+                                _id: facture.client._id,
+                                credit: (parseInt(customer.credit) + parseInt(facture.amount - facture.deposit)).toFixed(2),
+                              });
+                            }
+                          });
+                          ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                            loadCustomers();
+                            ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+                          });
+                        }
+                        // client didnt change
+                        if (facture.client.name != "Standard" && facture.oldClient._id === facture.client._id) {
+                          customersData.forEach((customer) => {
+                            if (customer._id === facture.client._id) {
+                              ipcRenderer.send("updateCustomer", {
+                                _id: facture.client._id,
+                                credit: parseInt(customer.credit) - parseInt(facture.oldAmount - facture.oldDeposit) + parseInt(facture.amount - facture.deposit),
+                              });
+                              ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                                loadCustomers();
+                                ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+                              });
+                            }
+                          });
+                        }
+
+                        ipcRenderer.removeAllListeners("refreshGridVending:update");
                       });
-                      if (facture.client.name != "Standard" && facture.amount - facture.deposit > 0) {
-                        customersData.forEach((customer) => {
-                          if (customer._id === facture.client._id) {
-                            // add credit
-                            ipcRenderer.send("updateCustomer", { _id: facture.client._id, credit: (parseInt(customer.credit) + parseInt(facture.amount - facture.deposit)).toFixed(2) });
-                            ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
-                              loadCustomers();
-                              ipcRenderer.removeAllListeners("refreshGridCustomer:update");
-                            });
-                          }
+                    } else {
+                      // add new vending
+                      facture.amount != 0 &&
+                        ipcRenderer.send("addVending", {
+                          time: new Date(),
+                          index: vendingsData.length + 1,
+                          paymentType: facture.paymentType,
+                          client: { name: facture.client.name, _id: facture.client._id, credit: facture.client.credit },
+                          type: "facture",
+                          mode: facture.mode,
+                          tva: facture.tva,
+                          rebate: facture.rebate.toFixed(2),
+                          deposit: facture.deposit.toFixed(2),
+                          amount: facture.amount.toFixed(2),
+                          total: facture.total.toFixed(2),
+                          totalbuyPrice: facture.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
+                          grid: facture.selectedProducts,
                         });
-                      }
+                      ipcRenderer.on("refreshGridVending:add", (e, res) => {
+                        store?.set("activity", [
+                          ...store?.get("activity"),
+                          {
+                            date: new Date(),
+                            page: "Facture",
+                            action: "ajouter",
+                            item: JSON.parse(res),
+                            title: "Nouvelle Facture Ajouter",
+                            user: store?.get("user")?.userName,
+                            role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                          },
+                        ]);
+                        useStore.setState({ toast: { show: true, title: "Vente Ajouter Avec Succés", type: "success" } });
+                        setTimeout(() => {
+                          useStore.setState({ toast: { show: false } });
+                        }, 2000);
+                        loadVendings();
+                        facture.selectedProducts.forEach((prod) => {
+                          // quantity update
+                          productsList.forEach((curProduct) => {
+                            if (curProduct._id === prod._id) {
+                              ipcRenderer.send("updateProduct", {
+                                _id: prod._id,
+                                quantity: parseInt(prod.quantity) - parseInt(prod.selectedQuantity),
+                              });
+                            }
+                          });
+                        });
+                        if (facture.client.name != "Standard" && facture.amount - facture.deposit > 0) {
+                          customersData.forEach((customer) => {
+                            if (customer._id === facture.client._id) {
+                              // add credit
+                              ipcRenderer.send("updateCustomer", { _id: facture.client._id, credit: (parseInt(customer.credit) + parseInt(facture.amount - facture.deposit)).toFixed(2) });
+                              ipcRenderer.on("refreshGridCustomer:update", (e, res) => {
+                                loadCustomers();
+                                ipcRenderer.removeAllListeners("refreshGridCustomer:update");
+                              });
+                            }
+                          });
+                        }
 
-                      ipcRenderer.removeAllListeners("refreshGridVending:add");
+                        ipcRenderer.removeAllListeners("refreshGridVending:add");
+                      });
+                    }
+
+                    ipcRenderer.on("refreshGridProduct:update", (e, res) => {
+                      loadProducts();
+                      ipcRenderer.removeAllListeners("refreshGridProduct:update");
                     });
-                  }
-
-                  ipcRenderer.on("refreshGridProduct:update", (e, res) => {
-                    loadProducts();
-                    ipcRenderer.removeAllListeners("refreshGridProduct:update");
-                  });
-                  useStore.setState((state) => ({
-                    facture: { mode: "Détail", client: { name: "Standard" }, amount: 0, tva: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null },
-                  }));
-                }}
-                className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <div className="flex flex-col">
-                  <span>Valider</span>
-                  <span className="text-base">(F1)</span>
-                </div>
-                <img src={done} className="w-10" />
-              </button>
+                    useStore.setState((state) => ({
+                      facture: { mode: "Détail", client: { name: "Standard" }, amount: 0, tva: 0, total: 0, rebate: 0, deposit: 0, selectedProducts: [], selectedProduct: null },
+                    }));
+                  }}
+                  className="text-xl  text-white gap-2 rounded-sm items-center flex">
+                  <div className="flex flex-col">
+                    <span>Valider</span>
+                    <span className="text-base">(F1)</span>
+                  </div>
+                  <img src={done} className="w-10" />
+                </button>
+              </div>
+              <div className="bg-lime-500 shrink-0 hover:bg-lime-700 p-[9px]">
+                <button ref={printBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
+                  <div className="flex flex-col">
+                    <span>Imprimer</span>
+                    <span className="text-base">(F2)</span>
+                  </div>
+                  <img src={print} className="w-10" />
+                </button>
+              </div>
+              <div className="bg-rose-500 shrink-0 hover:bg-rose-700 p-[9px]">
+                <button
+                  ref={deleteBtn}
+                  onClick={() => {
+                    useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: [] } }));
+                    setTotalFacture();
+                  }}
+                  className="text-xl  text-white gap-2 rounded-sm items-center flex">
+                  <div className="flex flex-col">
+                    <span>Suprimer</span>
+                    <span className="text-base">(Suppr)</span>
+                  </div>
+                  <img src={deletePng} className="w-10" />
+                </button>
+              </div>
             </div>
-            <div className="bg-lime-500 shrink-0 hover:bg-lime-700 p-[9px]">
-              <button ref={printBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
-                <div className="flex flex-col">
-                  <span>Imprimer</span>
-                  <span className="text-base">(F2)</span>
-                </div>
-                <img src={print} className="w-10" />
-              </button>
-            </div>
-            <div className="bg-rose-500 shrink-0 hover:bg-rose-700 p-[9px]">
-              <button
-                ref={deleteBtn}
-                onClick={() => {
-                  useStore.setState((state) => ({ facture: { ...state.facture, selectedProducts: [] } }));
-                  setTotalFacture();
-                }}
-                className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <div className="flex flex-col">
-                  <span>Suprimer</span>
-                  <span className="text-base">(Suppr)</span>
-                </div>
-                <img src={deletePng} className="w-10" />
-              </button>
-            </div>
-          </div>
+          </Animation>
         </div>
         <ProductFormPopUp title={title} />
         <div ref={gridRef} className={`${showPrintDiv && "hidden"} `}>

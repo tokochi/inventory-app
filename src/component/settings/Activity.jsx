@@ -14,14 +14,14 @@ export default function Activity() {
   const [item, setitem] = useState();
   const [activity, setActivity] = useState();
   const toCurrency = useStore((state) => state.toCurrency);
-  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+  const normalButton = `inline-flex items-center justify-between w-full  gap-5 text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
  const [dropdownOpen, setDropdownOpen] = useState(false);
   //store?.set("activity",[]);
   return (
-    <div className={`grow overflow-y-auto shadow-lg h-[calc(100vh_-_150px)] w-full rounded-sm  relative ${theme.back} ${theme.textXl}`}>
+    <div className={`grow overflow-y-auto shadow-lg h-[calc(100vh_-_190px)] w-full rounded-sm  relative ${theme.back} ${theme.textXl}`}>
       <table className="table-auto w-full divide-slate-200">
         {/* Table header */}
-        <thead className={`text-xs sticky top-0 z-50 uppercase  text-center ${theme.nav} ${theme.textXl} `}>
+        <thead className={`text-xs sticky top-0 z-10 uppercase  text-center ${theme.nav} ${theme.textXl} `}>
           <tr>
             <th className="px-2  first:pl-5 last:pr-5 py-3 whitespace-nowrap">
               <div className="font-semibold text-center">ID</div>
@@ -41,7 +41,7 @@ export default function Activity() {
             <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
               <div className="font-semibold text-center">Role</div>
             </th>
-            <th className="px-2 first:pl-5 last:pr-5 py-3 Z-10 whitespace-nowrap">
+            <th className="px-2 first:pl-5 last:pr-5 py-3  whitespace-nowrap">
               <div className="font-semibold text-center">Article</div>
             </th>
           </tr>

@@ -19,7 +19,6 @@ import { loadCustomers, loadBuyings, loadVendings, loadProviders, loadProducts, 
 import Settings from "./pages/Settings";
 import PrivateRoute from "./component/PrivateRoute";
 import Zakat from "./pages/Zakat";
-import styled from "styled-components";
 import GlobalFonts from "./css/styled"
 import { useStore } from "./contexts/Store";
 loadCustomers();

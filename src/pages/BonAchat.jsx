@@ -17,10 +17,9 @@ import deletePng2 from "./../data/icons/delete2.png";
 import done from "./../data/icons/done.png";
 import minus from "./../data/icons/minus.png";
 import print from "./../data/icons/print.png";
+import Animation from "../component/animation";
 const { ipcRenderer } = require("electron");
-
 moment.locale("fr");
-
 const Wrapper = styled.div`
   & .e-ddl.e-input-group.e-control-wrapper .e-input {
     padding-left: 0.5rem;
@@ -60,7 +59,6 @@ export default function BonAchat() {
   const gridRef = useRef();
   const [date, setDate] = useState(new Date());
   const theme = useStore((state) => state.theme);
-
   let autoCompleteObj;
   let validateBtn = useRef();
   let addQtyBtn = useRef();
@@ -77,7 +75,6 @@ export default function BonAchat() {
   useHotkeys("f5", () => addListBtn.current.click());
   useHotkeys("f6", () => newTabBtn.current.click());
   const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
-
   const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
@@ -119,14 +116,12 @@ export default function BonAchat() {
       </tbody>
     </table>
   );
-
   useEffect(() => {
     useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, autoCompleteObj } }));
   }, [autoCompleteObj]);
-
   const toCurrency = useStore((state) => state.toCurrency);
   return (
-    <div className={`${theme.nav} ${theme.text} m-2 shadow-lg rounded-sm h-[700px]  relative`}>
+    <div className={`${theme.nav} ${theme.text} m-2 shadow-lg rounded-sm h-[700px] overflow-x-hidden relative`}>
       <div className="flex h-full justify-center">
         <div id="left" className={`${theme.back}   flex-1 min-w-[480px]`}>
           <div className="flex  items-center justify-center my-2">
@@ -155,7 +150,7 @@ export default function BonAchat() {
           </div>
           <div id="date" className="flex select-none items-center my-2">
             <span className="px-4  text-sm font-medium min-w-[120px] ">Date:</span>
-            <div className={` ${theme.name==="classic" &&"border-slate-200 border"} w-[200px]   rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm`}>
+            <div className={` ${theme.name === "classic" && "border-slate-200 border"} w-[200px]   rounded-l hover:border-slate-300 focus:border-indigo-300 shadow-sm`}>
               <DatePickerComponent
                 id="expired"
                 name="expired"
@@ -379,7 +374,7 @@ export default function BonAchat() {
                       <td>
                         <input
                           onChange={(e) => {
-                            const UpdatedProducts = useStore.getState().bonAchat.selectedProducts.map((prod) => (e.target.id === prod._id ? { ...product, selectedQuantity: e.target.value } : prod));
+                            const UpdatedProducts = useStore.getState().bonAchat.selectedProducts.map((prod) => (e.target.id === prod._id ? { ...product, selectedQuantity: parseInt(e.target.value) } : prod));
                             useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
                             setTotalBonAchat();
                           }}
@@ -437,232 +432,237 @@ export default function BonAchat() {
               Produits:<span className="text-green-600"> {bonAchat.selectedProducts.length}</span>
             </div>
           </div>
-          <div id="validation" className="flex gap-2 items-center p-2 ">
-            <div className="bg-emerald-600 shrink-0 hover:bg-emerald-400 p-4">
-              <button
-                ref={addQtyBtn}
-                onClick={() => {
-                  const UpdatedProducts = useStore
-                    .getState()
-                    .bonAchat.selectedProducts.map((product) =>
-                      product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity >= 1
-                        ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) + 1 }
-                        : product
-                    );
-                  useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
-                  setTotalBonAchat();
-                }}
-                className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <span>Qté</span>
-                <img src={add} className="w-10" />
-              </button>
-            </div>
-            <div className="bg-red-600 shrink-0 hover:bg-red-400 p-4">
-              <button
-                ref={subQtyBtn}
-                onClick={() => {
-                  const UpdatedProducts = useStore
-                    .getState()
-                    .bonAchat.selectedProducts.map((product) =>
-                      product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity > 1
-                        ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) - 1 }
-                        : product
-                    );
-                  useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
-                  setTotalBonAchat();
-                }}
-                className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <span>Qté</span>
-                <img src={minus} className="w-10" />
-              </button>
-            </div>
-            <div className="bg-green-500 shrink-0 hover:bg-green-700 p-[9px]">
-              <button
-                ref={validateBtn}
-                onClick={() => {
-                  if (bonAchat.isEdit === true) {
-                    // update buying List
-                    ipcRenderer.send("updateBuying", {
-                      ...bonAchat,
-                      autoCompleteObj: {},
-                      totalbuyPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
-                      grid: bonAchat.selectedProducts,
-                    });
-                    ipcRenderer.on("refreshGridBuying:update", (e, res) => {
-                      store?.set("activity", [
-                        ...store?.get("activity"),
-                        {
-                          date: new Date(),
-                          page: "Bon Achat",
-                          action: "modifier",
-                          title: "Modifier Bon Achat",
-                          item: JSON.parse(res),
-                          user: store?.get("user")?.userName,
-                          role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
-                        },
-                      ]);
-                      bonAchat.selectedProducts.forEach((prod) => {
-                        // quantity update
-                        productsList.forEach((curProduct) => {
-                          if (curProduct._id === prod._id) {
-                            ipcRenderer.send("updateProduct", {
-                              _id: prod._id,
-                              quantity: parseInt(curProduct.quantity) - parseInt(prod?.oldSelectedQty) + parseInt(prod.selectedQuantity),
-                            });
-                          }
-                        });
-                      });
-                      loadBuyings();
-                      useStore.setState({ toast: { show: true, title: "Achat Modifier Avec Succés", type: "success" } });
-                      setTimeout(() => {
-                        useStore.setState({ toast: { show: false } });
-                      }, 2000);
-                      // clear oldSupplier credit if changed
-                      if (bonAchat.oldSupplier._id != bonAchat.supplier._id) {
-                        providersData.forEach((provider) => {
-                          if (provider._id === bonAchat.oldSupplier._id) {
-                            ipcRenderer.send("updateProvider", { _id: bonAchat.oldSupplier._id, credit: (parseInt(provider.credit) - parseInt(bonAchat.oldAmount - bonAchat.oldDeposit)).toFixed(2) });
-                          }
-                          // add credit to new Supplier
-                          if (provider._id === bonAchat.supplier._id && bonAchat.supplier.name != "Standard") {
-                            ipcRenderer.send("updateProvider", {
-                              _id: bonAchat.supplier._id,
-                              credit: (parseInt(provider.credit) + parseInt(bonAchat.amount - bonAchat.deposit)).toFixed(2),
-                            });
-                          }
-                        });
-                        ipcRenderer.on("refreshGridProvider:update", (e, res) => {
-                          loadProviders();
-                          ipcRenderer.removeAllListeners("refreshGridProvider:update");
-                        });
-                      }
-                      if (bonAchat.supplier.name != "Standard" && bonAchat.oldSupplier._id === bonAchat.supplier._id) {
-                        // supplier didnt change
-
-                        providersData.forEach((provider) => {
-                          if (provider._id === bonAchat.supplier._id) {
-                            ipcRenderer.send("updateProvider", {
-                              _id: bonAchat.supplier._id,
-                              credit: parseInt(provider.credit) - parseInt(bonAchat.oldAmount - bonAchat.oldDeposit) + parseInt(bonAchat.amount - bonAchat.deposit),
-                            });
-                            ipcRenderer.on("refreshGridProvider:update", (e, res) => {
-                              loadProviders();
-                              ipcRenderer.removeAllListeners("refreshGridProvider:update");
-                            });
-                          }
-                        });
-                      }
-
-                      ipcRenderer.removeAllListeners("refreshGridBuying:update");
-                    });
-                  } else {
-                    // add new buying
-                    bonAchat.amount != 0 &&
-                      ipcRenderer.send("addBuying", {
-                        time: new Date(),
-                        index: buyingsData.length + 1,
-                        paymentType: bonAchat.paymentType,
-                        supplier: { name: bonAchat.supplier.name, _id: bonAchat.supplier._id, credit: bonAchat.supplier.credit },
-                        type: "bonAchat",
-                        mode: bonAchat.mode,
-                        tva: bonAchat.tva,
-                        rebate: bonAchat.rebate.toFixed(2),
-                        deposit: bonAchat.deposit.toFixed(2),
-                        amount: bonAchat.amount.toFixed(2),
-                        total: bonAchat.total.toFixed(2),
+          <Animation visible={true} from={{ x: 400, y: 0, opacity: 0 }} enter={{ x: 0, y: 0, opacity: 1 }} leave={{}}>
+            <div id="validation" className="flex gap-2 items-center p-2 ">
+              <div className="bg-emerald-600 shrink-0 hover:bg-emerald-400 p-4">
+                <button
+                  ref={addQtyBtn}
+                  onClick={() => {
+                    const UpdatedProducts = useStore
+                      .getState()
+                      .bonAchat.selectedProducts.map((product) =>
+                        product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity >= 1
+                          ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) + 1 }
+                          : product
+                      );
+                    useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
+                    setTotalBonAchat();
+                  }}
+                  className="text-xl  text-white gap-2 rounded-sm items-center flex">
+                  <span>Qté</span>
+                  <img src={add} className="w-10" />
+                </button>
+              </div>
+              <div className="bg-red-600 shrink-0 hover:bg-red-400 p-4">
+                <button
+                  ref={subQtyBtn}
+                  onClick={() => {
+                    const UpdatedProducts = useStore
+                      .getState()
+                      .bonAchat.selectedProducts.map((product) =>
+                        product._id === indexRow && product.quantity > product.selectedQuantity && product.selectedQuantity > 1
+                          ? { ...product, selectedQuantity: parseFloat(product.selectedQuantity) - 1 }
+                          : product
+                      );
+                    useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: UpdatedProducts } }));
+                    setTotalBonAchat();
+                  }}
+                  className="text-xl  text-white gap-2 rounded-sm items-center flex">
+                  <span>Qté</span>
+                  <img src={minus} className="w-10" />
+                </button>
+              </div>
+              <div className="bg-green-500 shrink-0 hover:bg-green-700 p-[9px]">
+                <button
+                  ref={validateBtn}
+                  onClick={() => {
+                    if (bonAchat.isEdit === true) {
+                      // update buying List
+                      ipcRenderer.send("updateBuying", {
+                        ...bonAchat,
+                        autoCompleteObj: {},
                         totalbuyPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
                         grid: bonAchat.selectedProducts,
                       });
-                    ipcRenderer.on("refreshGridBuying:add", (e, res) => {
-                      store?.set("activity", [
-                        ...store?.get("activity"),
-                        {
-                          date: new Date(),
-                          page: "Bon Achat",
-                          action: "ajouter",
-                          item: JSON.parse(res),
-                          title: "Bon Achat Ajouter",
-                          user: store?.get("user")?.userName,
-                          role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
-                        },
-                      ]);
-                      bonAchat.selectedProducts.forEach((prod) => {
-                        // quantity update
-                        ipcRenderer.send("updateProduct", { _id: prod._id, buyPrice: prod.buyPrice, quantity: parseInt(prod.quantity) + parseInt(prod.selectedQuantity) });
-                      });
-                      loadBuyings();
-                      useStore.setState({ toast: { show: true, title: "Achat Ajouter Avec Succés", type: "success" } });
-                      setTimeout(() => {
-                        useStore.setState({ toast: { show: false } });
-                      }, 2000);
-                      if (bonAchat.supplier.name != "Standard" && bonAchat.amount - bonAchat.deposit > 0) {
-                        providersData.forEach((provider) => {
-                          if (provider._id === bonAchat.supplier._id) {
-                            // add credit
-                            ipcRenderer.send("updateProvider", { _id: bonAchat.supplier._id, credit: (parseInt(provider.credit) + parseInt(bonAchat.amount - bonAchat.deposit)).toFixed(2) });
-                            ipcRenderer.on("refreshGridProvider:update", (e, res) => {
-                              loadProviders();
-                              ipcRenderer.removeAllListeners("refreshGridProvider:update");
-                            });
-                          }
+                      ipcRenderer.on("refreshGridBuying:update", (e, res) => {
+                        store?.set("activity", [
+                          ...store?.get("activity"),
+                          {
+                            date: new Date(),
+                            page: "Bon Achat",
+                            action: "modifier",
+                            title: "Modifier Bon Achat",
+                            item: JSON.parse(res),
+                            user: store?.get("user")?.userName,
+                            role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                          },
+                        ]);
+                        bonAchat.selectedProducts.forEach((prod) => {
+                          // quantity update
+                          productsList.forEach((curProduct) => {
+                            if (curProduct._id === prod._id) {
+                              ipcRenderer.send("updateProduct", {
+                                _id: prod._id,
+                                quantity: parseInt(curProduct.quantity) - parseInt(prod?.oldSelectedQty) + parseInt(prod.selectedQuantity),
+                              });
+                            }
+                          });
                         });
-                      }
+                        loadBuyings();
+                        useStore.setState({ toast: { show: true, title: "Achat Modifier Avec Succés", type: "success" } });
+                        setTimeout(() => {
+                          useStore.setState({ toast: { show: false } });
+                        }, 2000);
+                        // clear oldSupplier credit if changed
+                        if (bonAchat.oldSupplier._id != bonAchat.supplier._id) {
+                          providersData.forEach((provider) => {
+                            if (provider._id === bonAchat.oldSupplier._id) {
+                              ipcRenderer.send("updateProvider", {
+                                _id: bonAchat.oldSupplier._id,
+                                credit: (parseInt(provider.credit) - parseInt(bonAchat.oldAmount - bonAchat.oldDeposit)).toFixed(2),
+                              });
+                            }
+                            // add credit to new Supplier
+                            if (provider._id === bonAchat.supplier._id && bonAchat.supplier.name != "Standard") {
+                              ipcRenderer.send("updateProvider", {
+                                _id: bonAchat.supplier._id,
+                                credit: (parseInt(provider.credit) + parseInt(bonAchat.amount - bonAchat.deposit)).toFixed(2),
+                              });
+                            }
+                          });
+                          ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                            loadProviders();
+                            ipcRenderer.removeAllListeners("refreshGridProvider:update");
+                          });
+                        }
+                        if (bonAchat.supplier.name != "Standard" && bonAchat.oldSupplier._id === bonAchat.supplier._id) {
+                          // supplier didnt change
 
-                      ipcRenderer.removeAllListeners("refreshGridBuying:add");
+                          providersData.forEach((provider) => {
+                            if (provider._id === bonAchat.supplier._id) {
+                              ipcRenderer.send("updateProvider", {
+                                _id: bonAchat.supplier._id,
+                                credit: parseInt(provider.credit) - parseInt(bonAchat.oldAmount - bonAchat.oldDeposit) + parseInt(bonAchat.amount - bonAchat.deposit),
+                              });
+                              ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                                loadProviders();
+                                ipcRenderer.removeAllListeners("refreshGridProvider:update");
+                              });
+                            }
+                          });
+                        }
+
+                        ipcRenderer.removeAllListeners("refreshGridBuying:update");
+                      });
+                    } else {
+                      // add new buying
+                      bonAchat.amount != 0 &&
+                        ipcRenderer.send("addBuying", {
+                          time: new Date(),
+                          index: buyingsData.length + 1,
+                          paymentType: bonAchat.paymentType,
+                          supplier: { name: bonAchat.supplier.name, _id: bonAchat.supplier._id, credit: bonAchat.supplier.credit },
+                          type: "bonAchat",
+                          mode: bonAchat.mode,
+                          tva: bonAchat.tva,
+                          rebate: bonAchat.rebate.toFixed(2),
+                          deposit: bonAchat.deposit.toFixed(2),
+                          amount: bonAchat.amount.toFixed(2),
+                          total: bonAchat.total.toFixed(2),
+                          totalbuyPrice: bonAchat.selectedProducts.reduce((acc, cur) => acc + cur.buyPrice * cur.selectedQuantity, 0).toFixed(2),
+                          grid: bonAchat.selectedProducts,
+                        });
+                      ipcRenderer.on("refreshGridBuying:add", (e, res) => {
+                        store?.set("activity", [
+                          ...store?.get("activity"),
+                          {
+                            date: new Date(),
+                            page: "Bon Achat",
+                            action: "ajouter",
+                            item: JSON.parse(res),
+                            title: "Bon Achat Ajouter",
+                            user: store?.get("user")?.userName,
+                            role: store?.get("user")?.isAdmin ? "Administrateur" : "Employée",
+                          },
+                        ]);
+                        bonAchat.selectedProducts.forEach((prod) => {
+                          // quantity update
+                          ipcRenderer.send("updateProduct", { _id: prod._id, buyPrice: prod.buyPrice, quantity: parseInt(prod.quantity) + parseInt(prod.selectedQuantity) });
+                        });
+                        loadBuyings();
+                        useStore.setState({ toast: { show: true, title: "Achat Ajouter Avec Succés", type: "success" } });
+                        setTimeout(() => {
+                          useStore.setState({ toast: { show: false } });
+                        }, 2000);
+                        if (bonAchat.supplier.name != "Standard" && bonAchat.amount - bonAchat.deposit > 0) {
+                          providersData.forEach((provider) => {
+                            if (provider._id === bonAchat.supplier._id) {
+                              // add credit
+                              ipcRenderer.send("updateProvider", { _id: bonAchat.supplier._id, credit: (parseInt(provider.credit) + parseInt(bonAchat.amount - bonAchat.deposit)).toFixed(2) });
+                              ipcRenderer.on("refreshGridProvider:update", (e, res) => {
+                                loadProviders();
+                                ipcRenderer.removeAllListeners("refreshGridProvider:update");
+                              });
+                            }
+                          });
+                        }
+
+                        ipcRenderer.removeAllListeners("refreshGridBuying:add");
+                      });
+                    }
+                    ipcRenderer.on("refreshGridProduct:update", (e, res) => {
+                      loadProducts();
+                      ipcRenderer.removeAllListeners("refreshGridProduct:update");
                     });
-                  }
-                  ipcRenderer.on("refreshGridProduct:update", (e, res) => {
-                    loadProducts();
-                    ipcRenderer.removeAllListeners("refreshGridProduct:update");
-                  });
-                  useStore.setState((state) => ({
-                    bonAchat: {
-                      mode: "Détail",
-                      supplier: { name: "Standard" },
-                      paymentType: "Espéce",
-                      amount: 0,
-                      total: 0,
-                      tva: 0,
-                      rebate: 0,
-                      deposit: 0,
-                      selectedProducts: [],
-                      selectedProduct: null,
-                    },
-                  }));
-                }}
-                className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <div className="flex flex-col">
-                  <span>Valider</span>
-                  <span className="text-base">(F1)</span>
-                </div>
-                <img src={done} className="w-10" />
-              </button>
+                    useStore.setState((state) => ({
+                      bonAchat: {
+                        mode: "Détail",
+                        supplier: { name: "Standard" },
+                        paymentType: "Espéce",
+                        amount: 0,
+                        total: 0,
+                        tva: 0,
+                        rebate: 0,
+                        deposit: 0,
+                        selectedProducts: [],
+                        selectedProduct: null,
+                      },
+                    }));
+                  }}
+                  className="text-xl  text-white gap-2 rounded-sm items-center flex">
+                  <div className="flex flex-col">
+                    <span>Valider</span>
+                    <span className="text-base">(F1)</span>
+                  </div>
+                  <img src={done} className="w-10" />
+                </button>
+              </div>
+              <div className="bg-lime-500 shrink-0 hover:bg-lime-700 p-[9px]">
+                <button ref={printBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
+                  <div className="flex flex-col">
+                    <span>Imprimer</span>
+                    <span className="text-base">(F2)</span>
+                  </div>
+                  <img src={print} className="w-10" />
+                </button>
+              </div>
+              <div className="bg-rose-500 shrink-0 hover:bg-rose-700 p-[9px]">
+                <button
+                  ref={deleteBtn}
+                  onClick={() => {
+                    useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: [] } }));
+                    setTotalBonAchat();
+                  }}
+                  className="text-xl  text-white gap-2 rounded-sm items-center flex">
+                  <div className="flex flex-col">
+                    <span>Suprimer</span>
+                    <span className="text-base">(Suppr)</span>
+                  </div>
+                  <img src={deletePng} className="w-10" />
+                </button>
+              </div>
             </div>
-            <div className="bg-lime-500 shrink-0 hover:bg-lime-700 p-[9px]">
-              <button ref={printBtn} className="text-xl  text-white gap-2 rounded-sm items-center flex" onClick={() => setShowPrintDiv(false)}>
-                <div className="flex flex-col">
-                  <span>Imprimer</span>
-                  <span className="text-base">(F2)</span>
-                </div>
-                <img src={print} className="w-10" />
-              </button>
-            </div>
-            <div className="bg-rose-500 shrink-0 hover:bg-rose-700 p-[9px]">
-              <button
-                ref={deleteBtn}
-                onClick={() => {
-                  useStore.setState((state) => ({ bonAchat: { ...state.bonAchat, selectedProducts: [] } }));
-                  setTotalBonAchat();
-                }}
-                className="text-xl  text-white gap-2 rounded-sm items-center flex">
-                <div className="flex flex-col">
-                  <span>Suprimer</span>
-                  <span className="text-base">(Suppr)</span>
-                </div>
-                <img src={deletePng} className="w-10" />
-              </button>
-            </div>
-          </div>
+          </Animation>
         </div>
       </div>
       <ProductFormPopUp title={title} />

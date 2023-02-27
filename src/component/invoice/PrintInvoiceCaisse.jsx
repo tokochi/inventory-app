@@ -21,7 +21,7 @@ const Wrapper = styled.div`
     align-items: center;
   }
   .companyName {
-    font-weight: 600;
+    font-weight: 500;
     font-family: Roboto, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
       "Noto Color Emoji";
     text-align: center;
@@ -35,8 +35,8 @@ const Wrapper = styled.div`
     text-align: center;
     text-transform: uppercase;
     width: 100%;
-    border-top: 2px dashed #111827;
-    border-bottom: 2px dashed #111827;
+    border-top: 1.5px dashed #111827;
+    border-bottom: 1.5px dashed #111827;
   }
   .table {
     margin-top: 0.5rem;
@@ -48,7 +48,8 @@ const Wrapper = styled.div`
     font-weight: 400;
     text-transform: uppercase;
     width: 100%;
-    font-size: 11px;
+    font-size: 10px;
+    border-bottom: 1.5px dashed #111827;
   }
   .theadDiv {
     font-weight: 500;
@@ -60,11 +61,12 @@ const Wrapper = styled.div`
   .tbody2 {
     font-weight: 400;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 8px;
     font-weight: 400;
   }
   .tbody tr {
     text-align: left;
+    font-size: 8px;
   }
   .td1 {
     font-weight: 400;
@@ -158,17 +160,6 @@ export default function PrintInvoiceCaisse() {
     }
     return str;
   }
-  const toWords = new ToWords({
-    localeCode: "fr-FR",
-    converterOptions: {
-      currency: false,
-      ignoreDecimal: false,
-      ignoreZeroCurrency: false,
-      doNotAddOnly: false,
-    },
-  });
-
-
 
   return (
     <Wrapper>
@@ -177,7 +168,7 @@ export default function PrintInvoiceCaisse() {
           <span className="companyName">{store?.get("company")?.name}</span>
 
           <span className="ticket ">
-            {"Ticket:" + "0"}
+            {"Ticket: " + "0"}
             {caisse.index || parseInt(vendingsData.length + 1)}/{new Date().getFullYear()}
           </span>
         </div>
@@ -212,7 +203,7 @@ export default function PrintInvoiceCaisse() {
         <table>
           <tbody className="tbody2">
             <tr className=" ">
-              <td className="td11">ART:{caisse.selectedProducts.reduce((accS, curS) => accS + parseInt(curS.selectedQuantity), 0)}</td>
+              <td className="td11">ART: {caisse.selectedProducts.reduce((accS, curS) => accS + parseInt(curS.selectedQuantity), 0)}</td>
               <td className="td12">net a payer:</td>
               <td className="td13">{toCurrency(caisse.amount)}</td>
             </tr>

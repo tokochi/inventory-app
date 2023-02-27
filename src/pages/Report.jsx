@@ -7,8 +7,8 @@ import { useStore } from "../contexts/Store";
 export default function Report() {
   const theme = useStore((state) => state.theme);
   const [active, setActive] = useState({ all: true, today: false, week: false, month: false });
-  const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
-  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+  const activeButtoon = `inline-flex items-center justify-between text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
+  const normalButton = `inline-flex items-center justify-between text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
   const [date, setDate] = useState([]);
   const vendingsData = useStore((state) => state.vendings).filter((vente) => (date?.length > 0 ? new Date(date[0]) < new Date(vente.time) && new Date(vente.time) < new Date(date[1]) : vente));
   const productsData = useStore((state) => state.products);
@@ -66,7 +66,7 @@ export default function Report() {
   }
   const toCurrency = useStore((state) => state.toCurrency);
   return (
-    <div className="p-5  h-screen overflow-y-auto">
+    <div className="p-5 overflow-y-auto h-[calc(100vh_-_70px)]">
       <div className="mb-4  flex gap-2 justify-end items-center">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">

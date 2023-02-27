@@ -26,7 +26,7 @@ export default function Company() {
   const [refresh, setRefresh] = useState(false);
   const store = new Store({ schema });
   return (
-    <div className={`grow overflow-y-auto h-[calc(100vh_-_150px)] ${theme.back} ${theme.textXl}`}>
+    <div className={`grow overflow-y-auto  h-[calc(100vh_-_190px)] ${theme.back} ${theme.textXl}`}>
       <div className="p-6">
         <h2 className="text-2xl mb-2 font-bold ">Entreprise</h2>
         <Animation visible={true} from={{ x: 0, y: -400, opacity: 0 }} enter={{ x: 0, y: 0, opacity: 1 }} leave={{}}>
@@ -41,7 +41,7 @@ export default function Company() {
                   setRefresh(!refresh);
                 }}
                 value={store?.get("company")?.userName}
-                className={`p-0 w-[300px] border-none  absolute font-semibold text-slate-800 bg-transparent  text-2xl top-[30px] capitalize left-[70px] z-10`}
+                className={`p-0 w-[300px] border-none  absolute font-semibold text-slate-800 bg-transparent  text-2xl top-[30px] capitalize left-[50px] z-10`}
                 type="text"
               />
               <textarea
@@ -220,11 +220,12 @@ export default function Company() {
         </section>
       </div>
       <footer>
-        <div className="flex flex-col px-6 py-5 border-t border-slate-200">
+        <div className="flex flex-col px-6 py-3 border-t border-slate-200">
           <div className="flex self-end">
             <button
               onClick={(e) => {
-                store.set("company", {});
+                const user = store.get("user");
+                store.set("user", { userName: user.userName });
                 location.reload();
               }}
               // type="submit"
@@ -232,11 +233,12 @@ export default function Company() {
               Reset
             </button>
             <button
+              type="submit"
               onClick={(e) => {
                 window.location.reload();
               }}
               //  type="submit"
-              className={`btn ${theme.button} hover:opacity-80 text-white ml-3`}>
+              className={`btn ${theme.button} hover:bg-indigo-600 text-white ml-3`}>
               Sauvgarder
             </button>
           </div>

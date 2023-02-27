@@ -6,12 +6,6 @@ import Caisse2 from "../component/caisse/Caisse2";
 import Caisse3 from "../component/caisse/Caisse3";
 import { useStore } from "../contexts/Store";
 export default function CaisseContainer() {
-  function chooseCaisse(index) {
-    if (index === 0) return () => <Caisse />;
-    if (index === 1) return () => <Caisse1 />;
-    if (index === 2) return () => <Caisse2 />;
-    if (index === 3) return () => <Caisse3 />;
-  }
   let tabObj;
   const showTabs1 = useStore((state) => state.showTabs1);
   const showTabs2 = useStore((state) => state.showTabs2);
@@ -23,10 +17,10 @@ export default function CaisseContainer() {
 
   return (
     <>
-      <div className=" m-2 shadow-lg rounded-sm  relative">
+      <div className=" m-2 shadow-lg rounded-sm   relative">
         <TabComponent
           ref={(g) => (tabObj = g)}
-          heightAdjustMode="Auto"
+          height="100%"
           animation={{ previous: { effect: "None" }, next: { effect: "None" } }}
           showCloseButton
           removed={(e) => {

@@ -499,6 +499,9 @@ ipcMain.on("backupData", async (event, data) => {
   Buying.insertMany(data.buyings)
     .then(() => console.log("Data inserted"))
     .catch((err) => console.log("cannot Buying.insertMany", err));
+    Depense.insertMany(data.Depenses)
+      .then(() => console.log("Data inserted"))
+      .catch((err) => console.log("cannot Depense.insertMany", err));
 });
 // ********* Electron App *********************************
 Store.initRenderer();
@@ -564,9 +567,12 @@ app.on("window-all-closed", () => {
   }
   // backup
   if ((new Date() - new Date(store?.get("backupTime"))) / 3600000 > 24) {
-    Promise.all([Product.find(), Customer.find(), Provider.find(), Vending.find(), Buying.find()])
+    Promise.all([Product.find(), Customer.find(), Provider.find(), Vending.find(), Buying.find(), Depense.find()])
       .then((values) => {
-        store?.set("backup", [...store?.get("backup"), { date: new Date(), products: values[0], customers: values[1], providers: values[2], vendings: values[3], buyings: values[4] }]);
+        store?.set("backup", [
+          ...store?.get("backup"),
+          { date: new Date(), products: values[0], customers: values[1], providers: values[2], vendings: values[3], buyings: values[4], depenses: values[5] },
+        ]);
         store?.set("backupTime", new Date());
         console.log("backup done");
       })
@@ -612,42 +618,45 @@ ipcMain.on("zoom+", (event, data) => {
 const printOptions = {
   silent: false,
   pageSize: { height: 301000, width: 58100 },
-  // printBackground: true,
-  // color: true,
-  // margin: {
-  //   marginType: "printableArea",
-  // },
-  // landscape: false,
-  // pagesPerSheet: 1,
-  // collate: false,
-  // copies: 1,
-  // header: "Page header",
-  // footer: "Page footer",
+  printBackground: false,
+  color: true,
+  margin: {
+    marginType: "printableArea",
+  },
+  landscape: false,
+  pagesPerSheet: 1,
+  collate: false,
+  copies: 1,
+  header: "Page header",
+  footer: "Page footer",
 };
 
-// when worker window is ready
-// ipcMain.on("readyToPrintPDF", (event) => {
-//   const pdfPath = join(tmpdir(), "print.pdf");
-//   // Use default printing options
-//   win.webContents
-//     .printToPDF({ printSelectionOnly: true, pageSize: { height: 301000, width: 58100 } })
-//     .then((data) => {
-//       writeFile(pdfPath, data, function (error) {
-//         if (error) {
-//           throw error;
-//         }
-//         shell.openExternal("file://" + pdfPath);
-//         event.sender.send("wrote-pdf", pdfPath);
-//       });
-//     })
-//     .catch((error) => {
-//       throw error;
-//     });
-// });
+// Print To PDF method #1
+ipcMain.on("readyToPrintPDF", (event) => {
+  const pdfPath = join(tmpdir(), "print.pdf");
+  // Use default printing options
+  win.webContents
+    .print({ printSelectionOnly: true,  })
+    .then((data) => {
+      writeFile(pdfPath, data, function (error) {
+        if (error) {
+          throw error;
+        }
+        shell.openExternal("file://" + pdfPath);
+        event.sender.send("wrote-pdf", pdfPath);
+      });
+    })
+    .catch((error) => {
+      throw error;
+    });
+});
 
-ipcMain.on("printComponent", (event, url) => {
+
+
+// Print To PDF method #2
+ipcMain.on("previewComponent", (event, url) => {
   console.log("Print Initiated in Main...");
-  let wino = new BrowserWindow({ show: true });
+  let wino = new BrowserWindow({ show: false });
 
   wino.loadURL(url);
 
@@ -659,57 +668,44 @@ ipcMain.on("printComponent", (event, url) => {
   });
   return "shown print dialog";
 });
-
-//handle preview
-ipcMain.on("previewComponent", (event, url) => {
-  let wino = new BrowserWindow({ title: "Preview", show: true, defaultEncoding: "utf8", autoHideMenuBar: true });
-  wino.loadURL(url);
-
-  wino.webContents.once("did-finish-load", () => {
-    wino.webContents
-      .printToPDF(printOptions)
-      .then((data) => {
-        let buf = Buffer.from(data);
-        var data = buf.toString("base64");
-        let url = "data:application/pdf;base64," + data;
-
-        wino.webContents.on("ready-to-show", () => {
-          wino.show();
-          wino.setTitle("Preview");
-        });
-
-        wino.webContents.on("closed", () => (wino = null));
-        wino.loadURL(url);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  });
-  return "shown preview window";
-});
 ipcMain.on("previewComponent2", (event, url) => {
-  let wino = new BrowserWindow({ title: "Preview", show: true, defaultEncoding: "utf8", autoHideMenuBar: true });
+  console.log("Print Initiated in Main...");
+  let wino = new BrowserWindow({ show: false });
+
   wino.loadURL(url);
 
-  wino.webContents.once("did-finish-load", () => {
-    wino.webContents
-      .printToPDF({ ...printOptions, pageSize:"A4" })
-      .then((data) => {
-        let buf = Buffer.from(data);
-        var data = buf.toString("base64");
-        let url = "data:application/pdf;base64," + data;
-
-        wino.webContents.on("ready-to-show", () => {
-          wino.show();
-          wino.setTitle("Preview");
-        });
-
-        wino.webContents.on("closed", () => (wino = null));
-        wino.loadURL(url);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  wino.webContents.on("did-finish-load", () => {
+    wino.webContents.print({ ...printOptions, pageSize: "A4" }, (success, failureReason) => {
+      console.log("Print Initiated in Main...");
+      if (!success) console.log(failureReason);
+    });
   });
-  return "shown preview window";
+  return "shown print dialog";
 });
+//handle preview
+// ipcMain.on("previewComponent", (event, url) => {
+//   let wino = new BrowserWindow({ title: "Preview", show: true, defaultEncoding: "utf8", autoHideMenuBar: true });
+//   wino.loadURL(url);
+
+//   wino.webContents.once("did-finish-load", () => {
+//     wino.webContents
+//       .printToPDF(printOptions)
+//       .then((data) => {
+//         let buf = Buffer.from(data);
+//         var data = buf.toString("base64");
+//         let url = "data:application/pdf;base64," + data;
+
+//         wino.webContents.on("ready-to-show", () => {
+//           wino.show();
+//           wino.setTitle("Preview");
+//         });
+
+//         wino.webContents.on("closed", () => (wino = null));
+//         wino.loadURL(url);
+//       })
+//       .catch((error) => {
+//         console.log(error);
+//       });
+//   });
+//   return "shown preview window";
+// });

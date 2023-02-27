@@ -4,7 +4,10 @@
   "private": true,
   "version": "2.0.0",
   "description": "",
-  "author": "Tokochi",
+  "author": {
+    "name": "Tokochi",
+    "email": "tokochi@hotmail.fr"
+  },
   "license": "MIT",
   "main": "dist/electron/main/index.js",
   "scripts": {

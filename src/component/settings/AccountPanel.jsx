@@ -25,16 +25,16 @@ export default function AccountPanel() {
   const users = store?.get("users");
   //store?.set("users", [{ userName:"admin", password:"admin", isAdmin: true,caisse:1, pages: ["/products", "/provider", "/customers", "/sell", "/buy", "/caisse", "/facture", "/bonAchat"] }]);
   return (
-    <div className={`grow overflow-y-auto  h-[calc(100vh_-_150px)] ${theme.back} ${theme.textXl} transition-colors  duration-300`}>
-      <div className=" p-6 space-y-6 ">
+    <div className={`grow overflow-y-auto  h-[calc(100vh_-_190px)] ${theme.back} ${theme.textXl} transition-colors  duration-300`}>
+      <div className=" p-4 ">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl  font-bold mb-5">Mon Compte</h2>
+          <h2 className="text-2xl font-bold mb-4">Mon Compte</h2>
           <button
             onClick={(e) => {
               e.preventDefault();
               navigate("/add");
             }}
-            className={`btn ${theme.button} hover:opacity-80 text-white`}>
+            className={`btn ${theme.button} hover:bg-indigo-600 text-white`}>
             <svg className="w-4 h-4 fill-current opacity-50 shrink-0" viewBox="0 0 16 16">
               <path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" />
             </svg>
@@ -485,7 +485,7 @@ export default function AccountPanel() {
         </div>
       </div>
       <footer>
-        <div className="flex flex-col px-6 py-5 border-t border-slate-200">
+        <div className="flex flex-col px-6 py-3 border-t border-slate-200">
           <div className="flex self-end">
             <button
               onClick={(e) => {
@@ -503,7 +503,7 @@ export default function AccountPanel() {
                 window.location.reload();
               }}
               //  type="submit"
-              className={`btn ${theme.button} hover:opacity-80 text-white ml-3`}>
+              className={`btn ${theme.button} hover:bg-indigo-600 text-white ml-3`}>
               Sauvgarder
             </button>
           </div>

@@ -19,6 +19,7 @@ export default function BackUp() {
   const [providers, setProviders] = useState(false);
   const [vendings, setVendings] = useState(false);
   const [buyings, setBuyings] = useState(false);
+  const [depenses, setDepenses] = useState(false);
   const [isSpin, setIsSpin] = useState(false);
   useEffect(() => {
     if (isSpin) {
@@ -31,7 +32,7 @@ export default function BackUp() {
   }, [isSpin]);
   //store?.set("backup", []);
   return (
-    <div className={`grow overflow-y-auto shadow-lg h-[calc(100vh_-_150px)] w-full rounded-sm  relative ${theme.back} ${theme.textXl}`}>
+    <div className={`grow overflow-y-auto shadow-lg h-[calc(100vh_-_190px)] w-full rounded-sm  relative ${theme.back} ${theme.textXl}`}>
       <div className="w-full">
         <table className="table-auto  w-full divide-slate-200">
           {/* Table header */}
@@ -73,7 +74,7 @@ export default function BackUp() {
                     #{index + 1}
                   </td>
                   <td key={uuidv4()} className="text-left capitalize w-1/8">
-                    📆 {moment(db?.date).format("LLLL")}
+                    📆 {moment(db?.date).format("LLL")}
                   </td>
                   <td key={uuidv4()} className="text-center w-1/8">
                     {db?.products?.length}
@@ -100,6 +101,7 @@ export default function BackUp() {
                         setProviders(db?.providers);
                         setVendings(db?.vendings);
                         setBuyings(db?.buyings);
+                        setDepenses(db?.depenses);
                         setDropdownOpen(true);
                       }}>
                       <img src={backup} width="25" />
@@ -125,7 +127,7 @@ export default function BackUp() {
                   className="btn-xs bg-indigo-500 hover:bg-indigo-600 text-white"
                   onClick={(e) => {
                     setIsSpin(true);
-                    ipcRenderer.send("backupData", { products, customers, providers, vendings, buyings });
+                    ipcRenderer.send("backupData", { products, customers, providers, vendings, buyings, depenses });
                   }}>
                   Accepter
                 </button>

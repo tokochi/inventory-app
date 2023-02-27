@@ -8,7 +8,7 @@ import Store from "electron-store";
 const { ipcRenderer } = require("electron");
 
 export default function ProviderCreditList({ header, id, svg, children, width, footer, content, onChange, close, fields, dataSource, ...rest }) {
-  const providersData = () => useStore((state) => state.providers);
+  const theme = useStore((state) => state.theme);
   const avanceList = () => useStore((state) => state.providers).reduce((acc, cur) => acc.concat(cur.avance), []);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const store = new Store();
@@ -40,12 +40,12 @@ export default function ProviderCreditList({ header, id, svg, children, width, f
         open={() => setDropdownOpen(true)}
         close={() => setDropdownOpen(false)}
         content={() => (
-          <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+          <div className={`${theme.nav} shadow-lg rounded-sm border border-slate-600 relative`}>
             <div>
               <div className="overflow-x-auto">
                 <table className="table-auto w-full  divide-slate-200">
                   {/* Table header */}
-                  <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                  <thead className={`text-xs uppercase text-center ${theme.text} ${theme.main}  border-t border-slate-600`}>
                     <tr>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                         <div className="font-semibold text-center">ID</div>
@@ -114,7 +114,7 @@ export default function ProviderCreditList({ header, id, svg, children, width, f
                                   if (provider._id === provID) {
                                     ipcRenderer.send("updateProvider", {
                                       _id: provID,
-                                      credit: parseInt(provider.credit) + avanceAmount,
+                                      credit: store?.get("restorCredit") && parseInt(provider.credit) + avanceAmount,
                                       avance: provider.avance.filter((avance) => avance._id !== avanceID),
                                     });
                                   }

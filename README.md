@@ -1,61 +1,206 @@
-# electron-vite-react
+# Inventory Management App
 
-[![awesome-vite](https://awesome.re/mentioned-badge.svg)](https://github.com/vitejs/awesome-vite)
-![GitHub stars](https://img.shields.io/github/stars/caoxiemeihao/vite-react-electron?color=fa6470&style=flat)
-![GitHub issues](https://img.shields.io/github/issues/caoxiemeihao/vite-react-electron?color=d8b22d&style=flat)
-![GitHub license](https://img.shields.io/github/license/caoxiemeihao/vite-react-electron?style=flat)
-[![Required Node.JS >= v14.17.0](https://img.shields.io/static/v1?label=node&message=%3E=14.17.0&logo=node.js&color=3f893e&style=flat)](https://nodejs.org/about/releases)
+A Store System built with Electron, Tailwind, React, Syncfusion, Zustand, MongoDB and Vite.
 
-English | [简体中文](README.zh-CN.md)
 
-## Overview
+## Some Screens
 
-📦 Out of the box  
-🎯 Based on [react-ts](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) template, less invasive  
-🌱 Simple directory structure，real flexible  
-💪 Support Use Electron、Node.js API and in Renderer-process  
-🔩 Support C/C++ native addons  
-🖥 It's easy to implement multiple windows  
 
-## Quick start
+![Login](https://github.com/tokochi/inventory-app/blob/master/img/login.png)
 
-```sh
-npm create electron-vite
+![Add-User](https://github.com/tokochi/inventory-app/blob/master/img/add-acount.png)
+
+![Cashier-Closed](https://github.com/tokochi/inventory-app/blob/master/img/invoices.png)
+
+![Cashier](https://github.com/tokochi/inventory-app/blob/master/img/sales.png)
+
+![Alerts](https://github.com/tokochi/inventory-app/blob/master/img/report.png)
+
+![Products](https://github.com/tokochi/inventory-app/blob/master/img/notification.png)
+
+![Sale](https://github.com/tokochi/inventory-app/blob/master/img/cashier.png)
+
+![Sale](https://github.com/tokochi/inventory-app/blob/master/img/add-product.png)
+
+![Sale](https://github.com/tokochi/inventory-app/blob/master/img/activities.png)
+
+![Discount](https://github.com/tokochi/inventory-app/blob/master/img/settings.png)
+
+![Payment](https://github.com/tokochi/inventory-app/blob/master/img/users.png)
+
+![Backup](https://github.com/tokochi/inventory-app/blob/master/img/backup.png)
+
+## About this Project
+
+
+This project is a production ready inventroy management App, so, I'll be happy if you could provide me any feedback about the project, code, structure or anything that you can report that could make me a better developer!
+
+The language is French but i will provide an English version very soon
+
+
+Email-me: tokochi@hotmail.fr
+
+Connect with me at [LinkedIn](https://www.linkedin.com/in/tokochi-madjid-7a4071158/)
+
+
+
+Also, you can use this Project as you wish, be for study, be for make improvements or earn money with it!
+
+
+
+It's free!
+
+
+
+## Installers
+
+
+
+If you just want to see the App running or want to use this project in production, you can just download the installer of the app in the OS version desired.
+
+[Linux .AppImage installer](https://drive.google.com/file/d/10YQXt8tGGk6rJyingI-ypfh0R4s98prd/view?usp=share_link)
+
+[MacOS .dmg installer](https://drive.google.com/file/d/10YQXt8tGGk6rJyingI-ypfh0R4s98prd/view?usp=share_link)
+
+[Windows .exe installer](https://drive.google.com/file/d/10YQXt8tGGk6rJyingI-ypfh0R4s98prd/view?usp=share_link)
+
+
+
+> Make sure to install the mongoDb driver : [mongoDB-Driver](https://www.mongodb.com/try/download/community)!
+
+
+
+## Some technical information
+
+
+
+The structure of the project was based on this amazing plugin [electron-vite](https://www.npmjs.com/package/electron-vite) , that helped me with the initial structure of the project, and a faster Electron Dev environement.
+
+
+
+With some changes, was possible to make the Project more clear, separating the modules of front-end from the back-end, what also made the process of perform the build process more easier.
+
+## Functionalities
+
+
+This Project supports the following operations:
+
+- Login/Logout
+
+- Backup
+
+- Activities
+
+- Invoices
+
+- Reports
+
+- Print inventory
+
+- Alerts, Notifications about: Customers in debit, Budgets out of date and Products with low stock.
+
+
+
+Management of :
+
+
+
+- Cashier
+
+- Sales
+
+- Products
+
+- Stock
+
+- Budgets
+
+- Customers
+
+- Providers
+
+- Users
+
+
+
+## Getting Started
+
+
+
+### Prerequisites
+
+
+
+To run this project, be either in development or production, you'll only need to have the [npm](https://www.npmjs.com/) installed and, to run the Database, you'll need the [MongoDB](https://www.mongodb.com/try/download/community) installed.
+
+### Installing
+
+Cloning the Repository
+
+```
+$ git clone https://github.com/tokochi/inventory-app
+
+$ cd inventory-app
 ```
 
-![electron-vite-react.gif](https://github.com/electron-vite/electron-vite-react/blob/main/public/electron-vite-react.gif?raw=true)
+**In all the followings instructions, I'll be using the yarn, but you can also use npm.**
 
-## Debug
 
-![electron-vite-react-debug.gif](https://github.com/electron-vite/electron-vite-react/blob/main/public/electron-vite-react-debug.gif?raw=true)
 
-## Directory structure
+Installing dependencies
 
-*🚨 By default, the files in `electron` folder will be built into the `dist/electron`*
-
-```tree
-├── electron                  Electron-related code
-|   ├── main                  Main-process source code
-|   ├── preload               Preload-script source code
-|   └── resources             Resources for the production build
-|       ├── icon.icns             Icon for the application on macOS
-|       ├── icon.ico              Icon for the application
-|       ├── installerIcon.ico     Icon for the application installer
-|       └── uninstallerIcon.ico   Icon for the application uninstaller
-|
-├── release                   Generated after production build, contains executables
-|   └──{version}
-|       ├── {os}-unpacked     Contains unpacked application executable
-|       └── Setup.{ext}       Installer for the application
-|
-├── public                    Static assets
-└── src                       Renderer source code, your React application
+```
+$ yarn
 ```
 
-## `dependencies` vs `devDependencies`
 
-- First, you need to know if your dependencies are needed after the application is packaged.
 
-- Like [serialport](https://www.npmjs.com/package/serialport), [sqlite3](https://www.npmjs.com/package/sqlite3) they are node-native modules and should be placed in `dependencies`. In addition, Vite will not build them, but treat them as external modules.
+### Running in Development
 
-- Dependencies like [Vue](https://www.npmjs.com/package/vue) and [React](https://www.npmjs.com/package/react), which are pure javascript modules that can be built with Vite, can be placed in `devDependencies`. This reduces the size of the application.
+
+```
+$ yarn dev
+```
+
+
+## Build
+
+
+```
+$ yarn build
+```
+
+
+## Built With
+
+
+
+* [Electron](https://electronjs.org/) - Used to build the native App
+
+* [React](https://reactjs.org/) - Front-end Framework
+
+* [React-Router](https://reacttraining.com/react-router/) - Router
+
+* [Zustand](https://github.com/pmndrs/zustand) - React State Manager
+
+* [Syncfusion](https://www.syncfusion.com/) - CSS Framework
+
+* [Mongodb](https://www.mongodb.com/try/download/community) - Database
+
+* [Vite](https://vitejs.dev/) - bundler tool
+
+
+
+## Contributing
+
+You can send how many PR's do you want, I'll be glad to analyse and accept them! And if you have any question about the project...
+
+Email-me: tokochi@hotmail.fr
+
+Connect with me at [LinkedIn](https://www.linkedin.com/in/tokochi-madjid-7a4071158/)
+
+Thank you!
+
+## License
+
+This project is licensed under the MIT License

@@ -24,7 +24,7 @@ const Wrapper = styled.div`
   .Facture {
     font-size: 1.25rem;
     line-height: 1.75rem;
-    font-weight: 600;
+    font-weight: 500;
   }
   .rc {
     margin-top: 0.5rem;

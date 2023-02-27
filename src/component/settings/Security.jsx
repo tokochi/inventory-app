@@ -36,7 +36,7 @@ export default function Security() {
   const [restorCredit, setRestorCredit] = useState(store?.get("restorCredit"));
 
   return (
-    <div className={`grow overflow-y-auto h-[calc(100vh_-_150px)] ${theme.back} ${theme.textXl}`}>
+    <div className={`grow overflow-y-auto h-[calc(100vh_-_190px)] ${theme.back} ${theme.textXl}`}>
       <div className=" p-6 space-y-6 ">
         <h2 className="text-2xl  font-bold mb-5">Sécurité</h2>
         <section>
@@ -347,7 +347,7 @@ export default function Security() {
         </section>
       </div>
       <footer>
-        <div className="flex flex-col px-6 py-5 border-t border-slate-200">
+        <div className="flex flex-col px-6 py-3 border-t border-slate-200">
           <div className="flex self-end">
             <button
               onClick={(e) => {
@@ -365,7 +365,7 @@ export default function Security() {
                 window.location.reload();
               }}
               //  type="submit"
-              className={`btn ${theme.button} hover:opacity-80 text-white ml-3`}>
+              className={`btn ${theme.button} hover:bg-indigo-600 text-white ml-3`}>
               Sauvgarder
             </button>
           </div>

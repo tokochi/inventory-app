@@ -182,7 +182,7 @@ export default function ProvidersTable() {
     }
   }
   return (
-    <div className="p-2 h-screen">
+    <div className="p-2 h-[calc(100vh_-_200px)]">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
@@ -252,11 +252,11 @@ export default function ProvidersTable() {
               <div className="overflow-x-auto">
                 <div className="flex gap-2 p-2">
                   <span className="text-lg mr-2">Liste Fournisseur:</span>
-                  <button className={normalButton}>
+                  <button className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Nombre Fournisseur:
                     <span className="ml-1  text-emerald-600">{providersData.length}</span>
                   </button>
-                  <button className={normalButton}>
+                  <button className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Déttes Fournisseur:
                     <span className="ml-1  text-emerald-600">{toCurrency(providersData.reduce((acc, cur) => acc + cur.credit, 0))}</span>
                   </button>

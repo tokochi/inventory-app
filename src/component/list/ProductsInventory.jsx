@@ -37,7 +37,7 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
         open={() => setDropdownOpen(true)}
         close={() => setDropdownOpen(false)}
         content={() => (
-          <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
+          <div className={`${theme.nav} shadow-lg rounded-sm border border-slate-600 relative`}>
             <div>
               <div className="overflow-x-auto">
                 <div className="flex gap-2 p-2">
@@ -55,7 +55,7 @@ export default function ProductsInventory({ header, id, svg, children, width, fo
                   </button>
                 </div>
                 <table className="table-auto w-full  divide-slate-200 ">
-                  <thead className="text-xs uppercase text-center text-slate-500 bg-slate-50 border-t border-slate-200">
+                  <thead className={`text-xs uppercase text-center ${theme.text} ${theme.main}  border-t border-slate-600`}>
                     <tr>
                       <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                         <div className="font-semibold text-center">ID</div>

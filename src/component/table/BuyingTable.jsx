@@ -13,7 +13,7 @@ import {
   Search,
   Selection,
   Sort,
-  Toolbar
+  Toolbar,
 } from "@syncfusion/ej2-react-grids";
 import { DialogComponent } from "@syncfusion/ej2-react-popups";
 import Store from "electron-store";
@@ -72,8 +72,8 @@ export default function BuyingTable() {
   const gridRef = useRef();
   const buyingData = useStore((state) => state.buyings).filter((buying) => filterBuying(buying));
   const activeButtoon = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-transparent shadow-sm ${theme.button} text-white duration-150 ease-in-out`;
-   const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
- const reactToPrint = useReactToPrint({
+  const normalButton = `inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm ${theme.nav} ${theme.text} duration-150 ease-in-out`;
+  const reactToPrint = useReactToPrint({
     content: () => gridRef.current,
     print: (target) =>
       new Promise(() => {
@@ -114,7 +114,7 @@ export default function BuyingTable() {
         } else if (store?.get("buyingPin")) {
           setSelectedProd(grid?.getSelectedRecords()[0]);
           setDropdownOpen2(true);
-        } else if (grid.getSelectedRecords()[0].type === "bonAchat") {
+        } else if (grid.getSelectedRecords()[0]?.type === "bonAchat") {
           navigate("/bonAchat");
           useStore.setState((state) => ({
             bonAchat: {
@@ -150,9 +150,9 @@ export default function BuyingTable() {
           },
         ]);
         // Toast
-        useStore.setState({ toast: { show: true,title: "Achat Supprimer Du Stock", type: "error" } });
+        useStore.setState({ toast: { show: true, title: "Achat Supprimer Du Stock", type: "error" } });
         setTimeout(() => {
-          useStore.setState({ toast: { show: false}});
+          useStore.setState({ toast: { show: false } });
         }, 2000);
         loadBuyings();
         ipcRenderer.removeAllListeners("refreshGridBuying:delete");
@@ -198,7 +198,7 @@ export default function BuyingTable() {
     }
   }
   return (
-    <div className="p-2 h-screen">
+    <div className="p-2 h-[calc(100vh_-_200px)]">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
@@ -282,15 +282,18 @@ export default function BuyingTable() {
               <div className="overflow-x-auto">
                 <div className="flex gap-2 p-2">
                   <span className="text-lg mr-2">Liste Achats:</span>
-                  <button className={normalButton}>
+                  <button
+                    className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Nombre Achats:
                     <span className="ml-1  text-emerald-600">{buyingData?.length}</span>
                   </button>
-                  <button className={normalButton}>
+                  <button
+                    className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Nombre Articles:
                     <span className="ml-1  text-emerald-600">{buyingData?.reduce((acc, buying) => acc + buying.grid.reduce((accu, product) => accu + parseInt(product.selectedQuantity), 0), 0)}</span>
                   </button>
-                  <button className={normalButton}>
+                  <button
+                    className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Total Achats:
                     <span className="ml-1  text-emerald-600">{toCurrency(buyingData.reduce((acc, cur) => acc + cur.amount, 0))}</span>
                   </button>

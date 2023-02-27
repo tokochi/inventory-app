@@ -76,7 +76,7 @@ export default function ProductsTable() {
         let data = target.contentWindow.document.documentElement.outerHTML;
         let blob = new Blob([data], { type: "text/html; charset=utf-8" });
         let url = URL.createObjectURL(blob);
-        ipcRenderer.send("previewComponent", url);
+        ipcRenderer.send("previewComponent2", url);
       }),
   });
   useEffect(() => {
@@ -101,6 +101,7 @@ export default function ProductsTable() {
         break;
     }
   }
+  
   function actionComplete(args) {
     switch (true) {
       case args.requestType === "save" && args.action === "add":
@@ -200,7 +201,7 @@ export default function ProductsTable() {
   }, [grid]);
 
   return (
-    <div className="p-2 h-screen">
+    <div className="p-2 h-[calc(100vh_-_200px)]">
       <div className="mb-4 mx-4 flex justify-between">
         <ul className="flex flex-wrap -m-1">
           <li className="m-1">
@@ -288,15 +289,15 @@ export default function ProductsTable() {
               <div className="overflow-x-auto">
                 <div className="flex gap-2 p-2">
                   <span className="text-lg mr-2">Liste Inventaire:</span>
-                  <button className={normalButton}>
+                  <button className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Nombre Produits:
                     <span className="ml-1  text-emerald-600">{productsData.length}</span>
                   </button>
-                  <button className={normalButton}>
+                  <button className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Nombre Articles:
                     <span className="ml-1  text-emerald-600">{productsData.reduce((acc, cur) => acc + cur.quantity, 0)}</span>
                   </button>
-                  <button className={normalButton}>
+                  <button className={`inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border border-slate-200 hover:border-slate-300 shadow-sm bg-white text-slate-500 duration-150 ease-in-out`}>
                     Capital Stock:
                     <span className="ml-1  text-emerald-600">{toCurrency(productsData.reduce((prevProduct, currProduct) => prevProduct + currProduct.quantity * currProduct.buyPrice, 0))}</span>
                   </button>
